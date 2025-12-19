@@ -306,23 +306,30 @@ export const Solution = () => {
             width: fit-content; /* Only take space needed */
           }
           
+
+          /* Aggressive Mobile Fix for Card Overflow */
           .course-card-stack {
             padding: 0;
             margin-top: 1rem;
-            width: 75%; /* Reduced to 75% per user request */
-            max-width: 350px;
+            width: auto;
+            max-width: 280px; /* Safe pixel width for all mobile screens */
             margin-left: auto;
             margin-right: auto;
             transform: none;
           }
 
           .card-main {
-            padding: 1rem; /* Further reduced padding */
+            padding: 1rem 0.8rem; /* Minimize horizontal padding */
           }
 
           .card-header h3 {
-            font-size: 1rem; /* Further reduced font size */
-            white-space: normal; /* Allow wrapping */
+            font-size: 0.95rem; /* Reduce font size slightly more */
+            white-space: normal;
+            line-height: 1.3;
+          }
+          
+          .module-preview {
+             padding: 0.75rem;
           }
         }
       `}</style>
