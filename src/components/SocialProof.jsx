@@ -178,6 +178,10 @@ export const SocialProof = () => {
             flex-direction: column;
             gap: 2rem;
           }
+          
+          .testimonials-grid {
+            grid-template-columns: 1fr;
+          }
         }
       `}</style>
     </section>
