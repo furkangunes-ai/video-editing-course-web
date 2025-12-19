@@ -309,11 +309,11 @@ export const Solution = () => {
           .course-card-stack {
             padding: 0;
             margin-top: 1rem;
-            width: 90%; /* Strict width */
-            max-width: 350px; /* Limit max width on tablet/large phones */
+            width: 75%; /* Reduced to 75% per user request */
+            max-width: 350px;
             margin-left: auto;
             margin-right: auto;
-            transform: none; /* Reset any potential transforms */
+            transform: none;
           }
 
           .card-main {
