@@ -287,17 +287,33 @@ export const Solution = () => {
             text-align: center;
           }
           
+
           .benefits-list {
-            text-align: left;
-            display: inline-block;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center items flex-wise */
+            text-align: left; /* Keep text left-aligned for readability */
+            width: 100%;
+          }
+          
+          .benefit-item {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            width: fit-content; /* Only take space needed */
           }
           
           .course-card-stack {
             padding: 0;
             margin-top: 1rem;
-            max-width: 90%; /* Force margin on sides */
+            width: 90%; /* Strict width */
+            max-width: 350px; /* Limit max width on tablet/large phones */
             margin-left: auto;
             margin-right: auto;
+            transform: none; /* Reset any potential transforms */
           }
 
           .card-main {
