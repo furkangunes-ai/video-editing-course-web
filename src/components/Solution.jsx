@@ -48,28 +48,7 @@ export const Solution = () => {
             </div>
           </div>
 
-          <div className="solution-visual">
-            <div className="course-card-stack">
-              <div className="card-layer layer-1"></div>
-              <div className="card-layer layer-2"></div>
-              <div className="card-main">
-                <div className="card-header">
-                  <span className="course-tag">PREMIUM KURS</span>
-                  <h3>Video Editörlüğü Ustalık Sınıfı</h3>
-                </div>
-                <div className="card-body">
 
-                  <div className="instructor-info">
-                    <div className="instructor-avatar"></div>
-                    <div>
-                      <p className="instructor-name">Furkan Güneş</p>
-                      <p className="instructor-title">Expert Editor</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -79,10 +58,12 @@ export const Solution = () => {
         }
 
         .solution-content {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 4rem;
+          display: flex;
+          flex-direction: column;
           align-items: center;
+          text-align: center;
+          max-width: 800px;
+          margin: 0 auto;
         }
 
         .badge-success {
