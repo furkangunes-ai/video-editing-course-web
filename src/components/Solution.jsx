@@ -291,9 +291,11 @@ export const Solution = () => {
           .benefits-list {
             display: flex;
             flex-direction: column;
-            align-items: center; /* Center items flex-wise */
-            text-align: left; /* Keep text left-aligned for readability */
-            width: 100%;
+            align-items: flex-start; /* Align items to the left relative to list container */
+            text-align: left;
+            width: fit-content; /* Shrink to fit content so margin:auto works */
+            margin: 0 auto 3rem auto; /* Center the list block horizontally */
+            padding-left: 0; /* Removing default padding if any */
           }
           
           .benefit-item {
