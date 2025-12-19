@@ -210,23 +210,7 @@ export const Solution = () => {
           display: inline-block;
         }
 
-        .module-preview {
-          background: rgba(0,0,0,0.2);
-          padding: 1rem;
-          border-radius: var(--radius-md);
-          margin-bottom: 1.5rem;
-        }
 
-        .module-line {
-          height: 8px;
-          background: var(--color-border);
-          border-radius: 4px;
-          margin-bottom: 0.5rem;
-        }
-
-        .module-line.short {
-          width: 60%;
-        }
 
         .instructor-info {
           display: flex;
@@ -326,9 +310,7 @@ export const Solution = () => {
             line-height: 1.3;
           }
           
-          .module-preview {
-             padding: 0.75rem;
-          }
+
         }
       `}</style>
     </section>
