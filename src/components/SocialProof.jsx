@@ -170,6 +170,11 @@ export const SocialProof = () => {
         }
 
         @media (max-width: 768px) {
+          .section-title {
+            font-size: 1.75rem;
+            line-height: 1.2;
+          }
+
           .stat-divider {
             display: none;
           }

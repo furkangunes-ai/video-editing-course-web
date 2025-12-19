@@ -260,6 +260,10 @@ export const Solution = () => {
             gap: 3rem;
           }
           
+          .section-title {
+            font-size: 2rem;
+          }
+          
           .card-layer {
             display: none;
           }

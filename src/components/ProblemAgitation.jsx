@@ -109,7 +109,8 @@ export const ProblemAgitation = () => {
 
         @media (max-width: 768px) {
           .section-title {
-            font-size: 2rem;
+            font-size: 1.75rem;
+            line-height: 1.2;
           }
           
           .problems-grid {

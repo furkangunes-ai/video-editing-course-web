@@ -436,42 +436,60 @@ export const Pricing = () => {
             .pricing-wrapper {
                 flex-direction: column;
                 align-items: center;
-                gap: 2rem;
+                gap: 1.5rem;
             }
             
             .pricing-card {
                 max-width: 100%;
-                padding: 1.5rem;
+                padding: 1.5rem 1rem; /* Reduced horizontal padding */
             }
             
             .pricing-header {
-                margin-bottom: 1.5rem;
-                padding-bottom: 1.5rem;
+                margin-bottom: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .pricing-badge {
+                font-size: 0.75rem;
+                padding: 0.4rem 1rem;
+                width: max-content;
             }
             
             .plan-name {
                 font-size: 1.25rem;
             }
             
+            .price-frame {
+                 padding: 1.5rem 1rem;
+            }
+            
             .current-price {
-                font-size: 2.5rem;
+                font-size: 2.2rem; /* Reduced further */
+            }
+            
+            .old-price {
+                font-size: 1.2rem;
+            }
+            
+            .feature-item {
+                font-size: 1rem;
             }
             
             /* In mobile, disable scale difference to avoid layout shift issues and improve readability */
             .pricing-card.active {
-                transform: scale(1);
+                transform: none;
                 border-color: var(--color-primary);
-                box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+                box-shadow: 0 0 15px rgba(0, 255, 157, 0.1);
             }
             
             .skool-card.active {
                 border-color: #ff3333;
-                box-shadow: 0 0 20px rgba(255, 51, 51, 0.15);
+                box-shadow: 0 0 15px rgba(255, 51, 51, 0.15);
             }
 
             .pricing-card.inactive {
-                transform: scale(1);
-                opacity: 1; /* Keep fully visible on mobile as stacking makes comparison harder */
+                transform: none;
+                opacity: 1; 
                 filter: none;
                 border-color: var(--color-border);
             }
