@@ -436,18 +436,44 @@ export const Pricing = () => {
             .pricing-wrapper {
                 flex-direction: column;
                 align-items: center;
+                gap: 2rem;
             }
             
             .pricing-card {
                 max-width: 100%;
+                padding: 1.5rem;
             }
             
-            /* In mobile, maybe less scale difference to avoid layout shift issues? */
-            .pricing-card.active {
-                transform: scale(1.02);
+            .pricing-header {
+                margin-bottom: 1.5rem;
+                padding-bottom: 1.5rem;
             }
+            
+            .plan-name {
+                font-size: 1.25rem;
+            }
+            
+            .current-price {
+                font-size: 2.5rem;
+            }
+            
+            /* In mobile, disable scale difference to avoid layout shift issues and improve readability */
+            .pricing-card.active {
+                transform: scale(1);
+                border-color: var(--color-primary);
+                box-shadow: 0 0 20px rgba(0, 255, 157, 0.1);
+            }
+            
+            .skool-card.active {
+                border-color: #ff3333;
+                box-shadow: 0 0 20px rgba(255, 51, 51, 0.15);
+            }
+
             .pricing-card.inactive {
-                transform: scale(0.98);
+                transform: scale(1);
+                opacity: 1; /* Keep fully visible on mobile as stacking makes comparison harder */
+                filter: none;
+                border-color: var(--color-border);
             }
         }
       `}</style>

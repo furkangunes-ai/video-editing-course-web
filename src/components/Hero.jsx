@@ -228,6 +228,12 @@ export const Hero = () => {
         }
 
         @media (max-width: 768px) {
+          .hero {
+             padding-top: 100px;
+             min-height: auto;
+             padding-bottom: 4rem;
+          }
+
           .hero-content {
             grid-template-columns: 1fr;
             text-align: center;
@@ -235,15 +241,27 @@ export const Hero = () => {
           }
 
           .hero-title {
-            font-size: 2.5rem;
+            font-size: 2.2rem;
+            margin-bottom: 1rem;
           }
 
           .hero-subtitle {
             margin: 0 auto 2rem;
+            font-size: 1.1rem;
           }
 
           .hero-actions {
             justify-content: center;
+            flex-direction: column;
+            width: 100%;
+          }
+          
+          .btn {
+            width: 100%;
+          }
+          
+          .hero-visual {
+            margin-top: 2rem;
           }
         }
       `}</style>

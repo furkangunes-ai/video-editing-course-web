@@ -106,6 +106,16 @@ export const ProblemAgitation = () => {
           color: var(--color-text-muted);
           font-size: 0.95rem;
         }
+
+        @media (max-width: 768px) {
+          .section-title {
+            font-size: 2rem;
+          }
+          
+          .problems-grid {
+             grid-template-columns: 1fr;
+          }
+        }
       `}</style>
     </section>
   );

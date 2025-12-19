@@ -257,10 +257,40 @@ export const Solution = () => {
         @media (max-width: 768px) {
           .solution-content {
             grid-template-columns: 1fr;
+            gap: 3rem;
           }
           
           .card-layer {
             display: none;
+          }
+          
+          .solution-text {
+            text-align: center;
+          }
+          
+          .badge-success {
+            justify-content: center;
+          }
+          
+          .solution-stats {
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+          }
+          
+          .stat-item {
+            flex-direction: column;
+            text-align: center;
+          }
+          
+          .benefits-list {
+            text-align: left;
+            display: inline-block;
+          }
+          
+          .course-card-stack {
+            padding: 0;
+            margin-top: 1rem;
           }
         }
       `}</style>
