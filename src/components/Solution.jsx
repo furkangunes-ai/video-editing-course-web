@@ -58,11 +58,7 @@ export const Solution = () => {
                   <h3>Video Editörlüğü Ustalık Sınıfı</h3>
                 </div>
                 <div className="card-body">
-                  <div className="module-preview">
-                    <div className="module-line"></div>
-                    <div className="module-line short"></div>
-                    <div className="module-line"></div>
-                  </div>
+
                   <div className="instructor-info">
                     <div className="instructor-avatar"></div>
                     <div>
