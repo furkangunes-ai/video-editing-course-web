@@ -30,6 +30,20 @@
   --radius-full: 9999px;
 }
 
+@media (max-width: 1024px) {
+  :root {
+    font-size: 14px;
+    /* Slight scale down for tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 12px;
+    /* 75% scale for mobile (matches user's zoom preference) */
+  }
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
