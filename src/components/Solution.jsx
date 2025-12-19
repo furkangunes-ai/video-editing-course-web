@@ -295,6 +295,15 @@ export const Solution = () => {
           .course-card-stack {
             padding: 0;
             margin-top: 1rem;
+            max-width: 100%;
+          }
+
+          .card-main {
+            padding: 1.25rem;
+          }
+
+          .card-header h3 {
+            font-size: 1.2rem;
           }
         }
       `}</style>
