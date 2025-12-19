@@ -295,15 +295,18 @@ export const Solution = () => {
           .course-card-stack {
             padding: 0;
             margin-top: 1rem;
-            max-width: 100%;
+            max-width: 90%; /* Force margin on sides */
+            margin-left: auto;
+            margin-right: auto;
           }
 
           .card-main {
-            padding: 1.25rem;
+            padding: 1rem; /* Further reduced padding */
           }
 
           .card-header h3 {
-            font-size: 1.2rem;
+            font-size: 1rem; /* Further reduced font size */
+            white-space: normal; /* Allow wrapping */
           }
         }
       `}</style>
