@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Hero } from './components/Hero';
 import { ProblemAgitation } from './components/ProblemAgitation';
 import { Solution } from './components/Solution';
@@ -16,8 +17,9 @@ import { CameraBlur } from './components/CameraBlur';
 import { InteractiveGrid } from './components/InteractiveGrid';
 import { MagneticCursor } from './components/MagneticCursor';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
+import { ContentGenerator } from './pages/ContentGenerator';
 
-function App() {
+function HomePage() {
   useScrollAnimation();
 
   return (
@@ -57,6 +59,17 @@ function App() {
       </div>
       <Footer />
     </div>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/icerik-uretimi" element={<ContentGenerator />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
