@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -33,6 +34,7 @@ export const Navbar = () => {
                         <button onClick={() => scrollToSection('products')} className="nav-link">Ürünler</button>
                         <button onClick={() => scrollToSection('instructor')} className="nav-link">Ben Kimim</button>
                         <button onClick={() => scrollToSection('contact')} className="nav-link">İletişim</button>
+                        <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
                         <a
                             href="https://wa.me/905011411940"
                             target="_blank"
@@ -58,6 +60,7 @@ export const Navbar = () => {
                     <button onClick={() => scrollToSection('products')} className="mobile-nav-link">Ürünler</button>
                     <button onClick={() => scrollToSection('instructor')} className="mobile-nav-link">Ben Kimim</button>
                     <button onClick={() => scrollToSection('contact')} className="mobile-nav-link">İletişim</button>
+                    <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
                 </div>
             </div>
 
