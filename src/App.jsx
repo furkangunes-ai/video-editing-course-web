@@ -21,6 +21,7 @@ import { ContentGenerator } from './pages/ContentGenerator';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
+import { CoursePlayer } from './pages/CoursePlayer';
 import { AuthProvider } from './hooks/useAuth';
 
 function HomePage() {
@@ -75,6 +76,8 @@ function App() {
           <Route path="/giris" element={<Login />} />
           <Route path="/kayit" element={<Register />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/kurs/:courseId" element={<CoursePlayer />} />
+          <Route path="/kurs/:courseId/ders/:lessonId" element={<CoursePlayer />} />
           <Route path="/icerik-uretimi" element={<ContentGenerator />} />
         </Routes>
       </BrowserRouter>
