@@ -22,6 +22,8 @@ import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
 import { CoursePlayer } from './pages/CoursePlayer';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { ResetPassword } from './pages/ResetPassword';
 import { AuthProvider } from './hooks/useAuth';
 
 function HomePage() {
@@ -75,6 +77,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/giris" element={<Login />} />
           <Route path="/kayit" element={<Register />} />
+          <Route path="/sifremi-unuttum" element={<ForgotPassword />} />
+          <Route path="/sifre-sifirla" element={<ResetPassword />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/kurs/:courseId" element={<CoursePlayer />} />
           <Route path="/kurs/:courseId/ders/:lessonId" element={<CoursePlayer />} />

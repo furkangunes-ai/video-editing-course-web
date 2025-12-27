@@ -60,6 +60,8 @@ export function Login() {
 
           {error && <p style={styles.error}>{error}</p>}
 
+          <Link to="/sifremi-unuttum" style={styles.forgotLink}>Şifremi Unuttum</Link>
+
           <button
             type="submit"
             style={{
@@ -163,5 +165,12 @@ const styles = {
   link: {
     color: '#00ff9d',
     textDecoration: 'none',
+  },
+  forgotLink: {
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+    textDecoration: 'none',
+    textAlign: 'right',
+    marginTop: '-0.5rem',
   },
 };
