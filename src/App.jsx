@@ -18,6 +18,10 @@ import { InteractiveGrid } from './components/InteractiveGrid';
 import { MagneticCursor } from './components/MagneticCursor';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
 import { ContentGenerator } from './pages/ContentGenerator';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
+import { Dashboard } from './pages/Dashboard';
+import { AuthProvider } from './hooks/useAuth';
 
 function HomePage() {
   useScrollAnimation();
@@ -64,12 +68,17 @@ function HomePage() {
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/icerik-uretimi" element={<ContentGenerator />} />
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/giris" element={<Login />} />
+          <Route path="/kayit" element={<Register />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/icerik-uretimi" element={<ContentGenerator />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

@@ -35,14 +35,10 @@ export const Navbar = () => {
                         <button onClick={() => scrollToSection('instructor')} className="nav-link">Ben Kimim</button>
                         <button onClick={() => scrollToSection('contact')} className="nav-link">İletişim</button>
                         <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
-                        <a
-                            href="https://wa.me/905011411940"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-primary btn-sm"
-                        >
+                        <Link to="/giris" className="nav-link">Giriş Yap</Link>
+                        <Link to="/kayit" className="btn btn-primary btn-sm">
                             Kayıt Ol
-                        </a>
+                        </Link>
                     </div>
 
                     <button
@@ -61,6 +57,8 @@ export const Navbar = () => {
                     <button onClick={() => scrollToSection('instructor')} className="mobile-nav-link">Ben Kimim</button>
                     <button onClick={() => scrollToSection('contact')} className="mobile-nav-link">İletişim</button>
                     <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
+                    <Link to="/giris" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Giriş Yap</Link>
+                    <Link to="/kayit" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Kayıt Ol</Link>
                 </div>
             </div>
 
