@@ -6,7 +6,7 @@ const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 export function AdminAnalytics() {
   const [stats, setStats] = useState(null);
   const [realtime, setRealtime] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [adminKey, setAdminKey] = useState('');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
