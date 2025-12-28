@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Menu, X, User, LogOut, BookOpen, Settings } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 
 export const Navbar = () => {
@@ -10,6 +10,7 @@ export const Navbar = () => {
     const profileRef = useRef(null);
     const { user, loading, logout, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -45,15 +46,19 @@ export const Navbar = () => {
         }
     };
 
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+    const handleLogoClick = () => {
+        if (location.pathname === '/') {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            navigate('/');
+        }
     };
 
     return (
         <>
             <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
                 <div className="container navbar-container">
-                    <div className="logo" onClick={scrollToTop} style={{ cursor: 'pointer' }}>
+                    <div className="logo" onClick={handleLogoClick} style={{ cursor: 'pointer' }}>
                         VideoMaster
                     </div>
 

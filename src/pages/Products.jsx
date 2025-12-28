@@ -28,44 +28,43 @@ export const Products = () => {
                             <h2 className="product-title">Video Editörlüğü Ustalık Sınıfı</h2>
                             <p className="product-description">
                                 Sıfırdan profesyonel seviyeye video editörlüğü öğrenin.
-                                Adobe Premiere Pro, After Effects ve DaVinci Resolve ile uygulamalı eğitim.
+                                Premiere Pro eğitimi ve müşteri bulma rehberi dahil.
                             </p>
 
                             <div className="product-features">
                                 <div className="feature-item">
                                     <Video size={18} />
-                                    <span>50+ Video Ders</span>
+                                    <span>7+ Saat İçerik</span>
                                 </div>
                                 <div className="feature-item">
                                     <Clock size={18} />
-                                    <span>20+ Saat İçerik</span>
-                                </div>
-                                <div className="feature-item">
-                                    <CheckCircle size={18} />
                                     <span>Ömür Boyu Erişim</span>
                                 </div>
                                 <div className="feature-item">
+                                    <CheckCircle size={18} />
+                                    <span>WhatsApp Destek</span>
+                                </div>
+                                <div className="feature-item">
                                     <Star size={18} />
-                                    <span>Sertifika</span>
+                                    <span>%80 İndirim</span>
                                 </div>
                             </div>
 
                             <div className="product-includes">
                                 <h4>Kurs İçeriği:</h4>
                                 <ul>
-                                    <li>Temel video düzenleme teknikleri</li>
-                                    <li>Renk düzeltme ve grading</li>
-                                    <li>Ses düzenleme ve mix</li>
-                                    <li>Motion graphics temelleri</li>
-                                    <li>Profesyonel iş akışı</li>
-                                    <li>Gerçek proje uygulamaları</li>
+                                    <li>Tüm Eğitim Modülleri (7+ Saat)</li>
+                                    <li>Premiere Pro Eğitimi</li>
+                                    <li>Müşteri Bulma Rehberi (Bonus)</li>
+                                    <li>Özel WhatsApp Destek Grubu</li>
+                                    <li>30 Gün Para İade Garantisi</li>
                                 </ul>
                             </div>
 
                             <div className="product-pricing">
-                                <div className="price-original">₺2.999</div>
-                                <div className="price-current">₺1.499</div>
-                                <div className="price-note">Tek seferlik ödeme</div>
+                                <div className="price-original">₺5.000</div>
+                                <div className="price-current">₺999</div>
+                                <div className="price-note">Tek seferlik ödeme • Ömür boyu erişim</div>
                             </div>
 
                             <Link to="/kayit" className="product-btn btn-primary">
