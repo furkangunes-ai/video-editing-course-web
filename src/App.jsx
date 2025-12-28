@@ -18,6 +18,7 @@ import { InteractiveGrid } from './components/InteractiveGrid';
 import { MagneticCursor } from './components/MagneticCursor';
 import { useScrollAnimation } from './hooks/useScrollAnimation';
 import { ContentGenerator } from './pages/ContentGenerator';
+import { Products } from './pages/Products';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
 import { Dashboard } from './pages/Dashboard';
@@ -85,6 +86,7 @@ function App() {
           <Route path="/kurs/:courseId" element={<CoursePlayer />} />
           <Route path="/kurs/:courseId/ders/:lessonId" element={<CoursePlayer />} />
           <Route path="/icerik-uretimi" element={<ContentGenerator />} />
+          <Route path="/urunler" element={<Products />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/profil" element={<Profile />} />
         </Routes>

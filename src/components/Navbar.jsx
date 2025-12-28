@@ -45,16 +45,20 @@ export const Navbar = () => {
         }
     };
 
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
     return (
         <>
             <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
                 <div className="container navbar-container">
-                    <div className="logo">
+                    <div className="logo" onClick={scrollToTop} style={{ cursor: 'pointer' }}>
                         VideoMaster
                     </div>
 
                     <div className="desktop-menu">
-                        <button onClick={() => scrollToSection('products')} className="nav-link">Ürünler</button>
+                        <Link to="/urunler" className="nav-link">Ürünler</Link>
                         <button onClick={() => scrollToSection('instructor')} className="nav-link">Ben Kimim</button>
                         <button onClick={() => scrollToSection('contact')} className="nav-link">İletişim</button>
                         <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
@@ -123,7 +127,7 @@ export const Navbar = () => {
             {/* Mobile Menu Overlay */}
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
-                    <button onClick={() => scrollToSection('products')} className="mobile-nav-link">Ürünler</button>
+                    <Link to="/urunler" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Ürünler</Link>
                     <button onClick={() => scrollToSection('instructor')} className="mobile-nav-link">Ben Kimim</button>
                     <button onClick={() => scrollToSection('contact')} className="mobile-nav-link">İletişim</button>
                     <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
