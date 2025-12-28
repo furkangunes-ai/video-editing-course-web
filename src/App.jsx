@@ -25,6 +25,7 @@ import { CoursePlayer } from './pages/CoursePlayer';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { AdminAnalytics } from './pages/AdminAnalytics';
+import { Profile } from './pages/Profile';
 import { AuthProvider } from './hooks/useAuth';
 
 function HomePage() {
@@ -85,6 +86,7 @@ function App() {
           <Route path="/kurs/:courseId/ders/:lessonId" element={<CoursePlayer />} />
           <Route path="/icerik-uretimi" element={<ContentGenerator />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/profil" element={<Profile />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
