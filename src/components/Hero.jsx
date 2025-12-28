@@ -1,7 +1,12 @@
-import React from 'react';
-import { Play, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { Play, ArrowRight, X } from 'lucide-react';
 
 export const Hero = () => {
+  const [showVideo, setShowVideo] = useState(false);
+
+  // Bunny.net video - Library ID: 289541, Video ID: 0001d9d3-21b1-476c-8a20-348ca53c570c
+  const bunnyVideoUrl = "https://iframe.mediadelivery.net/embed/289541/0001d9d3-21b1-476c-8a20-348ca53c570c?autoplay=true&preload=true";
+
   return (
     <section className="section hero">
       <div className="container">
@@ -28,7 +33,7 @@ export const Hero = () => {
               >
                 Hemen Başla <ArrowRight size={20} />
               </a>
-              <button className="btn btn-outline">
+              <button className="btn btn-outline" onClick={() => setShowVideo(true)}>
                 <Play size={20} /> Örnek Ders İzle
               </button>
             </div>
@@ -42,16 +47,40 @@ export const Hero = () => {
               <div className="visual-glow"></div>
               <div className="visual-content">
                 {/* Video Container */}
-                <div className="video-wrapper">
+                <div className="video-wrapper" onClick={() => setShowVideo(true)}>
                   <img
                     src="/hero-image.png"
                     alt="Video Editörlüğü Arayüzü"
                     className="hero-image"
                   />
+                  <div className="play-button-wrapper">
+                    <div className="play-button">
+                      <Play size={32} />
+                    </div>
+                    <span className="video-hint">Örnek Dersi İzle</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
+
+          {/* Video Modal */}
+          {showVideo && (
+            <div className="video-modal" onClick={() => setShowVideo(false)}>
+              <div className="video-modal-content" onClick={(e) => e.stopPropagation()}>
+                <button className="video-close-btn" onClick={() => setShowVideo(false)}>
+                  <X size={24} />
+                </button>
+                <iframe
+                  src={bunnyVideoUrl}
+                  className="hero-video-iframe"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                  allowFullScreen
+                  title="Örnek Ders"
+                />
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -227,6 +256,69 @@ export const Hero = () => {
           border-color: var(--color-primary);
         }
 
+        /* Video Modal Styles */
+        .video-modal {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.95);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 9999;
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        .video-modal-content {
+          position: relative;
+          width: 90%;
+          max-width: 1200px;
+          aspect-ratio: 16/9;
+          background: #000;
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          box-shadow: 0 25px 80px rgba(0, 255, 157, 0.2);
+          border: 1px solid rgba(0, 255, 157, 0.3);
+        }
+
+        .video-close-btn {
+          position: absolute;
+          top: -50px;
+          right: 0;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          z-index: 10;
+        }
+
+        .video-close-btn:hover {
+          background: var(--color-primary);
+          color: black;
+          border-color: var(--color-primary);
+          transform: rotate(90deg);
+        }
+
+        .hero-video-iframe {
+          width: 100%;
+          height: 100%;
+          border: none;
+        }
+
         @media (max-width: 768px) {
           .hero {
              padding-top: 100px;
@@ -262,6 +354,16 @@ export const Hero = () => {
           
           .hero-visual {
             margin-top: 2rem;
+          }
+
+          .video-modal-content {
+            width: 95%;
+          }
+
+          .video-close-btn {
+            top: -45px;
+            width: 36px;
+            height: 36px;
           }
         }
       `}</style>
