@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
-import { Play, Users, Clock, CheckCircle, Calendar, MessageCircle, Video, Star, ArrowRight, Zap, Shield, Award, Sparkles } from 'lucide-react';
+import { Play, Users, Clock, CheckCircle, Calendar, MessageCircle, Video, Star, ArrowRight, Zap, Shield, Sparkles, Award } from 'lucide-react';
 
 export const Products = () => {
     const [hoveredCard, setHoveredCard] = useState(null);
@@ -203,11 +203,7 @@ export const Products = () => {
                                     </li>
                                     <li>
                                         <CheckCircle size={16} />
-                                        <span>Portföy Değerlendirmesi</span>
-                                    </li>
-                                    <li>
-                                        <CheckCircle size={16} />
-                                        <span>Kariyer Danışmanlığı</span>
+                                        <span>Portföy ve Kariyer Danışmanlığı</span>
                                     </li>
                                 </ul>
 
@@ -267,8 +263,8 @@ export const Products = () => {
                             <span>30 Gün Para İade Garantisi</span>
                         </div>
                         <div className="trust-item">
-                            <Award size={24} />
-                            <span>Sertifikalı Eğitim</span>
+                            <Clock size={24} />
+                            <span>Ömür Boyu Erişim</span>
                         </div>
                         <div className="trust-item">
                             <MessageCircle size={24} />
@@ -417,6 +413,9 @@ export const Products = () => {
                     position: relative;
                     padding: 2.5rem;
                     z-index: 1;
+                    display: flex;
+                    flex-direction: column;
+                    height: 100%;
                 }
 
                 .card-header {
@@ -605,6 +604,7 @@ export const Products = () => {
                 .benefits-list {
                     list-style: none;
                     margin-bottom: 2rem;
+                    flex-grow: 1;
                 }
 
                 .benefits-list li {
