@@ -421,6 +421,7 @@ export const Products = () => {
                 .card-header {
                     text-align: center;
                     margin-bottom: 2rem;
+                    min-height: 200px;
                 }
 
                 .badge-row {
@@ -499,6 +500,10 @@ export const Products = () => {
                     padding: 1.5rem;
                     background: rgba(0, 0, 0, 0.3);
                     border-radius: 1rem;
+                    min-height: 130px;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
                 }
 
                 .old-price {
@@ -554,6 +559,7 @@ export const Products = () => {
                     grid-template-columns: repeat(2, 1fr);
                     gap: 0.75rem;
                     margin-bottom: 1.5rem;
+                    min-height: 120px;
                 }
 
                 .feature-item {
@@ -605,6 +611,7 @@ export const Products = () => {
                     list-style: none;
                     margin-bottom: 2rem;
                     flex-grow: 1;
+                    min-height: 180px;
                 }
 
                 .benefits-list li {
