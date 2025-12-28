@@ -1,11 +1,18 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { resendCode, verifyEmail } from '../api/authApi';
+
+const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
 export function Profile() {
   const { user, loading, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('info');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [verificationStep, setVerificationStep] = useState('idle'); // idle, sent, verifying
+  const [verificationError, setVerificationError] = useState('');
+  const [verificationSuccess, setVerificationSuccess] = useState('');
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -48,6 +55,38 @@ export function Profile() {
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleSendVerificationCode = async () => {
+    setVerificationError('');
+    setVerificationStep('sending');
+    try {
+      await resendCode(user.email);
+      setVerificationStep('sent');
+      setVerificationSuccess('Doğrulama kodu email adresinize gönderildi.');
+    } catch (error) {
+      setVerificationError(error.message || 'Kod gönderilemedi');
+      setVerificationStep('idle');
+    }
+  };
+
+  const handleVerifyEmail = async () => {
+    if (verificationCode.length !== 6) {
+      setVerificationError('Lütfen 6 haneli kodu girin');
+      return;
+    }
+    setVerificationError('');
+    setVerificationStep('verifying');
+    try {
+      await verifyEmail(user.email, verificationCode);
+      setVerificationSuccess('Email adresiniz başarıyla doğrulandı! Sayfa yenileniyor...');
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      setVerificationError(error.message || 'Doğrulama başarısız');
+      setVerificationStep('sent');
+    }
   };
 
   return (
@@ -120,9 +159,57 @@ export function Profile() {
                 </div>
                 <div style={styles.infoItem}>
                   <span style={styles.infoLabel}>Email Durumu</span>
-                  <span style={{...styles.infoValue, color: user.is_verified ? '#00ff9d' : '#ff4757'}}>
-                    {user.is_verified ? 'Doğrulanmış' : 'Doğrulanmamış'}
-                  </span>
+                  {user.is_verified ? (
+                    <span style={{...styles.infoValue, color: '#00ff9d', display: 'flex', alignItems: 'center', gap: '0.5rem'}}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                      </svg>
+                      Doğrulanmış
+                    </span>
+                  ) : (
+                    <div style={styles.verificationSection}>
+                      {verificationStep === 'idle' && (
+                        <button style={styles.verifyBtn} onClick={handleSendVerificationCode}>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                          </svg>
+                          Email Doğrula
+                        </button>
+                      )}
+                      {verificationStep === 'sending' && (
+                        <span style={styles.verifyingText}>Kod gönderiliyor...</span>
+                      )}
+                      {verificationStep === 'sent' && (
+                        <div style={styles.codeInputSection}>
+                          <p style={styles.codeHint}>6 haneli doğrulama kodunu girin:</p>
+                          <div style={styles.codeInputRow}>
+                            <input
+                              type="text"
+                              maxLength="6"
+                              value={verificationCode}
+                              onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, ''))}
+                              placeholder="000000"
+                              style={styles.codeInput}
+                            />
+                            <button
+                              style={styles.verifySubmitBtn}
+                              onClick={handleVerifyEmail}
+                              disabled={verificationStep === 'verifying'}
+                            >
+                              {verificationStep === 'verifying' ? 'Doğrulanıyor...' : 'Doğrula'}
+                            </button>
+                          </div>
+                          <button style={styles.resendBtn} onClick={handleSendVerificationCode}>
+                            Tekrar Gönder
+                          </button>
+                        </div>
+                      )}
+                      {verificationError && <p style={styles.errorText}>{verificationError}</p>}
+                      {verificationSuccess && <p style={styles.successText}>{verificationSuccess}</p>}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -153,26 +240,40 @@ export function Profile() {
         {activeTab === 'subscription' && (
           <div style={styles.tabContent}>
             <div style={styles.card}>
-              <h3 style={styles.cardTitle}>Üyelik Durumu</h3>
+              <h3 style={styles.cardTitle}>Satın Alınan Kurslar</h3>
               {user.has_access ? (
-                <div style={styles.subscriptionActive}>
-                  <div style={styles.subscriptionIcon}>
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#00ff9d" strokeWidth="2">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                      <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
+                <div style={styles.coursesList}>
+                  {/* Video Editörlüğü Ustalık Sınıfı */}
+                  <div style={styles.courseItem}>
+                    <div style={styles.courseItemLeft}>
+                      <div style={styles.courseItemIcon}>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00ff9d" strokeWidth="2">
+                          <polygon points="23 7 16 12 23 17 23 7"></polygon>
+                          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+                        </svg>
+                      </div>
+                      <div style={styles.courseItemInfo}>
+                        <h4 style={styles.courseItemTitle}>Video Editörlüğü Ustalık Sınıfı</h4>
+                        <p style={styles.courseItemDesc}>Sıfırdan profesyonel video editör olun</p>
+                      </div>
+                    </div>
+                    <div style={styles.courseItemRight}>
+                      <span style={styles.accessActiveBadge}>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                          <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                        Erişim Aktif
+                      </span>
+                      <Link to="/kurs/1" style={styles.goToCourseBtn}>
+                        Kursa Git
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <line x1="5" y1="12" x2="19" y2="12"></line>
+                          <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                      </Link>
+                    </div>
                   </div>
-                  <h4 style={styles.subscriptionTitle}>Premium Üyelik Aktif</h4>
-                  <p style={styles.subscriptionText}>
-                    Tüm kurslara ve içeriklere sınırsız erişiminiz bulunuyor.
-                  </p>
-                  <Link to="/dashboard" style={styles.goToCourses}>
-                    Kurslara Git
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                      <line x1="5" y1="12" x2="19" y2="12"></line>
-                      <polyline points="12 5 19 12 12 19"></polyline>
-                    </svg>
-                  </Link>
                 </div>
               ) : (
                 <div style={styles.subscriptionInactive}>
@@ -182,15 +283,29 @@ export function Profile() {
                       <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
                   </div>
-                  <h4 style={styles.subscriptionTitle}>Premium Üyelik Yok</h4>
+                  <h4 style={styles.subscriptionTitle}>Henüz Kurs Satın Almadınız</h4>
                   <p style={styles.subscriptionText}>
-                    Kurslara erişmek için premium üyelik satın alın.
+                    Video editörlüğü kursuna erişmek için satın alın.
                   </p>
                   <Link to="/#products" style={styles.buyBtn}>
-                    Üyelik Satın Al
+                    Kursu Satın Al
                   </Link>
                 </div>
               )}
+            </div>
+
+            {/* Diğer Kurslar - Yakında */}
+            <div style={styles.card}>
+              <h3 style={styles.cardTitle}>Diğer Kurslar</h3>
+              <div style={styles.comingSoonSection}>
+                <div style={styles.comingSoonIcon}>
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7000ff" strokeWidth="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <polyline points="12 6 12 12 16 14"></polyline>
+                  </svg>
+                </div>
+                <p style={styles.comingSoonText}>Yeni kurslar yakında eklenecek!</p>
+              </div>
             </div>
           </div>
         )}
@@ -460,5 +575,176 @@ const styles = {
     textDecoration: 'none',
     fontWeight: '600',
     fontSize: '0.95rem',
+  },
+  // Email verification styles
+  verificationSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  verifyBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 1rem',
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    color: '#000',
+    border: 'none',
+    borderRadius: '0.5rem',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+  },
+  verifyingText: {
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+  },
+  codeInputSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  codeHint: {
+    color: '#a0a0a0',
+    fontSize: '0.85rem',
+    margin: 0,
+  },
+  codeInputRow: {
+    display: 'flex',
+    gap: '0.5rem',
+  },
+  codeInput: {
+    width: '100px',
+    padding: '0.5rem 0.75rem',
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    letterSpacing: '0.2em',
+    textAlign: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    border: '1px solid rgba(255,255,255,0.2)',
+    borderRadius: '0.5rem',
+    color: '#fff',
+    outline: 'none',
+  },
+  verifySubmitBtn: {
+    padding: '0.5rem 1rem',
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    color: '#000',
+    border: 'none',
+    borderRadius: '0.5rem',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+  },
+  resendBtn: {
+    background: 'none',
+    border: 'none',
+    color: '#a0a0a0',
+    fontSize: '0.8rem',
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    padding: 0,
+    textAlign: 'left',
+  },
+  errorText: {
+    color: '#ff4757',
+    fontSize: '0.85rem',
+    margin: 0,
+  },
+  successText: {
+    color: '#00ff9d',
+    fontSize: '0.85rem',
+    margin: 0,
+  },
+  // Course list styles
+  coursesList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  courseItem: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1.25rem',
+    backgroundColor: 'rgba(0,255,157,0.05)',
+    border: '1px solid rgba(0,255,157,0.2)',
+    borderRadius: '1rem',
+    flexWrap: 'wrap',
+    gap: '1rem',
+  },
+  courseItemLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+  },
+  courseItemIcon: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '0.75rem',
+    backgroundColor: 'rgba(0,255,157,0.1)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  courseItemInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  },
+  courseItemTitle: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#fff',
+    margin: 0,
+  },
+  courseItemDesc: {
+    fontSize: '0.85rem',
+    color: '#a0a0a0',
+    margin: 0,
+  },
+  courseItemRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    flexWrap: 'wrap',
+  },
+  accessActiveBadge: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+    padding: '0.35rem 0.75rem',
+    backgroundColor: 'rgba(0,255,157,0.1)',
+    color: '#00ff9d',
+    fontSize: '0.8rem',
+    fontWeight: '600',
+    borderRadius: '1rem',
+  },
+  goToCourseBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+    padding: '0.5rem 1rem',
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    color: '#000',
+    borderRadius: '0.5rem',
+    textDecoration: 'none',
+    fontWeight: '600',
+    fontSize: '0.85rem',
+  },
+  comingSoonSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: '2rem',
+    gap: '0.75rem',
+  },
+  comingSoonIcon: {
+    opacity: 0.7,
+  },
+  comingSoonText: {
+    color: '#a0a0a0',
+    fontSize: '0.95rem',
+    margin: 0,
   },
 };
