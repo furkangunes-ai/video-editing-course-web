@@ -2,7 +2,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Hero } from './components/Hero';
 import { ProblemAgitation } from './components/ProblemAgitation';
 import { Solution } from './components/Solution';
-import { SocialProof } from './components/SocialProof';
 import { Pricing } from './components/Pricing';
 import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
@@ -51,10 +50,7 @@ function HomePage() {
         <div className="fade-in-section editor-panel">
           <Solution />
         </div>
-        <div className="fade-in-section editor-panel">
-          <SocialProof />
-        </div>
-        <div className="fade-in-section editor-panel">
+                <div className="fade-in-section editor-panel">
           <Instructor />
         </div>
         <div id="products" className="fade-in-section editor-panel">

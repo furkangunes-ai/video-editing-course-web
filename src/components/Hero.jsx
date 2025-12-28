@@ -4,8 +4,8 @@ import { Play, ArrowRight, X } from 'lucide-react';
 export const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
 
-  // Bunny.net video - Library ID: 289541, Video ID: 0001d9d3-21b1-476c-8a20-348ca53c570c
-  const bunnyVideoUrl = "https://iframe.mediadelivery.net/embed/289541/0001d9d3-21b1-476c-8a20-348ca53c570c?autoplay=true&preload=true";
+  // Bunny.net video - Library ID: 571191, Video ID: 0001d9d3-21b1-476c-8a20-348ca53c570c
+  const bunnyVideoUrl = "https://iframe.mediadelivery.net/embed/571191/0001d9d3-21b1-476c-8a20-348ca53c570c?autoplay=true&preload=true";
 
   return (
     <section className="section hero">
