@@ -414,8 +414,8 @@ export const Products = () => {
                     padding: 2.5rem;
                     z-index: 1;
                     display: grid;
-                    grid-template-rows: 200px 140px 130px auto auto auto;
-                    gap: 0;
+                    grid-template-rows: auto auto auto auto auto auto;
+                    gap: 1.5rem;
                     height: 100%;
                 }
 
@@ -595,7 +595,6 @@ export const Products = () => {
                 .divider {
                     height: 1px;
                     background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.2), transparent);
-                    align-self: center;
                 }
 
                 .premium-divider {
@@ -605,7 +604,6 @@ export const Products = () => {
                 /* Benefits List */
                 .benefits-list {
                     list-style: none;
-                    align-self: start;
                 }
 
                 .benefits-list li {
@@ -639,7 +637,6 @@ export const Products = () => {
                     font-weight: 600;
                     text-decoration: none;
                     transition: all 0.3s ease;
-                    align-self: end;
                 }
 
                 .cta-button.primary {
@@ -672,8 +669,6 @@ export const Products = () => {
                     font-size: 0.8rem;
                     color: #666;
                     text-align: center;
-                    align-self: end;
-                    margin-top: 0.75rem;
                 }
 
                 .limited-spots {
