@@ -413,15 +413,14 @@ export const Products = () => {
                     position: relative;
                     padding: 2.5rem;
                     z-index: 1;
-                    display: flex;
-                    flex-direction: column;
+                    display: grid;
+                    grid-template-rows: 200px 140px 130px auto auto auto;
+                    gap: 0;
                     height: 100%;
                 }
 
                 .card-header {
                     text-align: center;
-                    margin-bottom: 2rem;
-                    min-height: 200px;
                 }
 
                 .badge-row {
@@ -496,11 +495,9 @@ export const Products = () => {
                 /* Price Section */
                 .price-section {
                     text-align: center;
-                    margin-bottom: 2rem;
                     padding: 1.5rem;
                     background: rgba(0, 0, 0, 0.3);
                     border-radius: 1rem;
-                    min-height: 130px;
                     display: flex;
                     flex-direction: column;
                     justify-content: center;
@@ -558,8 +555,7 @@ export const Products = () => {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
                     gap: 0.75rem;
-                    margin-bottom: 1.5rem;
-                    min-height: 120px;
+                    align-content: start;
                 }
 
                 .feature-item {
@@ -599,7 +595,7 @@ export const Products = () => {
                 .divider {
                     height: 1px;
                     background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.2), transparent);
-                    margin: 1.5rem 0;
+                    align-self: center;
                 }
 
                 .premium-divider {
@@ -609,9 +605,7 @@ export const Products = () => {
                 /* Benefits List */
                 .benefits-list {
                     list-style: none;
-                    margin-bottom: 2rem;
-                    flex-grow: 1;
-                    min-height: 180px;
+                    align-self: start;
                 }
 
                 .benefits-list li {
@@ -645,7 +639,7 @@ export const Products = () => {
                     font-weight: 600;
                     text-decoration: none;
                     transition: all 0.3s ease;
-                    margin-bottom: 1rem;
+                    align-self: end;
                 }
 
                 .cta-button.primary {
@@ -678,6 +672,8 @@ export const Products = () => {
                     font-size: 0.8rem;
                     color: #666;
                     text-align: center;
+                    align-self: end;
+                    margin-top: 0.75rem;
                 }
 
                 .limited-spots {
@@ -819,6 +815,7 @@ export const Products = () => {
 
                     .card-content {
                         padding: 1.5rem;
+                        grid-template-rows: auto auto auto auto auto auto;
                     }
 
                     .features-grid {
