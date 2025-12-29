@@ -27,7 +27,6 @@ import { ResetPassword } from './pages/ResetPassword';
 import { AdminAnalytics } from './pages/AdminAnalytics';
 import { Profile } from './pages/Profile';
 import { AuthProvider } from './hooks/useAuth';
-import { ThemeProvider } from './hooks/useTheme';
 
 function HomePage() {
   useScrollAnimation();
@@ -71,10 +70,9 @@ function HomePage() {
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <BrowserRouter>
-          <Routes>
+    <AuthProvider>
+      <BrowserRouter>
+        <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/giris" element={<Login />} />
           <Route path="/kayit" element={<Register />} />
@@ -86,11 +84,10 @@ function App() {
           <Route path="/icerik-uretimi" element={<ContentGenerator />} />
           <Route path="/urunler" element={<Products />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/profil" element={<Profile />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </ThemeProvider>
+          <Route path="/profil" element={<Profile />} />
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 

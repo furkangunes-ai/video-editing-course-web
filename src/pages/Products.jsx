@@ -279,10 +279,9 @@ export const Products = () => {
                     min-height: 100vh;
                     padding-top: 100px;
                     padding-bottom: 6rem;
-                    background: var(--color-bg);
+                    background: #0a0a0a;
                     position: relative;
                     overflow: hidden;
-                    transition: background 0.3s ease;
                 }
 
                 .bg-gradient {
@@ -341,7 +340,7 @@ export const Products = () => {
                 .products-title {
                     font-size: clamp(2.5rem, 5vw, 4rem);
                     font-weight: 800;
-                    color: var(--color-text);
+                    color: #fff;
                     margin-bottom: 1rem;
                     letter-spacing: -0.02em;
                 }
@@ -371,8 +370,8 @@ export const Products = () => {
                 /* Product Card */
                 .product-card {
                     position: relative;
-                    background: var(--color-card-bg);
-                    border: 1px solid var(--color-card-border);
+                    background: linear-gradient(180deg, rgba(30, 30, 30, 0.8) 0%, rgba(15, 15, 15, 0.9) 100%);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
                     border-radius: 1.5rem;
                     overflow: hidden;
                     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -484,12 +483,12 @@ export const Products = () => {
                 .product-title {
                     font-size: 1.5rem;
                     font-weight: 700;
-                    color: var(--color-text);
+                    color: #fff;
                     margin-bottom: 0.5rem;
                 }
 
                 .product-tagline {
-                    color: var(--color-text-muted);
+                    color: #a0a0a0;
                     font-size: 0.95rem;
                 }
 
@@ -568,7 +567,7 @@ export const Products = () => {
                     border: 1px solid rgba(0, 255, 157, 0.1);
                     border-radius: 0.5rem;
                     font-size: 0.85rem;
-                    color: var(--color-text-muted);
+                    color: #ccc;
                 }
 
                 .premium-feature {
@@ -612,7 +611,7 @@ export const Products = () => {
                     align-items: center;
                     gap: 0.75rem;
                     padding: 0.6rem 0;
-                    color: var(--color-text-muted);
+                    color: #ccc;
                     font-size: 0.95rem;
                 }
 
@@ -685,7 +684,7 @@ export const Products = () => {
                     text-align: center;
                     font-size: 1.75rem;
                     font-weight: 700;
-                    color: var(--color-text);
+                    color: #fff;
                     margin-bottom: 2rem;
                 }
 
@@ -696,8 +695,8 @@ export const Products = () => {
                 }
 
                 .comparison-card {
-                    background: var(--color-card-bg);
-                    border: 1px solid var(--color-card-border);
+                    background: rgba(20, 20, 20, 0.6);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
                     border-radius: 1rem;
                     padding: 2rem;
                     transition: all 0.3s ease;
@@ -729,13 +728,13 @@ export const Products = () => {
 
                 .comparison-card h4 {
                     font-size: 1.2rem;
-                    color: var(--color-text);
+                    color: #fff;
                     margin-bottom: 0.75rem;
                 }
 
                 .comparison-card p {
                     font-size: 0.9rem;
-                    color: var(--color-text-muted);
+                    color: #888;
                     line-height: 1.6;
                     margin-bottom: 1rem;
                 }
@@ -747,7 +746,7 @@ export const Products = () => {
                 .comparison-card li {
                     position: relative;
                     padding-left: 1.25rem;
-                    color: var(--color-text-muted);
+                    color: #aaa;
                     font-size: 0.9rem;
                     margin-bottom: 0.5rem;
                 }
@@ -769,16 +768,16 @@ export const Products = () => {
                     justify-content: center;
                     gap: 3rem;
                     padding: 2rem;
-                    background: var(--color-card-bg);
+                    background: rgba(20, 20, 20, 0.5);
                     border-radius: 1rem;
-                    border: 1px solid var(--color-card-border);
+                    border: 1px solid rgba(255, 255, 255, 0.05);
                 }
 
                 .trust-item {
                     display: flex;
                     align-items: center;
                     gap: 0.75rem;
-                    color: var(--color-text-muted);
+                    color: #888;
                     font-size: 0.9rem;
                 }
 

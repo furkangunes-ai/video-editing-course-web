@@ -1,4 +1,17 @@
 :root {
+  /* Brand Colors - Premium Dark Theme */
+  --color-bg: #0a0a0a;
+  --color-surface: #1a1a1a;
+  --color-surface-hover: #2a2a2a;
+  --color-primary: #00ff9d;
+  /* Vibrant Green for Action */
+  --color-primary-hover: #00cc7d;
+  --color-accent: #7000ff;
+  /* Deep Purple for Depth */
+  --color-text: #ffffff;
+  --color-text-muted: #a0a0a0;
+  --color-border: #333333;
+
   /* Typography */
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
   --font-display: 'Outfit', system-ui, -apple-system, sans-serif;
@@ -15,40 +28,6 @@
   --radius-md: 1rem;
   --radius-lg: 2rem;
   --radius-full: 9999px;
-}
-
-/* Dark Theme (Default) */
-:root, [data-theme="dark"] {
-  --color-bg: #0a0a0a;
-  --color-surface: #1a1a1a;
-  --color-surface-hover: #2a2a2a;
-  --color-primary: #00ff9d;
-  --color-primary-hover: #00cc7d;
-  --color-accent: #7000ff;
-  --color-text: #ffffff;
-  --color-text-muted: #a0a0a0;
-  --color-border: #333333;
-  --color-card-bg: rgba(20, 20, 20, 0.6);
-  --color-card-border: rgba(255, 255, 255, 0.05);
-  --color-input-bg: rgba(255, 255, 255, 0.05);
-  --color-shadow: rgba(0, 0, 0, 0.5);
-}
-
-/* Light Theme */
-[data-theme="light"] {
-  --color-bg: #f5f5f7;
-  --color-surface: #ffffff;
-  --color-surface-hover: #e8e8ed;
-  --color-primary: #00b36b;
-  --color-primary-hover: #009959;
-  --color-accent: #5c00cc;
-  --color-text: #1a1a1a;
-  --color-text-muted: #666666;
-  --color-border: #e0e0e0;
-  --color-card-bg: rgba(255, 255, 255, 0.9);
-  --color-card-border: rgba(0, 0, 0, 0.08);
-  --color-input-bg: rgba(0, 0, 0, 0.03);
-  --color-shadow: rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 1024px) {
@@ -79,7 +58,7 @@ body {
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  /* Prevent horizontal scroll globally */
 }
 
 /* Noise Texture Removed for cleaner Grid look */
@@ -217,15 +196,14 @@ input[type="submit"], input[type="button"],
 
 /* Editor Panel Style */
 .editor-panel {
-  background: var(--color-card-bg);
+  background: rgba(20, 20, 20, 0.6);
   backdrop-filter: blur(10px);
-  border: 1px solid var(--color-card-border);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   border-radius: var(--radius-lg);
   padding: 3rem;
   margin: 2rem 0;
   position: relative;
   overflow: hidden;
-  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .editor-panel::before {
