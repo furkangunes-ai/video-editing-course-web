@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Menu, X, User, LogOut, BookOpen, Settings } from 'lucide-react';
+import { Menu, X, User, LogOut, BookOpen, Settings, Sun, Moon } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
 
 export const Navbar = () => {
     const [isScrolled, setIsScrolled] = useState(false);
@@ -9,6 +10,7 @@ export const Navbar = () => {
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileRef = useRef(null);
     const { user, loading, logout, isAuthenticated } = useAuth();
+    const { isDark, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -67,6 +69,10 @@ export const Navbar = () => {
                         <button onClick={() => scrollToSection('instructor')} className="nav-link">Ben Kimim</button>
                         <button onClick={() => scrollToSection('contact')} className="nav-link">İletişim</button>
                         <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
+
+                        <button className="theme-toggle" onClick={toggleTheme} title={isDark ? 'Aydınlık Mod' : 'Karanlık Mod'}>
+                            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+                        </button>
 
                         {loading ? (
                             <span className="nav-link" style={{ opacity: 0.5 }}>...</span>
@@ -137,6 +143,11 @@ export const Navbar = () => {
                     <button onClick={() => scrollToSection('contact')} className="mobile-nav-link">İletişim</button>
                     <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
 
+                    <button className="theme-toggle mobile-theme-toggle" onClick={toggleTheme}>
+                        {isDark ? <Sun size={24} /> : <Moon size={24} />}
+                        <span>{isDark ? 'Aydınlık Mod' : 'Karanlık Mod'}</span>
+                    </button>
+
                     {isAuthenticated ? (
                         <>
                             <div className="mobile-profile-section">
@@ -170,10 +181,42 @@ export const Navbar = () => {
         }
 
         .navbar.scrolled {
-          background: rgba(10, 10, 10, 0.8);
+          background: var(--color-bg);
           backdrop-filter: blur(10px);
           padding: 1rem 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 40px;
+          height: 40px;
+          border-radius: 50%;
+          background: var(--color-surface);
+          border: 1px solid var(--color-border);
+          color: var(--color-text);
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+          background: var(--color-surface-hover);
+          border-color: var(--color-primary);
+          color: var(--color-primary);
+          transform: rotate(15deg);
+        }
+
+        .mobile-theme-toggle {
+          width: auto;
+          height: auto;
+          border-radius: 2rem;
+          padding: 0.75rem 1.5rem;
+          gap: 0.75rem;
+          font-size: 1rem;
+          font-weight: 500;
         }
 
         .navbar-container {
