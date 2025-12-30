@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { getCourse, getLessonVideo, updateProgress, getMyProgress } from '../api/courseApi';
+import { trackVideoStart, trackVideoComplete, setTag } from '../utils/clarity';
 
 export function CoursePlayer() {
   const { courseId, lessonId } = useParams();
@@ -75,6 +76,11 @@ export function CoursePlayer() {
       const video = await getLessonVideo(lId);
       setVideoData(video);
       watchedSecondsRef.current = 0;
+      // Clarity: Video başladı
+      if (lesson) {
+        trackVideoStart(lId, lesson.title);
+        setTag('current_course', course?.title || courseId);
+      }
 
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
@@ -97,6 +103,8 @@ export function CoursePlayer() {
       await updateProgress(currentLesson.id, watchedSecondsRef.current, true);
       const updatedProgress = await getMyProgress();
       setProgress(updatedProgress);
+      // Clarity: Video tamamlandı
+      trackVideoComplete(currentLesson.id);
     }
   };
 

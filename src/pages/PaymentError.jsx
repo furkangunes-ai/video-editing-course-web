@@ -1,11 +1,17 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { XCircle, ArrowRight, RefreshCw, MessageCircle } from 'lucide-react';
+import { trackPurchaseFailed } from '../utils/clarity';
 
 export const PaymentError = () => {
     const [searchParams] = useSearchParams();
     const errorMessage = searchParams.get('error') || 'Bilinmeyen hata';
+
+    useEffect(() => {
+        // Clarity: Ödeme başarısız
+        trackPurchaseFailed(errorMessage);
+    }, [errorMessage]);
 
     const getErrorText = (error) => {
         switch (error) {

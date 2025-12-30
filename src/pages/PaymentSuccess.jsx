@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { CheckCircle, ArrowRight, PartyPopper } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { trackPurchaseComplete } from '../utils/clarity';
 
 export const PaymentSuccess = () => {
     const [searchParams] = useSearchParams();
@@ -12,7 +13,11 @@ export const PaymentSuccess = () => {
     useEffect(() => {
         // Kullanıcı bilgisini yenile (has_access güncellenmiş olacak)
         refreshUser?.();
-    }, [refreshUser]);
+        // Clarity: Satın alma tamamlandı
+        if (orderCode) {
+            trackPurchaseComplete(orderCode, 999);
+        }
+    }, [refreshUser, orderCode]);
 
     return (
         <>

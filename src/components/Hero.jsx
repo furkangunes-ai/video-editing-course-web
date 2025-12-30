@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Play, ArrowRight, X } from 'lucide-react';
+import { trackCTAClick, trackEvent } from '../utils/clarity';
 
 export const Hero = () => {
   const [showVideo, setShowVideo] = useState(false);
@@ -29,10 +30,14 @@ export const Hero = () => {
               <Link
                 to="/satin-al"
                 className="btn btn-primary"
+                onClick={() => trackCTAClick('hero_hemen_basla')}
               >
                 Hemen Başla <ArrowRight size={20} />
               </Link>
-              <button className="btn btn-outline" onClick={() => setShowVideo(true)}>
+              <button className="btn btn-outline" onClick={() => {
+                setShowVideo(true);
+                trackEvent('hero_video_play');
+              }}>
                 <Play size={20} /> Örnek Ders İzle
               </button>
             </div>

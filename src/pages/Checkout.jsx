@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail, ArrowRight, RefreshCw } from 'lucide-react';
+import { trackCheckoutStart, trackEmailVerified, trackPaymentStart, trackError, setTag } from '../utils/clarity';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
@@ -86,6 +87,9 @@ export const Checkout = () => {
         }
 
         setLoading(true);
+        // Clarity: Checkout başladı
+        trackCheckoutStart('Video Editörlüğü Ustalık Sınıfı', 999);
+        setTag('checkout_email', formData.email);
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/payment/send-verification`, {
@@ -143,6 +147,8 @@ export const Checkout = () => {
 
             setIsEmailVerified(true);
             setStep(3);
+            // Clarity: Email doğrulandı
+            trackEmailVerified();
         } catch (err) {
             const message = err.message || 'Doğrulama kodu hatalı';
             setError(typeof message === 'string' ? message : 'Doğrulama kodu hatalı');
@@ -154,6 +160,8 @@ export const Checkout = () => {
     const handlePayment = async () => {
         setError('');
         setLoading(true);
+        // Clarity: Ödeme başlatıldı
+        trackPaymentStart();
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/payment/create-guest-order`, {
@@ -190,6 +198,8 @@ export const Checkout = () => {
         } catch (err) {
             const message = err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
             setError(typeof message === 'string' ? message : 'Bir hata oluştu.');
+            // Clarity: Hata oluştu
+            trackError('payment_error', message);
             setLoading(false);
         }
     };
