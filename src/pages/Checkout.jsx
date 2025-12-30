@@ -102,13 +102,17 @@ export const Checkout = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'Doğrulama kodu gönderilemedi');
+                const errorMessage = typeof errorData.detail === 'string'
+                    ? errorData.detail
+                    : (errorData.detail?.msg || errorData.message || 'Doğrulama kodu gönderilemedi');
+                throw new Error(errorMessage);
             }
 
             setStep(2);
             setCountdown(300); // 5 dakika
         } catch (err) {
-            setError(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+            const message = err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+            setError(typeof message === 'string' ? message : 'Bir hata oluştu.');
         } finally {
             setLoading(false);
         }
@@ -131,13 +135,17 @@ export const Checkout = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'Doğrulama başarısız');
+                const errorMessage = typeof errorData.detail === 'string'
+                    ? errorData.detail
+                    : (errorData.detail?.msg || errorData.message || 'Doğrulama başarısız');
+                throw new Error(errorMessage);
             }
 
             setIsEmailVerified(true);
             setStep(3);
         } catch (err) {
-            setError(err.message || 'Doğrulama kodu hatalı');
+            const message = err.message || 'Doğrulama kodu hatalı';
+            setError(typeof message === 'string' ? message : 'Doğrulama kodu hatalı');
         } finally {
             setLoading(false);
         }
@@ -164,7 +172,10 @@ export const Checkout = () => {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'Sipariş oluşturulamadı');
+                const errorMessage = typeof errorData.detail === 'string'
+                    ? errorData.detail
+                    : (errorData.detail?.msg || errorData.message || 'Sipariş oluşturulamadı');
+                throw new Error(errorMessage);
             }
 
             const data = await response.json();
@@ -177,7 +188,8 @@ export const Checkout = () => {
                 }
             }, 500);
         } catch (err) {
-            setError(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+            const message = err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.';
+            setError(typeof message === 'string' ? message : 'Bir hata oluştu.');
             setLoading(false);
         }
     };
