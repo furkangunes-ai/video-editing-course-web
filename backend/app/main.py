@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
 from app.database import engine, Base
-from app.api import auth, courses
+from app.api import auth, courses, payment
 
 settings = get_settings()
 
@@ -28,6 +28,7 @@ app.add_middleware(
 # Router'ları ekle
 app.include_router(auth.router)
 app.include_router(courses.router)
+app.include_router(payment.router)
 
 
 @app.get("/")

@@ -26,6 +26,9 @@ import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { AdminAnalytics } from './pages/AdminAnalytics';
 import { Profile } from './pages/Profile';
+import { Checkout } from './pages/Checkout';
+import { PaymentSuccess } from './pages/PaymentSuccess';
+import { PaymentError } from './pages/PaymentError';
 import { AuthProvider } from './hooks/useAuth';
 
 function HomePage() {
@@ -85,6 +88,9 @@ function App() {
           <Route path="/urunler" element={<Products />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/profil" element={<Profile />} />
+          <Route path="/satin-al" element={<Checkout />} />
+          <Route path="/odeme-basarili" element={<PaymentSuccess />} />
+          <Route path="/odeme-hatasi" element={<PaymentError />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Check, ShieldCheck, ArrowRight } from 'lucide-react';
 
 export const Pricing = () => {
@@ -55,14 +56,12 @@ export const Pricing = () => {
                         </div>
 
                         <div className="pricing-cta">
-                            <a
-                                href="https://wa.me/905011411940"
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <Link
+                                to="/satin-al"
                                 className="btn btn-primary btn-block"
                             >
-                                Hemen İndirimli Kaydol <ArrowRight size={20} />
-                            </a>
+                                Hemen Satın Al <ArrowRight size={20} />
+                            </Link>
                             <p className="guarantee-text">
                                 <ShieldCheck size={16} className="inline-icon" />
                                 30 Gün Para İade Garantisi

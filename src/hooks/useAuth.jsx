@@ -44,12 +44,24 @@ export function AuthProvider({ children }) {
     setUser(null);
   }, []);
 
+  const refreshUser = useCallback(async () => {
+    if (isLoggedIn()) {
+      try {
+        const userData = await getMe();
+        setUser(userData);
+      } catch (error) {
+        setUser(null);
+      }
+    }
+  }, []);
+
   const value = {
     user,
     loading,
     login,
     register,
     logout,
+    refreshUser,
     isAuthenticated: !!user,
   };
 
