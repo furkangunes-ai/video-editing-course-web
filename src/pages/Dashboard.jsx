@@ -1,12 +1,21 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { Award, Download, ExternalLink, Loader2 } from 'lucide-react';
+
+const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
 export function Dashboard() {
-  const { user, loading, logout, isAuthenticated } = useAuth();
+  const { user, loading, logout, isAuthenticated, token } = useAuth();
   const navigate = useNavigate();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileRef = useRef(null);
+
+  // Sertifika state'leri
+  const [certificates, setCertificates] = useState([]);
+  const [certificateEligibility, setCertificateEligibility] = useState(null);
+  const [certLoading, setCertLoading] = useState(false);
+  const [certGenerating, setCertGenerating] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -24,6 +33,72 @@ export function Dashboard() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Sertifikaları ve uygunluğu kontrol et
+  useEffect(() => {
+    if (user?.has_access && token) {
+      fetchCertificates();
+      checkCertificateEligibility(1); // Kurs ID: 1
+    }
+  }, [user, token]);
+
+  const fetchCertificates = async () => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/certificates/my`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCertificates(data);
+      }
+    } catch (err) {
+      console.error('Sertifikalar yüklenemedi:', err);
+    }
+  };
+
+  const checkCertificateEligibility = async (courseId) => {
+    setCertLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/certificates/check/${courseId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCertificateEligibility(data);
+      }
+    } catch (err) {
+      console.error('Sertifika uygunluğu kontrol edilemedi:', err);
+    } finally {
+      setCertLoading(false);
+    }
+  };
+
+  const generateCertificate = async (courseId) => {
+    setCertGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/certificates/generate`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ course_id: courseId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setCertificates(prev => [...prev, data]);
+        setCertificateEligibility(prev => ({ ...prev, has_certificate: true }));
+      } else {
+        const err = await res.json();
+        alert(err.detail || 'Sertifika oluşturulamadı');
+      }
+    } catch (err) {
+      console.error('Sertifika oluşturulamadı:', err);
+      alert('Bir hata oluştu');
+    } finally {
+      setCertGenerating(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -114,19 +189,131 @@ export function Dashboard() {
         </div>
 
         {user.has_access ? (
-          <div style={styles.courses}>
-            <h2 style={styles.sectionTitle}>Kurslarım</h2>
-            <div style={styles.courseGrid}>
-              <div style={styles.courseCard}>
-                <div style={styles.courseThumbnail}>
-                  <span style={styles.playIcon}>▶</span>
+          <>
+            <div style={styles.courses}>
+              <h2 style={styles.sectionTitle}>Kurslarım</h2>
+              <div style={styles.courseGrid}>
+                <div style={styles.courseCard}>
+                  <div style={styles.courseThumbnail}>
+                    <span style={styles.playIcon}>▶</span>
+                  </div>
+                  <h3 style={styles.courseTitle}>Video Editörlüğü Ustalık Sınıfı</h3>
+                  <p style={styles.courseProgress}>
+                    İlerleme: {certificateEligibility?.completion_percentage || 0}%
+                  </p>
+                  <Link to="/kurs/1" style={styles.continueBtn}>Devam Et</Link>
                 </div>
-                <h3 style={styles.courseTitle}>Video Editörlüğü Ustalık Sınıfı</h3>
-                <p style={styles.courseProgress}>İlerleme: 0%</p>
-                <Link to="/kurs/1" style={styles.continueBtn}>Devam Et</Link>
               </div>
             </div>
-          </div>
+
+            {/* Sertifikalar Bölümü */}
+            <div style={styles.certificateSection}>
+              <h2 style={styles.sectionTitle}>
+                <Award size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+                Sertifikalarım
+              </h2>
+
+              {certLoading ? (
+                <div style={styles.certLoading}>
+                  <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Yükleniyor...</span>
+                </div>
+              ) : (
+                <>
+                  {/* Mevcut Sertifikalar */}
+                  {certificates.length > 0 && (
+                    <div style={styles.certGrid}>
+                      {certificates.map(cert => (
+                        <div key={cert.id} style={styles.certCard}>
+                          <div style={styles.certHeader}>
+                            <Award size={32} color="#00ff9d" />
+                            <span style={styles.certBadge}>Tamamlama Sertifikası</span>
+                          </div>
+                          <h3 style={styles.certTitle}>{cert.course_title}</h3>
+                          <p style={styles.certDate}>
+                            {new Date(cert.completion_date).toLocaleDateString('tr-TR', {
+                              day: 'numeric', month: 'long', year: 'numeric'
+                            })}
+                          </p>
+                          <p style={styles.certCode}>Kod: {cert.certificate_code}</p>
+                          <div style={styles.certActions}>
+                            <a
+                              href={`${API_BASE_URL}/api/certificates/download/${cert.certificate_code}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={styles.certBtn}
+                            >
+                              <Download size={16} />
+                              İndir
+                            </a>
+                            <Link to={`/sertifika/${cert.certificate_code}`} style={styles.certBtnSecondary}>
+                              <ExternalLink size={16} />
+                              Görüntüle
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Sertifika Uygunluk Durumu */}
+                  {certificateEligibility && !certificateEligibility.has_certificate && (
+                    <div style={styles.eligibilityCard}>
+                      {certificateEligibility.eligible ? (
+                        <>
+                          <div style={styles.eligibleIcon}>🎉</div>
+                          <h3 style={styles.eligibleTitle}>Tebrikler! Sertifikanızı Alabilirsiniz</h3>
+                          <p style={styles.eligibleText}>
+                            Kursu %{certificateEligibility.completion_percentage} oranında tamamladınız.
+                          </p>
+                          <button
+                            onClick={() => generateCertificate(1)}
+                            disabled={certGenerating}
+                            style={styles.generateBtn}
+                          >
+                            {certGenerating ? (
+                              <>
+                                <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                                Oluşturuluyor...
+                              </>
+                            ) : (
+                              <>
+                                <Award size={18} />
+                                Sertifika Oluştur
+                              </>
+                            )}
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <div style={styles.progressIcon}>📊</div>
+                          <h3 style={styles.progressTitle}>Sertifika İçin İlerlemeniz</h3>
+                          <div style={styles.progressBarContainer}>
+                            <div
+                              style={{
+                                ...styles.progressBar,
+                                width: `${certificateEligibility.completion_percentage}%`
+                              }}
+                            />
+                          </div>
+                          <p style={styles.progressText}>
+                            %{certificateEligibility.completion_percentage} / %{certificateEligibility.required_percentage} tamamlandı
+                          </p>
+                          <p style={styles.progressHint}>
+                            Sertifika almak için kursu en az %80 oranında tamamlamanız gerekiyor.
+                          </p>
+                        </>
+                      )}
+                    </div>
+                  )}
+
+                  {certificates.length === 0 && !certificateEligibility && (
+                    <p style={styles.noCerts}>Henüz sertifikanız bulunmuyor.</p>
+                  )}
+                </>
+              )}
+            </div>
+          </>
         ) : (
           <div style={styles.noaccess}>
             <div style={styles.lockIcon}>🔒</div>
@@ -402,5 +589,161 @@ const styles = {
     borderRadius: '2rem',
     textDecoration: 'none',
     fontWeight: '600',
+  },
+  // Sertifika stilleri
+  certificateSection: {
+    marginTop: '3rem',
+  },
+  certLoading: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.75rem',
+    padding: '2rem',
+    color: '#a0a0a0',
+  },
+  certGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '2rem',
+  },
+  certCard: {
+    background: 'linear-gradient(135deg, rgba(0, 255, 157, 0.05) 0%, rgba(112, 0, 255, 0.05) 100%)',
+    border: '1px solid rgba(0, 255, 157, 0.2)',
+    borderRadius: '1rem',
+    padding: '1.5rem',
+  },
+  certHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    marginBottom: '1rem',
+  },
+  certBadge: {
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    color: '#000',
+    padding: '0.25rem 0.75rem',
+    borderRadius: '1rem',
+    fontSize: '0.75rem',
+    fontWeight: '600',
+  },
+  certTitle: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    marginBottom: '0.5rem',
+  },
+  certDate: {
+    color: '#a0a0a0',
+    fontSize: '0.85rem',
+    marginBottom: '0.25rem',
+  },
+  certCode: {
+    color: '#666',
+    fontSize: '0.8rem',
+    fontFamily: 'monospace',
+    marginBottom: '1rem',
+  },
+  certActions: {
+    display: 'flex',
+    gap: '0.75rem',
+  },
+  certBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 1rem',
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    color: '#000',
+    borderRadius: '0.5rem',
+    textDecoration: 'none',
+    fontSize: '0.85rem',
+    fontWeight: '600',
+  },
+  certBtnSecondary: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 1rem',
+    background: 'transparent',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    color: '#fff',
+    borderRadius: '0.5rem',
+    textDecoration: 'none',
+    fontSize: '0.85rem',
+    fontWeight: '500',
+  },
+  eligibilityCard: {
+    background: 'rgba(255, 255, 255, 0.03)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '1rem',
+    padding: '2rem',
+    textAlign: 'center',
+  },
+  eligibleIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem',
+  },
+  eligibleTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    marginBottom: '0.5rem',
+    color: '#00ff9d',
+  },
+  eligibleText: {
+    color: '#a0a0a0',
+    marginBottom: '1.5rem',
+  },
+  generateBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.5rem',
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    color: '#000',
+    border: 'none',
+    borderRadius: '2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+  },
+  progressIcon: {
+    fontSize: '3rem',
+    marginBottom: '1rem',
+  },
+  progressTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    marginBottom: '1rem',
+  },
+  progressBarContainer: {
+    width: '100%',
+    maxWidth: '400px',
+    height: '12px',
+    background: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '6px',
+    margin: '0 auto 1rem',
+    overflow: 'hidden',
+  },
+  progressBar: {
+    height: '100%',
+    background: 'linear-gradient(90deg, #00ff9d 0%, #00cc7d 100%)',
+    borderRadius: '6px',
+    transition: 'width 0.5s ease',
+  },
+  progressText: {
+    fontSize: '1.1rem',
+    fontWeight: '600',
+    marginBottom: '0.5rem',
+  },
+  progressHint: {
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+  },
+  noCerts: {
+    textAlign: 'center',
+    color: '#a0a0a0',
+    padding: '2rem',
   },
 };

@@ -31,6 +31,7 @@ import { Profile } from './pages/Profile';
 import { Checkout } from './pages/Checkout';
 import { PaymentSuccess } from './pages/PaymentSuccess';
 import { PaymentError } from './pages/PaymentError';
+import { Certificate } from './pages/Certificate';
 import { AuthProvider } from './hooks/useAuth';
 
 function HomePage() {
@@ -95,6 +96,7 @@ function App() {
           <Route path="/satin-al" element={<Checkout />} />
           <Route path="/odeme-basarili" element={<PaymentSuccess />} />
           <Route path="/odeme-hatasi" element={<PaymentError />} />
+          <Route path="/sertifika/:code" element={<Certificate />} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
