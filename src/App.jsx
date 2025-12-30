@@ -25,6 +25,7 @@ import { CoursePlayer } from './pages/CoursePlayer';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { ResetPassword } from './pages/ResetPassword';
 import { AdminAnalytics } from './pages/AdminAnalytics';
+import { AdminEmailTemplates } from './pages/AdminEmailTemplates';
 import { Profile } from './pages/Profile';
 import { Checkout } from './pages/Checkout';
 import { PaymentSuccess } from './pages/PaymentSuccess';
@@ -87,6 +88,7 @@ function App() {
           <Route path="/icerik-uretimi" element={<ContentGenerator />} />
           <Route path="/urunler" element={<Products />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
+          <Route path="/admin/email-templates" element={<AdminEmailTemplates />} />
           <Route path="/profil" element={<Profile />} />
           <Route path="/satin-al" element={<Checkout />} />
           <Route path="/odeme-basarili" element={<PaymentSuccess />} />
