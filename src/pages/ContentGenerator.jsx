@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useContentGenerator } from '../hooks/useContentGenerator';
 
 const STEP_NAMES = [
@@ -46,6 +47,7 @@ export function ContentGenerator() {
     return (
       <div style={styles.container}>
         <div style={styles.card}>
+          <Link to="/" style={styles.backLink}>← Ana Sayfa</Link>
           <h1 style={styles.title}>İçerik Üretimi</h1>
           <p style={styles.subtitle}>Bu alana erişmek için parola gerekli</p>
 
@@ -71,6 +73,7 @@ export function ContentGenerator() {
   return (
     <div style={styles.container}>
       <div style={styles.card}>
+        <Link to="/" style={styles.backLink}>← Ana Sayfa</Link>
         <h1 style={styles.title}>İçerik Üretimi</h1>
         <p style={styles.subtitle}>Instagram için viral içerik oluştur</p>
 
@@ -180,6 +183,14 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '2rem',
+  },
+  backLink: {
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+    textDecoration: 'none',
+    display: 'inline-block',
+    marginBottom: '1rem',
+    transition: 'color 0.2s',
   },
   card: {
     backgroundColor: 'rgba(20, 20, 20, 0.8)',
