@@ -2,57 +2,112 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
-import { createOrder } from '../api/paymentApi';
-import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2 } from 'lucide-react';
+import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail } from 'lucide-react';
+
+const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
 export const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [orderData, setOrderData] = useState(null);
+    const [formData, setFormData] = useState({
+        name: '',
+        surname: '',
+        email: ''
+    });
     const formRef = useRef(null);
-    const { user, isAuthenticated, loading: authLoading } = useAuth();
+    const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
 
+    // Giriş yapmış kullanıcının bilgilerini form'a doldur
     useEffect(() => {
-        if (!authLoading && !isAuthenticated) {
-            navigate('/giris?redirect=/satin-al');
+        if (user) {
+            const nameParts = (user.full_name || '').split(' ');
+            setFormData({
+                name: nameParts[0] || '',
+                surname: nameParts.slice(1).join(' ') || '',
+                email: user.email || ''
+            });
         }
-    }, [authLoading, isAuthenticated, navigate]);
+    }, [user]);
 
+    // Zaten erişimi varsa dashboard'a yönlendir
     useEffect(() => {
         if (user?.has_access) {
             navigate('/dashboard');
         }
     }, [user, navigate]);
 
+    const handleInputChange = (e) => {
+        setFormData({
+            ...formData,
+            [e.target.name]: e.target.value
+        });
+    };
+
+    const validateForm = () => {
+        if (!formData.name.trim()) {
+            setError('Lütfen adınızı girin');
+            return false;
+        }
+        if (!formData.surname.trim()) {
+            setError('Lütfen soyadınızı girin');
+            return false;
+        }
+        if (!formData.email.trim()) {
+            setError('Lütfen email adresinizi girin');
+            return false;
+        }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            setError('Geçerli bir email adresi girin');
+            return false;
+        }
+        return true;
+    };
+
     const handlePayment = async () => {
-        setLoading(true);
         setError('');
 
+        if (!validateForm()) {
+            return;
+        }
+
+        setLoading(true);
+
         try {
-            const data = await createOrder('ustalık-sinifi');
+            // Guest checkout için direkt Shopier'a form gönder
+            const response = await fetch(`${API_BASE_URL}/api/payment/create-guest-order`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    buyer_name: formData.name,
+                    buyer_surname: formData.surname,
+                    buyer_email: formData.email,
+                    product_id: 'ustalık-sinifi'
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Sipariş oluşturulamadı');
+            }
+
+            const data = await response.json();
             setOrderData(data);
 
-            // Form verisi hazır, otomatik submit için timeout
+            // Form verisi hazır, otomatik submit
             setTimeout(() => {
                 if (formRef.current) {
                     formRef.current.submit();
                 }
             }, 500);
         } catch (err) {
-            setError(err.message);
+            setError(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
             setLoading(false);
         }
     };
-
-    if (authLoading) {
-        return (
-            <div className="checkout-loading">
-                <Loader2 className="spinner" size={40} />
-                <p>Yükleniyor...</p>
-            </div>
-        );
-    }
 
     return (
         <>
@@ -109,13 +164,60 @@ export const Checkout = () => {
                             </div>
                         </div>
 
-                        {/* Sağ: Ödeme Butonu */}
+                        {/* Sağ: Ödeme Formu */}
                         <div className="payment-section">
                             <h2>Güvenli Ödeme</h2>
 
-                            <div className="user-info">
-                                <p><strong>Hesap:</strong> {user?.email}</p>
-                                <p><strong>Ad Soyad:</strong> {user?.full_name || 'Belirtilmemiş'}</p>
+                            <div className="checkout-form">
+                                <div className="form-row">
+                                    <div className="form-group">
+                                        <label>
+                                            <User size={16} />
+                                            Ad
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            value={formData.name}
+                                            onChange={handleInputChange}
+                                            placeholder="Adınız"
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                    <div className="form-group">
+                                        <label>
+                                            <User size={16} />
+                                            Soyad
+                                        </label>
+                                        <input
+                                            type="text"
+                                            name="surname"
+                                            value={formData.surname}
+                                            onChange={handleInputChange}
+                                            placeholder="Soyadınız"
+                                            disabled={loading}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group">
+                                    <label>
+                                        <Mail size={16} />
+                                        Email
+                                    </label>
+                                    <input
+                                        type="email"
+                                        name="email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                        placeholder="ornek@email.com"
+                                        disabled={loading}
+                                    />
+                                </div>
+
+                                <p className="form-note">
+                                    Kurs erişim bilgileri bu email adresine gönderilecektir.
+                                </p>
                             </div>
 
                             {error && (
@@ -176,26 +278,6 @@ export const Checkout = () => {
             </div>
 
             <style>{`
-                .checkout-loading {
-                    min-height: 100vh;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    background: var(--color-bg);
-                    color: var(--color-text);
-                    gap: 1rem;
-                }
-
-                .spinner {
-                    animation: spin 1s linear infinite;
-                }
-
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-
                 .checkout-page {
                     min-height: 100vh;
                     padding-top: 100px;
@@ -213,6 +295,15 @@ export const Checkout = () => {
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 2rem;
+                }
+
+                .spinner {
+                    animation: spin 1s linear infinite;
+                }
+
+                @keyframes spin {
+                    from { transform: rotate(0deg); }
+                    to { transform: rotate(360deg); }
                 }
 
                 /* Sol: Ürün Özeti */
@@ -329,21 +420,60 @@ export const Checkout = () => {
                     font-size: 1.25rem;
                 }
 
-                .user-info {
-                    background: rgba(255, 255, 255, 0.03);
-                    border-radius: 0.5rem;
-                    padding: 1rem;
+                /* Form Styles */
+                .checkout-form {
                     margin-bottom: 1.5rem;
                 }
 
-                .user-info p {
-                    color: var(--color-text-muted);
-                    font-size: 0.9rem;
-                    margin-bottom: 0.25rem;
+                .form-row {
+                    display: grid;
+                    grid-template-columns: 1fr 1fr;
+                    gap: 1rem;
                 }
 
-                .user-info strong {
+                .form-group {
+                    margin-bottom: 1rem;
+                }
+
+                .form-group label {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: var(--color-text-muted);
+                    font-size: 0.85rem;
+                    margin-bottom: 0.5rem;
+                }
+
+                .form-group input {
+                    width: 100%;
+                    padding: 0.875rem 1rem;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 0.5rem;
                     color: var(--color-text);
+                    font-size: 1rem;
+                    transition: all 0.3s ease;
+                }
+
+                .form-group input:focus {
+                    outline: none;
+                    border-color: #00ff9d;
+                    background: rgba(0, 255, 157, 0.05);
+                }
+
+                .form-group input::placeholder {
+                    color: rgba(255, 255, 255, 0.3);
+                }
+
+                .form-group input:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+
+                .form-note {
+                    font-size: 0.8rem;
+                    color: var(--color-text-muted);
+                    margin-bottom: 1rem;
                 }
 
                 .error-message {
@@ -411,6 +541,10 @@ export const Checkout = () => {
 
                 @media (max-width: 768px) {
                     .checkout-content {
+                        grid-template-columns: 1fr;
+                    }
+
+                    .form-row {
                         grid-template-columns: 1fr;
                     }
 

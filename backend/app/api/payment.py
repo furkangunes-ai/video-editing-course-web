@@ -245,3 +245,121 @@ async def get_my_orders(
         }
         for o in orders
     ]
+
+
+from pydantic import BaseModel, EmailStr
+
+class GuestOrderRequest(BaseModel):
+    buyer_name: str
+    buyer_surname: str
+    buyer_email: EmailStr
+    product_id: str = "ustalık-sinifi"
+
+
+def generate_guest_order_code() -> str:
+    """Misafir kullanıcı için benzersiz sipariş kodu oluştur"""
+    timestamp = int(time.time())
+    random_suffix = random.randint(1000, 9999)
+    return f"VM-G-{timestamp}-{random_suffix}"
+
+
+@router.post("/create-guest-order")
+async def create_guest_order(
+    request: GuestOrderRequest,
+    db: Session = Depends(get_db)
+):
+    """Misafir kullanıcı için ödeme siparişi oluştur (hesap zorunluluğu yok)"""
+
+    # Ürün bilgisi
+    product = PRODUCTS.get(request.product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+
+    # Kullanıcı zaten var mı kontrol et
+    existing_user = db.query(User).filter(User.email == request.buyer_email).first()
+
+    if existing_user:
+        # Kullanıcı zaten kursa erişime sahip mi?
+        if existing_user.has_access:
+            raise HTTPException(
+                status_code=400,
+                detail="Bu email adresi ile zaten kursa erişiminiz var. Giriş yaparak dashboard'a erişebilirsiniz."
+            )
+        user_id = existing_user.id
+    else:
+        # Yeni kullanıcı oluştur (şifresiz - sonra email ile şifre oluşturabilir)
+        import secrets
+        temp_password = secrets.token_urlsafe(32)  # Rastgele güvenli şifre
+        from app.services.auth import get_password_hash
+
+        new_user = User(
+            email=request.buyer_email,
+            full_name=f"{request.buyer_name} {request.buyer_surname}",
+            hashed_password=get_password_hash(temp_password),
+            is_active=True,
+            has_access=False
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        user_id = new_user.id
+
+    # Sipariş kodu ve random number oluştur
+    order_code = generate_guest_order_code()
+    random_nr = str(random.randint(100000, 999999))
+
+    # Siparişi veritabanına kaydet
+    order = Order(
+        user_id=user_id,
+        order_code=order_code,
+        product_name=product["name"],
+        amount=product["price"],
+        currency=0,  # TRY
+        status="pending",
+        random_nr=random_nr
+    )
+    db.add(order)
+    db.commit()
+    db.refresh(order)
+
+    # İmza oluştur: random_nr + order_code + amount + currency
+    signature_data = f"{random_nr}{order_code}{product['price']:.2f}0"
+    signature = generate_signature(signature_data, settings.shopier_secret)
+
+    # Shopier form verileri
+    form_data = {
+        "API_key": settings.shopier_api_key,
+        "website_index": "1",
+        "platform_order_id": order_code,
+        "product_name": product["name"],
+        "product_type": product["type"],
+        "buyer_name": request.buyer_name,
+        "buyer_surname": request.buyer_surname,
+        "buyer_email": request.buyer_email,
+        "buyer_account_age": 0,
+        "buyer_id_nr": str(user_id),
+        "buyer_phone": "",
+        "billing_address": "Türkiye",
+        "billing_city": "İstanbul",
+        "billing_country": "TR",
+        "billing_postcode": "34000",
+        "shipping_address": "Dijital Ürün",
+        "shipping_city": "İstanbul",
+        "shipping_country": "TR",
+        "shipping_postcode": "34000",
+        "total_order_value": f"{product['price']:.2f}",
+        "currency": 0,
+        "platform": 0,
+        "is_in_frame": 0,
+        "current_language": 0,
+        "modul_version": "1.0.0",
+        "random_nr": random_nr,
+        "signature": signature
+    }
+
+    return {
+        "order_id": order.id,
+        "order_code": order_code,
+        "payment_url": settings.shopier_payment_url,
+        "form_data": form_data
+    }

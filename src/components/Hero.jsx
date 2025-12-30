@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Play, ArrowRight, X } from 'lucide-react';
 
 export const Hero = () => {
@@ -25,14 +26,12 @@ export const Hero = () => {
               Güzel yemek için en pahalı malzemeler şart değil.
             </p>
             <div className="hero-actions">
-              <a
-                href="https://wa.me/905011411940"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/satin-al"
                 className="btn btn-primary"
               >
                 Hemen Başla <ArrowRight size={20} />
-              </a>
+              </Link>
               <button className="btn btn-outline" onClick={() => setShowVideo(true)}>
                 <Play size={20} /> Örnek Ders İzle
               </button>
