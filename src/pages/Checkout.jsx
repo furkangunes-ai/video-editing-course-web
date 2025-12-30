@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
-import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail } from 'lucide-react';
+import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail, ArrowRight, RefreshCw } from 'lucide-react';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
@@ -10,6 +10,10 @@ export const Checkout = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [orderData, setOrderData] = useState(null);
+    const [step, setStep] = useState(1); // 1: Form, 2: Doğrulama, 3: Ödeme
+    const [verificationCode, setVerificationCode] = useState('');
+    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [countdown, setCountdown] = useState(0);
     const [formData, setFormData] = useState({
         name: '',
         surname: '',
@@ -38,11 +42,20 @@ export const Checkout = () => {
         }
     }, [user, navigate]);
 
+    // Countdown timer
+    useEffect(() => {
+        if (countdown > 0) {
+            const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+            return () => clearTimeout(timer);
+        }
+    }, [countdown]);
+
     const handleInputChange = (e) => {
         setFormData({
             ...formData,
             [e.target.name]: e.target.value
         });
+        setError('');
     };
 
     const validateForm = () => {
@@ -65,7 +78,7 @@ export const Checkout = () => {
         return true;
     };
 
-    const handlePayment = async () => {
+    const handleSendVerification = async () => {
         setError('');
 
         if (!validateForm()) {
@@ -75,7 +88,66 @@ export const Checkout = () => {
         setLoading(true);
 
         try {
-            // Guest checkout için direkt Shopier'a form gönder
+            const response = await fetch(`${API_BASE_URL}/api/payment/send-verification`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: formData.email,
+                    name: formData.name,
+                    surname: formData.surname
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Doğrulama kodu gönderilemedi');
+            }
+
+            setStep(2);
+            setCountdown(300); // 5 dakika
+        } catch (err) {
+            setError(err.message || 'Bir hata oluştu. Lütfen tekrar deneyin.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleVerifyCode = async () => {
+        setError('');
+
+        if (!verificationCode || verificationCode.length !== 6) {
+            setError('Lütfen 6 haneli doğrulama kodunu girin');
+            return;
+        }
+
+        setLoading(true);
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/payment/verify-email-code?email=${encodeURIComponent(formData.email)}&code=${verificationCode}`, {
+                method: 'POST',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.detail || 'Doğrulama başarısız');
+            }
+
+            setIsEmailVerified(true);
+            setStep(3);
+        } catch (err) {
+            setError(err.message || 'Doğrulama kodu hatalı');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handlePayment = async () => {
+        setError('');
+        setLoading(true);
+
+        try {
             const response = await fetch(`${API_BASE_URL}/api/payment/create-guest-order`, {
                 method: 'POST',
                 headers: {
@@ -85,6 +157,7 @@ export const Checkout = () => {
                     buyer_name: formData.name,
                     buyer_surname: formData.surname,
                     buyer_email: formData.email,
+                    verification_code: verificationCode,
                     product_id: 'ustalık-sinifi'
                 })
             });
@@ -109,11 +182,35 @@ export const Checkout = () => {
         }
     };
 
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    };
+
     return (
         <>
             <Navbar />
             <div className="checkout-page">
                 <div className="checkout-container">
+                    {/* Adım Göstergesi */}
+                    <div className="steps-indicator">
+                        <div className={`step-item ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
+                            <div className="step-number">{step > 1 ? <CheckCircle size={16} /> : '1'}</div>
+                            <span>Bilgiler</span>
+                        </div>
+                        <div className="step-line"></div>
+                        <div className={`step-item ${step >= 2 ? 'active' : ''} ${step > 2 ? 'completed' : ''}`}>
+                            <div className="step-number">{step > 2 ? <CheckCircle size={16} /> : '2'}</div>
+                            <span>Doğrulama</span>
+                        </div>
+                        <div className="step-line"></div>
+                        <div className={`step-item ${step >= 3 ? 'active' : ''}`}>
+                            <div className="step-number">3</div>
+                            <span>Ödeme</span>
+                        </div>
+                    </div>
+
                     <div className="checkout-content">
                         {/* Sol: Ürün Bilgisi */}
                         <div className="product-summary">
@@ -166,98 +263,229 @@ export const Checkout = () => {
 
                         {/* Sağ: Ödeme Formu */}
                         <div className="payment-section">
-                            <h2>Güvenli Ödeme</h2>
+                            {/* Step 1: Form */}
+                            {step === 1 && (
+                                <>
+                                    <h2>Bilgilerinizi Girin</h2>
 
-                            <div className="checkout-form">
-                                <div className="form-row">
-                                    <div className="form-group">
-                                        <label>
-                                            <User size={16} />
-                                            Ad
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="name"
-                                            value={formData.name}
-                                            onChange={handleInputChange}
-                                            placeholder="Adınız"
-                                            disabled={loading}
-                                        />
-                                    </div>
-                                    <div className="form-group">
-                                        <label>
-                                            <User size={16} />
-                                            Soyad
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="surname"
-                                            value={formData.surname}
-                                            onChange={handleInputChange}
-                                            placeholder="Soyadınız"
-                                            disabled={loading}
-                                        />
-                                    </div>
-                                </div>
+                                    <div className="checkout-form">
+                                        <div className="form-row">
+                                            <div className="form-group">
+                                                <label>
+                                                    <User size={16} />
+                                                    Ad
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="name"
+                                                    value={formData.name}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Adınız"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+                                            <div className="form-group">
+                                                <label>
+                                                    <User size={16} />
+                                                    Soyad
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    name="surname"
+                                                    value={formData.surname}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Soyadınız"
+                                                    disabled={loading}
+                                                />
+                                            </div>
+                                        </div>
 
-                                <div className="form-group">
-                                    <label>
-                                        <Mail size={16} />
-                                        Email
-                                    </label>
-                                    <input
-                                        type="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        placeholder="ornek@email.com"
+                                        <div className="form-group">
+                                            <label>
+                                                <Mail size={16} />
+                                                Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                value={formData.email}
+                                                onChange={handleInputChange}
+                                                placeholder="ornek@email.com"
+                                                disabled={loading}
+                                            />
+                                        </div>
+
+                                        <p className="form-note">
+                                            Email adresinizi doğruladıktan sonra ödeme adımına geçebilirsiniz.
+                                        </p>
+                                    </div>
+
+                                    {error && (
+                                        <div className="error-message">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        className="pay-button"
+                                        onClick={handleSendVerification}
                                         disabled={loading}
-                                    />
-                                </div>
-
-                                <p className="form-note">
-                                    Kurs erişim bilgileri bu email adresine gönderilecektir.
-                                </p>
-                            </div>
-
-                            {error && (
-                                <div className="error-message">
-                                    {error}
-                                </div>
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="spinner" size={20} />
+                                                Gönderiliyor...
+                                            </>
+                                        ) : (
+                                            <>
+                                                Doğrulama Kodu Gönder
+                                                <ArrowRight size={20} />
+                                            </>
+                                        )}
+                                    </button>
+                                </>
                             )}
 
-                            <button
-                                className="pay-button"
-                                onClick={handlePayment}
-                                disabled={loading}
-                            >
-                                {loading ? (
-                                    <>
-                                        <Loader2 className="spinner" size={20} />
-                                        Yönlendiriliyor...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Lock size={20} />
-                                        Güvenli Ödeme Yap - ₺999
-                                    </>
-                                )}
-                            </button>
+                            {/* Step 2: Doğrulama */}
+                            {step === 2 && (
+                                <>
+                                    <h2>Email Doğrulama</h2>
 
-                            <div className="security-badges">
-                                <div className="badge">
-                                    <ShieldCheck size={20} />
-                                    <span>256-bit SSL</span>
-                                </div>
-                                <div className="badge">
-                                    <Lock size={20} />
-                                    <span>Güvenli Ödeme</span>
-                                </div>
-                            </div>
+                                    <div className="verification-info">
+                                        <Mail size={24} />
+                                        <p>
+                                            <strong>{formData.email}</strong> adresine 6 haneli doğrulama kodu gönderdik.
+                                        </p>
+                                    </div>
 
-                            <p className="payment-note">
-                                Ödeme işlemi Shopier güvenli ödeme altyapısı üzerinden gerçekleştirilmektedir.
-                            </p>
+                                    <div className="form-group">
+                                        <label>
+                                            <Lock size={16} />
+                                            Doğrulama Kodu
+                                        </label>
+                                        <input
+                                            type="text"
+                                            value={verificationCode}
+                                            onChange={(e) => {
+                                                const value = e.target.value.replace(/\D/g, '').slice(0, 6);
+                                                setVerificationCode(value);
+                                                setError('');
+                                            }}
+                                            placeholder="123456"
+                                            maxLength={6}
+                                            disabled={loading}
+                                            className="verification-input"
+                                        />
+                                    </div>
+
+                                    {countdown > 0 && (
+                                        <p className="countdown-text">
+                                            Kod geçerlilik süresi: <strong>{formatTime(countdown)}</strong>
+                                        </p>
+                                    )}
+
+                                    {error && (
+                                        <div className="error-message">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        className="pay-button"
+                                        onClick={handleVerifyCode}
+                                        disabled={loading || verificationCode.length !== 6}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="spinner" size={20} />
+                                                Doğrulanıyor...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle size={20} />
+                                                Kodu Doğrula
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <button
+                                        className="resend-button"
+                                        onClick={handleSendVerification}
+                                        disabled={loading || countdown > 240}
+                                    >
+                                        <RefreshCw size={16} />
+                                        {countdown > 240 ? `Tekrar gönder (${formatTime(countdown - 240)})` : 'Kodu Tekrar Gönder'}
+                                    </button>
+
+                                    <button
+                                        className="back-button"
+                                        onClick={() => {
+                                            setStep(1);
+                                            setVerificationCode('');
+                                            setError('');
+                                        }}
+                                    >
+                                        ← Email adresini değiştir
+                                    </button>
+                                </>
+                            )}
+
+                            {/* Step 3: Ödeme */}
+                            {step === 3 && (
+                                <>
+                                    <h2>Güvenli Ödeme</h2>
+
+                                    <div className="verified-email">
+                                        <CheckCircle size={20} />
+                                        <span>{formData.email}</span>
+                                        <span className="verified-badge">Doğrulandı</span>
+                                    </div>
+
+                                    <div className="user-info-summary">
+                                        <p><strong>Ad Soyad:</strong> {formData.name} {formData.surname}</p>
+                                        <p><strong>Email:</strong> {formData.email}</p>
+                                    </div>
+
+                                    {error && (
+                                        <div className="error-message">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <button
+                                        className="pay-button"
+                                        onClick={handlePayment}
+                                        disabled={loading}
+                                    >
+                                        {loading ? (
+                                            <>
+                                                <Loader2 className="spinner" size={20} />
+                                                Yönlendiriliyor...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <Lock size={20} />
+                                                Güvenli Ödeme Yap - ₺999
+                                            </>
+                                        )}
+                                    </button>
+
+                                    <div className="security-badges">
+                                        <div className="badge">
+                                            <ShieldCheck size={20} />
+                                            <span>256-bit SSL</span>
+                                        </div>
+                                        <div className="badge">
+                                            <Lock size={20} />
+                                            <span>Güvenli Ödeme</span>
+                                        </div>
+                                    </div>
+
+                                    <p className="payment-note">
+                                        Ödeme işlemi Shopier güvenli ödeme altyapısı üzerinden gerçekleştirilmektedir.
+                                    </p>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -289,6 +517,55 @@ export const Checkout = () => {
                     max-width: 1000px;
                     margin: 0 auto;
                     padding: 0 1rem;
+                }
+
+                /* Steps Indicator */
+                .steps-indicator {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 2rem;
+                    gap: 0.5rem;
+                }
+
+                .step-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: var(--color-text-muted);
+                    font-size: 0.9rem;
+                }
+
+                .step-item.active {
+                    color: #00ff9d;
+                }
+
+                .step-item.completed .step-number {
+                    background: #00ff9d;
+                    color: #000;
+                }
+
+                .step-number {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: rgba(255, 255, 255, 0.1);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 600;
+                    font-size: 0.85rem;
+                }
+
+                .step-item.active .step-number {
+                    background: #00ff9d;
+                    color: #000;
+                }
+
+                .step-line {
+                    width: 40px;
+                    height: 2px;
+                    background: rgba(255, 255, 255, 0.1);
                 }
 
                 .checkout-content {
@@ -418,6 +695,141 @@ export const Checkout = () => {
                     color: var(--color-text);
                     margin-bottom: 1.5rem;
                     font-size: 1.25rem;
+                }
+
+                /* Verification Info */
+                .verification-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 1rem;
+                    padding: 1rem;
+                    background: rgba(0, 255, 157, 0.05);
+                    border: 1px solid rgba(0, 255, 157, 0.1);
+                    border-radius: 0.75rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .verification-info svg {
+                    color: #00ff9d;
+                    flex-shrink: 0;
+                }
+
+                .verification-info p {
+                    color: var(--color-text-muted);
+                    font-size: 0.9rem;
+                    margin: 0;
+                }
+
+                .verification-info strong {
+                    color: var(--color-text);
+                }
+
+                .verification-input {
+                    text-align: center;
+                    font-size: 1.5rem !important;
+                    letter-spacing: 0.5rem;
+                    font-family: monospace;
+                }
+
+                .countdown-text {
+                    text-align: center;
+                    color: var(--color-text-muted);
+                    font-size: 0.85rem;
+                    margin-bottom: 1rem;
+                }
+
+                .countdown-text strong {
+                    color: #00ff9d;
+                }
+
+                .resend-button {
+                    width: 100%;
+                    padding: 0.75rem;
+                    background: transparent;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 0.5rem;
+                    color: var(--color-text-muted);
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 0.5rem;
+                    margin-bottom: 0.5rem;
+                    transition: all 0.3s ease;
+                }
+
+                .resend-button:hover:not(:disabled) {
+                    border-color: #00ff9d;
+                    color: #00ff9d;
+                }
+
+                .resend-button:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .back-button {
+                    width: 100%;
+                    padding: 0.75rem;
+                    background: transparent;
+                    border: none;
+                    color: var(--color-text-muted);
+                    font-size: 0.85rem;
+                    cursor: pointer;
+                    transition: color 0.3s ease;
+                }
+
+                .back-button:hover {
+                    color: var(--color-text);
+                }
+
+                /* Verified Email */
+                .verified-email {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.75rem;
+                    padding: 1rem;
+                    background: rgba(0, 255, 157, 0.1);
+                    border: 1px solid rgba(0, 255, 157, 0.3);
+                    border-radius: 0.75rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .verified-email svg {
+                    color: #00ff9d;
+                }
+
+                .verified-email span {
+                    color: var(--color-text);
+                }
+
+                .verified-badge {
+                    margin-left: auto;
+                    background: #00ff9d;
+                    color: #000;
+                    padding: 0.25rem 0.5rem;
+                    border-radius: 0.25rem;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                }
+
+                .user-info-summary {
+                    background: rgba(255, 255, 255, 0.03);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 0.5rem;
+                    padding: 1rem;
+                    margin-bottom: 1.5rem;
+                }
+
+                .user-info-summary p {
+                    color: var(--color-text-muted);
+                    font-size: 0.9rem;
+                    margin: 0.25rem 0;
+                }
+
+                .user-info-summary strong {
+                    color: var(--color-text);
                 }
 
                 /* Form Styles */
@@ -550,6 +962,14 @@ export const Checkout = () => {
 
                     .checkout-container {
                         padding: 0 1rem;
+                    }
+
+                    .steps-indicator {
+                        font-size: 0.8rem;
+                    }
+
+                    .step-item span {
+                        display: none;
                     }
                 }
             `}</style>
