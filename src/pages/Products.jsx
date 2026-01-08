@@ -45,7 +45,7 @@ export const Products = () => {
                                             <Star size={12} />
                                             En Popüler
                                         </span>
-                                        <span className="discount-badge">%80 İNDİRİM</span>
+                                        <span className="discount-badge">%83 İNDİRİM</span>
                                     </div>
 
                                     <div className="product-icon">
@@ -58,9 +58,9 @@ export const Products = () => {
 
                                 <div className="price-section">
                                     <div className="price-wrapper">
-                                        <span className="old-price">₺5.000</span>
+                                        <span className="old-price">₺1.199</span>
                                         <div className="current-price-row">
-                                            <span className="current-price">₺999</span>
+                                            <span className="current-price">₺199</span>
                                             <span className="price-period">tek seferlik</span>
                                         </div>
                                     </div>

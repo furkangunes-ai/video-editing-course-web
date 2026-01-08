@@ -88,7 +88,7 @@ export const Checkout = () => {
 
         setLoading(true);
         // Clarity: Checkout başladı
-        trackCheckoutStart('Video Editörlüğü Ustalık Sınıfı', 999);
+        trackCheckoutStart('Video Editörlüğü Ustalık Sınıfı', 199);
         setTag('checkout_email', formData.email);
 
         try {
@@ -251,15 +251,15 @@ export const Checkout = () => {
                             <div className="price-breakdown">
                                 <div className="price-row">
                                     <span>Normal Fiyat</span>
-                                    <span className="original-price">₺5.000</span>
+                                    <span className="original-price">₺1.199</span>
                                 </div>
                                 <div className="price-row discount">
-                                    <span>İndirim (%80)</span>
-                                    <span>-₺4.001</span>
+                                    <span>İndirim (%83)</span>
+                                    <span>-₺1.000</span>
                                 </div>
                                 <div className="price-row total">
                                     <span>Toplam</span>
-                                    <span className="final-price">₺999</span>
+                                    <span className="final-price">₺199</span>
                                 </div>
                             </div>
 
@@ -487,7 +487,7 @@ export const Checkout = () => {
                                         ) : (
                                             <>
                                                 <Lock size={20} />
-                                                Güvenli Ödeme Yap - ₺999
+                                                Güvenli Ödeme Yap - ₺199
                                             </>
                                         )}
                                     </button>

@@ -20,15 +20,15 @@ export const Pricing = () => {
 
                             <div className="price-frame">
                                 <div className="discount-tag">
-                                    %80 İNDİRİM
+                                    %83 İNDİRİM
                                 </div>
                                 <div className="old-price-wrapper">
-                                    <span className="old-price">5.000 TL</span>
+                                    <span className="old-price">1.199 TL</span>
                                     <div className="strikethrough-line"></div>
                                 </div>
 
                                 <div className="current-price-container">
-                                    <span className="current-price">999 TL</span>
+                                    <span className="current-price">199 TL</span>
                                 </div>
                             </div>
 
