@@ -274,11 +274,11 @@ export const Checkout = () => {
                                 </div>
                                 <div className="feature">
                                     <CheckCircle size={16} />
-                                    <span>WhatsApp Destek Grubu</span>
+                                    <span>Sertifika</span>
                                 </div>
                                 <div className="feature">
                                     <CheckCircle size={16} />
-                                    <span>30 Gün Para İade Garantisi</span>
+                                    <span>3 Gün Para İade Garantisi</span>
                                 </div>
                             </div>
                         </div>

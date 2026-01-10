@@ -50,7 +50,7 @@ export const Pricing = () => {
                             </div>
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon" />
-                                <span>Özel WhatsApp Destek Grubu</span>
+                                <span>Ömür Boyu Erişim</span>
                             </div>
 
                         </div>
@@ -64,12 +64,12 @@ export const Pricing = () => {
                             </Link>
                             <p className="guarantee-text">
                                 <ShieldCheck size={16} className="inline-icon" />
-                                30 Gün Para İade Garantisi
+                                3 Gün Para İade Garantisi
                             </p>
                         </div>
                     </div>
 
-                    {/* New Skool Card */}
+                    {/* Skool Card - Ödeme sayfasına yönlendir */}
                     <div
                         className={`pricing-card skool-card ${activePlan === 'skool' ? 'active' : 'inactive'}`}
                         onClick={() => setActivePlan('skool')}
@@ -112,12 +112,12 @@ export const Pricing = () => {
                         </div>
 
                         <div className="pricing-cta">
-                            <a
-                                href="#"
+                            <Link
+                                to="/satin-al"
                                 className="btn btn-block btn-skool"
                             >
                                 Skool ile Abone Ol <ArrowRight size={20} />
-                            </a>
+                            </Link>
                         </div>
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
-import { Play, Users, Clock, CheckCircle, Calendar, MessageCircle, Video, Star, ArrowRight, Zap, Shield, Sparkles, Award } from 'lucide-react';
+import { Play, Users, Clock, CheckCircle, Calendar, MessageCircle, Video, Star, ArrowRight, Zap, Shield, Sparkles, Award, Radio } from 'lucide-react';
 
 export const Products = () => {
     const [hoveredCard, setHoveredCard] = useState(null);
@@ -29,9 +29,9 @@ export const Products = () => {
                         </p>
                     </div>
 
-                    {/* Products Grid */}
-                    <div className="products-grid">
-                        {/* Kurs Kartı */}
+                    {/* Products Grid - 3 Columns */}
+                    <div className="products-grid three-cols">
+                        {/* Kurs Kartı - Normal */}
                         <div
                             className={`product-card ${hoveredCard === 'course' ? 'hovered' : ''}`}
                             onMouseEnter={() => setHoveredCard('course')}
@@ -81,15 +81,15 @@ export const Products = () => {
                                     </div>
                                     <div className="feature-item">
                                         <div className="feature-icon">
-                                            <MessageCircle size={16} />
+                                            <Shield size={16} />
                                         </div>
-                                        <span>WhatsApp Destek</span>
+                                        <span>3 Gün Garanti</span>
                                     </div>
                                     <div className="feature-item">
                                         <div className="feature-icon">
-                                            <Shield size={16} />
+                                            <CheckCircle size={16} />
                                         </div>
-                                        <span>30 Gün Garanti</span>
+                                        <span>Sertifika</span>
                                     </div>
                                 </div>
 
@@ -110,7 +110,7 @@ export const Products = () => {
                                     </li>
                                     <li>
                                         <CheckCircle size={16} />
-                                        <span>Özel WhatsApp Destek Grubu</span>
+                                        <span>Temel Düzenleme Teknikleri</span>
                                     </li>
                                 </ul>
 
@@ -124,7 +124,107 @@ export const Products = () => {
 
                                 <p className="guarantee-text">
                                     <Shield size={14} />
-                                    30 Gün İçinde Memnun Kalmazsan Paranı İade Ediyoruz
+                                    3 Gün Para İade Garantisi
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Canlı Eğitim Kartı - Yeni */}
+                        <div
+                            className={`product-card live-card ${hoveredCard === 'live' ? 'hovered' : ''}`}
+                            onMouseEnter={() => setHoveredCard('live')}
+                            onMouseLeave={() => setHoveredCard(null)}
+                        >
+                            <div className="card-glow amber-glow"></div>
+                            <div className="card-content">
+                                <div className="card-header">
+                                    <div className="badge-row">
+                                        <span className="product-badge live-badge">
+                                            <Radio size={12} />
+                                            Canlı Eğitim
+                                        </span>
+                                        <span className="discount-badge">%25 İNDİRİM</span>
+                                    </div>
+
+                                    <div className="product-icon live-icon">
+                                        <Video size={28} />
+                                    </div>
+
+                                    <h2 className="product-title">Canlı Video Editörlük Eğitimi</h2>
+                                    <p className="product-tagline">4 Seans interaktif eğitim</p>
+                                </div>
+
+                                <div className="price-section live-price-section">
+                                    <div className="price-wrapper">
+                                        <span className="old-price">₺1.199</span>
+                                        <div className="current-price-row">
+                                            <span className="current-price live-price">₺899</span>
+                                            <span className="price-period">4 seans</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="features-grid">
+                                    <div className="feature-item live-feature">
+                                        <div className="feature-icon live-icon-sm">
+                                            <Calendar size={16} />
+                                        </div>
+                                        <span>4 Canlı Seans</span>
+                                    </div>
+                                    <div className="feature-item live-feature">
+                                        <div className="feature-icon live-icon-sm">
+                                            <MessageCircle size={16} />
+                                        </div>
+                                        <span>WhatsApp Destek</span>
+                                    </div>
+                                    <div className="feature-item live-feature">
+                                        <div className="feature-icon live-icon-sm">
+                                            <Zap size={16} />
+                                        </div>
+                                        <span>Anlık Soru-Cevap</span>
+                                    </div>
+                                    <div className="feature-item live-feature">
+                                        <div className="feature-icon live-icon-sm">
+                                            <Video size={16} />
+                                        </div>
+                                        <span>Kayıt Erişimi</span>
+                                    </div>
+                                </div>
+
+                                <div className="divider live-divider"></div>
+
+                                <ul className="benefits-list live-list">
+                                    <li>
+                                        <CheckCircle size={16} />
+                                        <span>Haftalık 2 Saat Canlı Ders</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={16} />
+                                        <span>Özel WhatsApp Destek Grubu</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={16} />
+                                        <span>Birebir Geri Bildirim</span>
+                                    </li>
+                                    <li>
+                                        <CheckCircle size={16} />
+                                        <span>Tüm Kayıtlara Ömür Boyu Erişim</span>
+                                    </li>
+                                </ul>
+
+                                <a
+                                    href="https://wa.me/905011411940?text=Merhaba,%20Canlı%20Video%20Editörlük%20Eğitimi%20hakkında%20bilgi%20almak%20istiyorum."
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="cta-button live-cta"
+                                >
+                                    <span>Kayıt Ol</span>
+                                    <ArrowRight size={18} />
+                                </a>
+
+                                <p className="limited-spots live-spots">
+                                    <Sparkles size={14} />
+                                    Sınırlı kontenjan - Sadece 10 kişi
                                 </p>
                             </div>
                         </div>
@@ -223,10 +323,10 @@ export const Products = () => {
                         </div>
                     </div>
 
-                    {/* Comparison Section */}
+                    {/* Comparison Section - 3 Cards */}
                     <div className="comparison-section">
                         <h3 className="comparison-title">Hangisi Sana Uygun?</h3>
-                        <div className="comparison-cards">
+                        <div className="comparison-cards three-cols">
                             <div className="comparison-card">
                                 <div className="comparison-icon green">
                                     <Play size={24} />
@@ -237,6 +337,18 @@ export const Products = () => {
                                     <li>Yeni başlayanlar için ideal</li>
                                     <li>Esnek çalışma imkanı</li>
                                     <li>Tek seferlik yatırım</li>
+                                </ul>
+                            </div>
+                            <div className="comparison-card">
+                                <div className="comparison-icon amber">
+                                    <Video size={24} />
+                                </div>
+                                <h4>Canlı Eğitim</h4>
+                                <p>Interaktif öğrenme, anlık sorular ve grup dinamiği ile daha hızlı ilerleme istiyorsan.</p>
+                                <ul>
+                                    <li>Canlı soru-cevap imkanı</li>
+                                    <li>WhatsApp destek grubu</li>
+                                    <li>Grup motivasyonu</li>
                                 </ul>
                             </div>
                             <div className="comparison-card">
@@ -258,7 +370,7 @@ export const Products = () => {
                     <div className="trust-section">
                         <div className="trust-item">
                             <Shield size={24} />
-                            <span>30 Gün Para İade Garantisi</span>
+                            <span>3 Gün Para İade Garantisi</span>
                         </div>
                         <div className="trust-item">
                             <Clock size={24} />
@@ -290,7 +402,8 @@ export const Products = () => {
                     width: 100%;
                     height: 600px;
                     background: radial-gradient(ellipse at center top, rgba(0, 255, 157, 0.08) 0%, transparent 60%),
-                                radial-gradient(ellipse at 20% 50%, rgba(112, 0, 255, 0.06) 0%, transparent 50%);
+                                radial-gradient(ellipse at 20% 50%, rgba(112, 0, 255, 0.06) 0%, transparent 50%),
+                                radial-gradient(ellipse at 80% 30%, rgba(255, 170, 0, 0.05) 0%, transparent 40%);
                     pointer-events: none;
                 }
 
@@ -308,7 +421,7 @@ export const Products = () => {
                 }
 
                 .products-container {
-                    max-width: 1200px;
+                    max-width: 1400px;
                     margin: 0 auto;
                     padding: 0 1.5rem;
                     position: relative;
@@ -344,7 +457,7 @@ export const Products = () => {
                 }
 
                 .products-title .highlight {
-                    background: linear-gradient(135deg, #00ff9d 0%, #00cc7d 50%, #7000ff 100%);
+                    background: linear-gradient(135deg, #00ff9d 0%, #ffaa00 50%, #7000ff 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
@@ -357,12 +470,16 @@ export const Products = () => {
                     line-height: 1.6;
                 }
 
-                /* Products Grid */
+                /* Products Grid - 3 Columns */
                 .products-grid {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
                     gap: 2rem;
                     margin-bottom: 5rem;
+                }
+
+                .products-grid.three-cols {
+                    grid-template-columns: repeat(3, 1fr);
                 }
 
                 /* Product Card */
@@ -378,6 +495,10 @@ export const Products = () => {
                 .product-card:hover {
                     transform: translateY(-8px);
                     border-color: rgba(0, 255, 157, 0.3);
+                }
+
+                .live-card:hover {
+                    border-color: rgba(255, 170, 0, 0.4);
                 }
 
                 .premium-card:hover {
@@ -399,6 +520,10 @@ export const Products = () => {
                     background: radial-gradient(circle at center, rgba(0, 255, 157, 0.15) 0%, transparent 50%);
                 }
 
+                .amber-glow {
+                    background: radial-gradient(circle at center, rgba(255, 170, 0, 0.18) 0%, transparent 50%);
+                }
+
                 .purple-glow {
                     background: radial-gradient(circle at center, rgba(112, 0, 255, 0.2) 0%, transparent 50%);
                 }
@@ -409,11 +534,11 @@ export const Products = () => {
 
                 .card-content {
                     position: relative;
-                    padding: 2.5rem;
+                    padding: 2rem;
                     z-index: 1;
                     display: grid;
                     grid-template-rows: auto auto auto auto auto auto;
-                    gap: 1.5rem;
+                    gap: 1.25rem;
                     height: 100%;
                 }
 
@@ -425,7 +550,8 @@ export const Products = () => {
                     display: flex;
                     justify-content: center;
                     gap: 0.75rem;
-                    margin-bottom: 1.5rem;
+                    margin-bottom: 1.25rem;
+                    flex-wrap: wrap;
                 }
 
                 .product-badge {
@@ -445,6 +571,11 @@ export const Products = () => {
                     color: #000;
                 }
 
+                .product-badge.live-badge {
+                    background: linear-gradient(135deg, #ffaa00 0%, #ff8800 100%);
+                    color: #000;
+                }
+
                 .product-badge.premium {
                     background: linear-gradient(135deg, #7000ff 0%, #9b4dff 100%);
                     color: #fff;
@@ -460,9 +591,9 @@ export const Products = () => {
                 }
 
                 .product-icon {
-                    width: 80px;
-                    height: 80px;
-                    margin: 0 auto 1.25rem;
+                    width: 70px;
+                    height: 70px;
+                    margin: 0 auto 1rem;
                     border-radius: 1.25rem;
                     background: linear-gradient(135deg, rgba(0, 255, 157, 0.15) 0%, rgba(0, 255, 157, 0.05) 100%);
                     border: 1px solid rgba(0, 255, 157, 0.2);
@@ -472,6 +603,12 @@ export const Products = () => {
                     color: #00ff9d;
                 }
 
+                .product-icon.live-icon {
+                    background: linear-gradient(135deg, rgba(255, 170, 0, 0.2) 0%, rgba(255, 136, 0, 0.1) 100%);
+                    border-color: rgba(255, 170, 0, 0.3);
+                    color: #ffaa00;
+                }
+
                 .product-icon.premium-icon {
                     background: linear-gradient(135deg, rgba(112, 0, 255, 0.2) 0%, rgba(155, 77, 255, 0.1) 100%);
                     border-color: rgba(112, 0, 255, 0.3);
@@ -479,21 +616,21 @@ export const Products = () => {
                 }
 
                 .product-title {
-                    font-size: 1.5rem;
+                    font-size: 1.35rem;
                     font-weight: 700;
                     color: #fff;
-                    margin-bottom: 0.5rem;
+                    margin-bottom: 0.4rem;
                 }
 
                 .product-tagline {
                     color: #a0a0a0;
-                    font-size: 0.95rem;
+                    font-size: 0.9rem;
                 }
 
                 /* Price Section */
                 .price-section {
                     text-align: center;
-                    padding: 1.5rem;
+                    padding: 1.25rem;
                     background: rgba(0, 0, 0, 0.3);
                     border-radius: 1rem;
                     display: flex;
@@ -502,7 +639,7 @@ export const Products = () => {
                 }
 
                 .old-price {
-                    font-size: 1.1rem;
+                    font-size: 1rem;
                     color: #666;
                     text-decoration: line-through;
                     display: block;
@@ -517,9 +654,15 @@ export const Products = () => {
                 }
 
                 .current-price {
-                    font-size: 3rem;
+                    font-size: 2.5rem;
                     font-weight: 800;
                     background: linear-gradient(180deg, #fff 0%, #00ff9d 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+
+                .current-price.live-price {
+                    background: linear-gradient(180deg, #fff 0%, #ffaa00 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
@@ -531,7 +674,7 @@ export const Products = () => {
                 }
 
                 .price-period {
-                    font-size: 1rem;
+                    font-size: 0.9rem;
                     color: #666;
                 }
 
@@ -542,7 +685,7 @@ export const Products = () => {
                 }
 
                 .contact-for-price {
-                    font-size: 1.1rem;
+                    font-size: 1rem;
                     color: #9b4dff;
                     font-weight: 600;
                     margin: 0;
@@ -552,20 +695,25 @@ export const Products = () => {
                 .features-grid {
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
-                    gap: 0.75rem;
+                    gap: 0.6rem;
                     align-content: start;
                 }
 
                 .feature-item {
                     display: flex;
                     align-items: center;
-                    gap: 0.5rem;
-                    padding: 0.6rem 0.8rem;
+                    gap: 0.4rem;
+                    padding: 0.5rem 0.6rem;
                     background: rgba(0, 255, 157, 0.05);
                     border: 1px solid rgba(0, 255, 157, 0.1);
                     border-radius: 0.5rem;
-                    font-size: 0.85rem;
+                    font-size: 0.8rem;
                     color: #ccc;
+                }
+
+                .live-feature {
+                    background: rgba(255, 170, 0, 0.08);
+                    border-color: rgba(255, 170, 0, 0.15);
                 }
 
                 .premium-feature {
@@ -574,8 +722,8 @@ export const Products = () => {
                 }
 
                 .feature-icon {
-                    width: 28px;
-                    height: 28px;
+                    width: 26px;
+                    height: 26px;
                     border-radius: 0.4rem;
                     background: rgba(0, 255, 157, 0.1);
                     display: flex;
@@ -583,6 +731,11 @@ export const Products = () => {
                     justify-content: center;
                     color: #00ff9d;
                     flex-shrink: 0;
+                }
+
+                .feature-icon.live-icon-sm {
+                    background: rgba(255, 170, 0, 0.15);
+                    color: #ffaa00;
                 }
 
                 .premium-icon-sm {
@@ -593,6 +746,10 @@ export const Products = () => {
                 .divider {
                     height: 1px;
                     background: linear-gradient(90deg, transparent, rgba(0, 255, 157, 0.2), transparent);
+                }
+
+                .live-divider {
+                    background: linear-gradient(90deg, transparent, rgba(255, 170, 0, 0.25), transparent);
                 }
 
                 .premium-divider {
@@ -607,15 +764,19 @@ export const Products = () => {
                 .benefits-list li {
                     display: flex;
                     align-items: center;
-                    gap: 0.75rem;
-                    padding: 0.6rem 0;
+                    gap: 0.6rem;
+                    padding: 0.5rem 0;
                     color: #ccc;
-                    font-size: 0.95rem;
+                    font-size: 0.9rem;
                 }
 
                 .benefits-list li svg {
                     color: #00ff9d;
                     flex-shrink: 0;
+                }
+
+                .live-list li svg {
+                    color: #ffaa00;
                 }
 
                 .premium-list li svg {
@@ -629,9 +790,9 @@ export const Products = () => {
                     justify-content: center;
                     gap: 0.75rem;
                     width: 100%;
-                    padding: 1.1rem 2rem;
+                    padding: 1rem 1.5rem;
                     border-radius: 0.75rem;
-                    font-size: 1.05rem;
+                    font-size: 1rem;
                     font-weight: 600;
                     text-decoration: none;
                     transition: all 0.3s ease;
@@ -646,6 +807,17 @@ export const Products = () => {
                 .cta-button.primary:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 8px 30px rgba(0, 255, 157, 0.4);
+                }
+
+                .cta-button.live-cta {
+                    background: linear-gradient(135deg, #ffaa00 0%, #ff8800 100%);
+                    color: #000;
+                    box-shadow: 0 4px 20px rgba(255, 170, 0, 0.3);
+                }
+
+                .cta-button.live-cta:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 30px rgba(255, 170, 0, 0.4);
                 }
 
                 .cta-button.premium-cta {
@@ -664,13 +836,17 @@ export const Products = () => {
                     align-items: center;
                     justify-content: center;
                     gap: 0.5rem;
-                    font-size: 0.8rem;
+                    font-size: 0.75rem;
                     color: #666;
                     text-align: center;
                 }
 
                 .limited-spots {
                     color: #9b4dff;
+                }
+
+                .live-spots {
+                    color: #ffaa00;
                 }
 
                 /* Comparison Section */
@@ -692,11 +868,15 @@ export const Products = () => {
                     gap: 1.5rem;
                 }
 
+                .comparison-cards.three-cols {
+                    grid-template-columns: repeat(3, 1fr);
+                }
+
                 .comparison-card {
                     background: rgba(20, 20, 20, 0.6);
                     border: 1px solid rgba(255, 255, 255, 0.08);
                     border-radius: 1rem;
-                    padding: 2rem;
+                    padding: 1.5rem;
                     transition: all 0.3s ease;
                 }
 
@@ -719,22 +899,27 @@ export const Products = () => {
                     color: #00ff9d;
                 }
 
+                .comparison-icon.amber {
+                    background: rgba(255, 170, 0, 0.12);
+                    color: #ffaa00;
+                }
+
                 .comparison-icon.purple {
                     background: rgba(112, 0, 255, 0.15);
                     color: #9b4dff;
                 }
 
                 .comparison-card h4 {
-                    font-size: 1.2rem;
+                    font-size: 1.1rem;
                     color: #fff;
-                    margin-bottom: 0.75rem;
+                    margin-bottom: 0.5rem;
                 }
 
                 .comparison-card p {
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     color: #888;
-                    line-height: 1.6;
-                    margin-bottom: 1rem;
+                    line-height: 1.5;
+                    margin-bottom: 0.75rem;
                 }
 
                 .comparison-card ul {
@@ -745,8 +930,8 @@ export const Products = () => {
                     position: relative;
                     padding-left: 1.25rem;
                     color: #aaa;
-                    font-size: 0.9rem;
-                    margin-bottom: 0.5rem;
+                    font-size: 0.85rem;
+                    margin-bottom: 0.4rem;
                 }
 
                 .comparison-card li::before {
@@ -756,7 +941,11 @@ export const Products = () => {
                     color: #00ff9d;
                 }
 
-                .comparison-card:last-child li::before {
+                .comparison-card:nth-child(2) li::before {
+                    color: #ffaa00;
+                }
+
+                .comparison-card:nth-child(3) li::before {
                     color: #9b4dff;
                 }
 
@@ -784,6 +973,17 @@ export const Products = () => {
                 }
 
                 /* Responsive */
+                @media (max-width: 1100px) {
+                    .products-grid.three-cols {
+                        grid-template-columns: 1fr;
+                        gap: 1.5rem;
+                    }
+
+                    .comparison-cards.three-cols {
+                        grid-template-columns: 1fr;
+                    }
+                }
+
                 @media (max-width: 900px) {
                     .products-grid {
                         grid-template-columns: 1fr;
@@ -807,7 +1007,7 @@ export const Products = () => {
                     }
 
                     .card-content {
-                        padding: 1.5rem;
+                        padding: 1.25rem;
                         grid-template-rows: auto auto auto auto auto auto;
                     }
 
@@ -816,7 +1016,7 @@ export const Products = () => {
                     }
 
                     .current-price {
-                        font-size: 2.5rem;
+                        font-size: 2rem;
                     }
 
                     .comparison-card {
