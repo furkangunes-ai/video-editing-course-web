@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Users, DollarSign, TrendingUp, Gift, Search, Copy, Check } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-api.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-production.up.railway.app';
 
 export function AdminReferrals() {
   const [referrals, setReferrals] = useState([]);
@@ -20,6 +20,15 @@ export function AdminReferrals() {
     total_discounts_given: 0,
     top_referrers: []
   });
+
+  // Referral settings
+  const [settings, setSettings] = useState({
+    referrer_reward: 50,
+    referred_discount: 30,
+    is_active: true,
+    min_purchase_amount: 0
+  });
+  const [settingsLoading, setSettingsLoading] = useState(false);
 
   // New discount code form
   const [showCodeForm, setShowCodeForm] = useState(false);
@@ -46,10 +55,11 @@ export function AdminReferrals() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [referralsRes, statsRes, codesRes] = await Promise.all([
+      const [referralsRes, statsRes, codesRes, settingsRes] = await Promise.all([
         fetch(`${API_URL}/api/referrals/admin/all`, { headers: getAuthHeaders() }),
         fetch(`${API_URL}/api/referrals/admin/stats`, { headers: getAuthHeaders() }),
-        fetch(`${API_URL}/api/referrals/admin/discount-codes`, { headers: getAuthHeaders() })
+        fetch(`${API_URL}/api/referrals/admin/discount-codes`, { headers: getAuthHeaders() }),
+        fetch(`${API_URL}/api/referrals/admin/settings`, { headers: getAuthHeaders() })
       ]);
 
       if (referralsRes.ok) {
@@ -66,10 +76,38 @@ export function AdminReferrals() {
         const data = await codesRes.json();
         setDiscountCodes(data);
       }
+
+      if (settingsRes.ok) {
+        const data = await settingsRes.json();
+        setSettings(data);
+      }
     } catch (err) {
       setError('Veriler yuklenemedi');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveSettings = async () => {
+    try {
+      setSettingsLoading(true);
+      const response = await fetch(`${API_URL}/api/referrals/admin/settings`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(settings)
+      });
+
+      if (response.ok) {
+        setSuccess('Ayarlar kaydedildi!');
+        setTimeout(() => setSuccess(''), 3000);
+      } else {
+        const err = await response.json();
+        setError(err.detail || 'Ayarlar kaydedilemedi');
+      }
+    } catch (err) {
+      setError('Bir hata olustu');
+    } finally {
+      setSettingsLoading(false);
     }
   };
 
@@ -255,7 +293,131 @@ export function AdminReferrals() {
         >
           Indirim Kodlari
         </button>
+        <button
+          onClick={() => setActiveTab('settings')}
+          style={{
+            ...styles.tab,
+            ...(activeTab === 'settings' ? styles.tabActive : {})
+          }}
+        >
+          Ayarlar
+        </button>
       </div>
+
+      {/* Settings Tab */}
+      {activeTab === 'settings' && (
+        <div style={styles.settingsContainer}>
+          <h3 style={styles.settingsTitle}>Referans Programi Ayarlari</h3>
+          <p style={styles.settingsDescription}>
+            Referans veren ve referans alan kullanicilarin indirim tutarlarini buradan ayarlayabilirsiniz.
+          </p>
+
+          <div style={styles.settingsGrid}>
+            <div style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <DollarSign size={20} style={{ color: '#00ff9d' }} />
+                <span>Referans Veren Odulu</span>
+              </div>
+              <p style={styles.settingDesc}>
+                Birini davet eden kisinin kazanacagi tutar (TL)
+              </p>
+              <div style={styles.settingInput}>
+                <input
+                  type="number"
+                  value={settings.referrer_reward}
+                  onChange={(e) => setSettings({ ...settings, referrer_reward: parseFloat(e.target.value) || 0 })}
+                  style={styles.input}
+                  min="0"
+                />
+                <span style={styles.inputSuffix}>TL</span>
+              </div>
+            </div>
+
+            <div style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <Gift size={20} style={{ color: '#a78bfa' }} />
+                <span>Davet Edilen Indirimi</span>
+              </div>
+              <p style={styles.settingDesc}>
+                Referans koduyla gelen kisinin alacagi indirim (TL)
+              </p>
+              <div style={styles.settingInput}>
+                <input
+                  type="number"
+                  value={settings.referred_discount}
+                  onChange={(e) => setSettings({ ...settings, referred_discount: parseFloat(e.target.value) || 0 })}
+                  style={styles.input}
+                  min="0"
+                />
+                <span style={styles.inputSuffix}>TL</span>
+              </div>
+            </div>
+
+            <div style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <TrendingUp size={20} style={{ color: '#fbbf24' }} />
+                <span>Minimum Satis Tutari</span>
+              </div>
+              <p style={styles.settingDesc}>
+                Referansin gecerli olmasi icin minimum satin alma tutari
+              </p>
+              <div style={styles.settingInput}>
+                <input
+                  type="number"
+                  value={settings.min_purchase_amount}
+                  onChange={(e) => setSettings({ ...settings, min_purchase_amount: parseFloat(e.target.value) || 0 })}
+                  style={styles.input}
+                  min="0"
+                />
+                <span style={styles.inputSuffix}>TL</span>
+              </div>
+            </div>
+
+            <div style={styles.settingCard}>
+              <div style={styles.settingHeader}>
+                <Users size={20} style={{ color: '#00d9ff' }} />
+                <span>Program Durumu</span>
+              </div>
+              <p style={styles.settingDesc}>
+                Referans programini acip kapatabilirsiniz
+              </p>
+              <div style={styles.toggleWrapper}>
+                <button
+                  onClick={() => setSettings({ ...settings, is_active: !settings.is_active })}
+                  style={{
+                    ...styles.toggleBtn,
+                    backgroundColor: settings.is_active ? 'rgba(0, 255, 157, 0.2)' : 'rgba(255, 77, 87, 0.2)',
+                    color: settings.is_active ? '#00ff9d' : '#ff4d57',
+                    borderColor: settings.is_active ? '#00ff9d' : '#ff4d57'
+                  }}
+                >
+                  {settings.is_active ? 'Aktif' : 'Pasif'}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style={styles.settingsActions}>
+            <button
+              onClick={saveSettings}
+              disabled={settingsLoading}
+              style={styles.saveSettingsBtn}
+            >
+              {settingsLoading ? 'Kaydediliyor...' : 'Ayarlari Kaydet'}
+            </button>
+          </div>
+
+          <div style={styles.settingsInfo}>
+            <h4 style={styles.infoTitle}>Nasil Calisir?</h4>
+            <ul style={styles.infoList}>
+              <li>Bir kullanici referans kodunu paylasir</li>
+              <li>Davet edilen kisi bu kodla kayit olur ve <strong>{settings.referred_discount} TL</strong> indirim alir</li>
+              <li>Davet edilen kisi satin alim yaptiginda, davet eden <strong>{settings.referrer_reward} TL</strong> kazanir</li>
+              <li>Kazanclar bir sonraki satin almada indirim olarak kullanilabilir</li>
+            </ul>
+          </div>
+        </div>
+      )}
 
       {/* Referrals Tab */}
       {activeTab === 'referrals' && (
@@ -839,6 +1001,105 @@ const styles = {
     cursor: 'pointer',
     fontSize: '0.8rem',
     fontWeight: '500',
+  },
+  // Settings Tab Styles
+  settingsContainer: {
+    backgroundColor: 'rgba(20, 20, 20, 0.8)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    borderRadius: '1rem',
+    padding: '2rem',
+  },
+  settingsTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    marginBottom: '0.5rem',
+  },
+  settingsDescription: {
+    color: '#666',
+    fontSize: '0.9rem',
+    marginBottom: '2rem',
+  },
+  settingsGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+    gap: '1.5rem',
+    marginBottom: '2rem',
+  },
+  settingCard: {
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '0.75rem',
+    padding: '1.25rem',
+  },
+  settingHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginBottom: '0.5rem',
+    fontWeight: '500',
+  },
+  settingDesc: {
+    fontSize: '0.8rem',
+    color: '#666',
+    marginBottom: '1rem',
+  },
+  settingInput: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+  },
+  inputSuffix: {
+    color: '#666',
+    fontSize: '0.9rem',
+  },
+  toggleWrapper: {
+    display: 'flex',
+  },
+  toggleBtn: {
+    padding: '0.75rem 1.5rem',
+    borderRadius: '0.5rem',
+    border: '1px solid',
+    cursor: 'pointer',
+    fontWeight: '500',
+    fontSize: '0.9rem',
+    transition: 'all 0.2s',
+  },
+  settingsActions: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    paddingTop: '1rem',
+    borderTop: '1px solid rgba(255, 255, 255, 0.1)',
+    marginBottom: '2rem',
+  },
+  saveSettingsBtn: {
+    padding: '0.875rem 2rem',
+    backgroundColor: '#a78bfa',
+    border: 'none',
+    borderRadius: '0.5rem',
+    color: '#000',
+    cursor: 'pointer',
+    fontWeight: '600',
+    fontSize: '0.95rem',
+    transition: 'all 0.2s',
+  },
+  settingsInfo: {
+    backgroundColor: 'rgba(167, 139, 250, 0.1)',
+    border: '1px solid rgba(167, 139, 250, 0.2)',
+    borderRadius: '0.75rem',
+    padding: '1.25rem',
+  },
+  infoTitle: {
+    fontSize: '0.95rem',
+    fontWeight: '600',
+    marginBottom: '0.75rem',
+    color: '#a78bfa',
+  },
+  infoList: {
+    margin: 0,
+    paddingLeft: '1.25rem',
+    color: '#a0a0a0',
+    fontSize: '0.85rem',
+    lineHeight: '1.8',
   },
 };
 

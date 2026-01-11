@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Save, GripVertical, Video, FileQuestion, ChevronDown } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-api.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-production.up.railway.app';
 
 export function AdminContentOrder() {
   const navigate = useNavigate();

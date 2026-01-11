@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, Trophy, RefreshCw, ChevronRight } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-api.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-production.up.railway.app';
 
 export function QuizPlayer({ quizId, onComplete }) {
   const [quiz, setQuiz] = useState(null);

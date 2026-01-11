@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, Save, ArrowLeft, GripVertical, Check, X, Edit2 } from 'lucide-react';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-api.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-production.up.railway.app';
 
 export function AdminQuizBuilder() {
   const navigate = useNavigate();

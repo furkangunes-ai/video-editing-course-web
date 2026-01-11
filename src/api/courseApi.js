@@ -24,15 +24,24 @@ export async function getCourse(courseId) {
   return response.json();
 }
 
-export async function getLessonVideo(lessonId) {
-  const response = await fetch(`${API_BASE_URL}/api/videos/lesson/${lessonId}`, {
+export async function getLessonVideo(courseId, lessonId) {
+  const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}/lessons/${lessonId}`, {
     headers: getAuthHeaders(),
   });
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || 'Video yüklenemedi');
   }
-  return response.json();
+  const lesson = await response.json();
+  // Frontend'in beklediği formata dönüştür
+  return {
+    id: lesson.id,
+    title: lesson.title,
+    description: lesson.description,
+    embed_url: lesson.video_url, // Bunny.net embed URL
+    duration_seconds: lesson.duration_seconds,
+    is_free: lesson.is_free
+  };
 }
 
 export async function updateProgress(lessonId, watchedSeconds, completed = false) {

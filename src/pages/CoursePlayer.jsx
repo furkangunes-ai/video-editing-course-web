@@ -6,7 +6,7 @@ import { trackVideoStart, trackVideoComplete, setTag } from '../utils/clarity';
 import { QuizPlayer } from '../components/QuizPlayer';
 import { Reviews } from '../components/Reviews';
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-api.up.railway.app';
+const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-production.up.railway.app';
 
 export function CoursePlayer() {
   const { courseId, lessonId, quizId } = useParams();
@@ -138,7 +138,7 @@ export function CoursePlayer() {
     setError('');
 
     try {
-      const video = await getLessonVideo(lId);
+      const video = await getLessonVideo(courseId, lId);
       setVideoData(video);
       watchedSecondsRef.current = 0;
       // Clarity: Video started
