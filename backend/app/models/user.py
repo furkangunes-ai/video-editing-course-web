@@ -29,3 +29,14 @@ class User(Base):
     referred_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     referral_earnings = Column(Float, default=0)  # Toplam kazanç
     referral_balance = Column(Float, default=0)   # Çekilebilir bakiye
+
+
+class CourseAccess(Base):
+    """Kullanıcının hangi kurslara erişimi olduğunu takip eder"""
+    __tablename__ = "course_access"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, index=True)
+    granted_at = Column(DateTime(timezone=True), server_default=func.now())
+    granted_by = Column(String, nullable=True)  # 'purchase', 'bundle', 'admin', 'promo'

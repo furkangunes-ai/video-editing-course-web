@@ -10,7 +10,7 @@ import time
 from typing import Optional
 
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User, CourseAccess
 from app.models.payment import Order
 from app.services.auth import get_current_active_user
 from app.config import get_settings
@@ -22,11 +22,37 @@ settings = get_settings()
 PRODUCTS = {
     "ustalık-sinifi": {
         "name": "Video Editörlüğü Ustalık Sınıfı",
-        "price": 999.00,
-        "original_price": 5000.00,
+        "price": 199.00,
+        "original_price": 1199.00,
+        "course_ids": [1],  # Ana kurs
+        "type": 1  # Dijital ürün
+    },
+    "canli-egitim": {
+        "name": "Canlı Video Editörlük Eğitimi",
+        "price": 899.00,
+        "original_price": 1199.00,
+        "course_ids": [1, 2],  # Bundle: Ana kurs + Canlı eğitim kursu
         "type": 1  # Dijital ürün
     }
 }
+
+
+def grant_course_access(db: Session, user_id: int, course_ids: list, granted_by: str = "purchase"):
+    """Kullanıcıya kurs erişimi ver"""
+    for course_id in course_ids:
+        # Zaten erişimi var mı kontrol et
+        existing = db.query(CourseAccess).filter(
+            CourseAccess.user_id == user_id,
+            CourseAccess.course_id == course_id
+        ).first()
+
+        if not existing:
+            access = CourseAccess(
+                user_id=user_id,
+                course_id=course_id,
+                granted_by=granted_by
+            )
+            db.add(access)
 
 
 def generate_signature(data: str, secret: str) -> str:
@@ -180,6 +206,16 @@ async def payment_callback(
         if user:
             user.has_access = True
 
+            # Ürüne göre kurs erişimi ver
+            product = None
+            for prod_id, prod_info in PRODUCTS.items():
+                if prod_info["name"] == order.product_name:
+                    product = prod_info
+                    break
+
+            if product and "course_ids" in product:
+                grant_course_access(db, user.id, product["course_ids"], "purchase")
+
         db.commit()
 
         return RedirectResponse(
@@ -254,6 +290,10 @@ class GuestOrderRequest(BaseModel):
     buyer_surname: str
     buyer_email: EmailStr
     product_id: str = "ustalık-sinifi"
+    verification_code: Optional[str] = None
+    discount_code: Optional[str] = None
+    discount_type: Optional[str] = None
+    discount_amount: Optional[float] = None
 
 
 def generate_guest_order_code() -> str:
@@ -308,12 +348,17 @@ async def create_guest_order(
     order_code = generate_guest_order_code()
     random_nr = str(random.randint(100000, 999999))
 
+    # İndirim uygula
+    final_price = product["price"]
+    if request.discount_amount and request.discount_amount > 0:
+        final_price = max(0, product["price"] - request.discount_amount)
+
     # Siparişi veritabanına kaydet
     order = Order(
         user_id=user_id,
         order_code=order_code,
         product_name=product["name"],
-        amount=product["price"],
+        amount=final_price,
         currency=0,  # TRY
         status="pending",
         random_nr=random_nr
@@ -323,7 +368,7 @@ async def create_guest_order(
     db.refresh(order)
 
     # İmza oluştur: random_nr + order_code + amount + currency
-    signature_data = f"{random_nr}{order_code}{product['price']:.2f}0"
+    signature_data = f"{random_nr}{order_code}{final_price:.2f}0"
     signature = generate_signature(signature_data, settings.shopier_secret)
 
     # Shopier form verileri
@@ -347,7 +392,7 @@ async def create_guest_order(
         "shipping_city": "İstanbul",
         "shipping_country": "TR",
         "shipping_postcode": "34000",
-        "total_order_value": f"{product['price']:.2f}",
+        "total_order_value": f"{final_price:.2f}",
         "currency": 0,
         "platform": 0,
         "is_in_frame": 0,
@@ -361,5 +406,38 @@ async def create_guest_order(
         "order_id": order.id,
         "order_code": order_code,
         "payment_url": settings.shopier_payment_url,
-        "form_data": form_data
+        "form_data": form_data,
+        "product_name": product["name"],
+        "final_price": final_price
+    }
+
+
+@router.get("/products")
+async def get_products():
+    """Mevcut ürünleri getir"""
+    return {
+        product_id: {
+            "id": product_id,
+            "name": info["name"],
+            "price": info["price"],
+            "original_price": info["original_price"],
+            "course_ids": info.get("course_ids", [])
+        }
+        for product_id, info in PRODUCTS.items()
+    }
+
+
+@router.get("/products/{product_id}")
+async def get_product(product_id: str):
+    """Tek bir ürün bilgisini getir"""
+    product = PRODUCTS.get(product_id)
+    if not product:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+
+    return {
+        "id": product_id,
+        "name": product["name"],
+        "price": product["price"],
+        "original_price": product["original_price"],
+        "course_ids": product.get("course_ids", [])
     }

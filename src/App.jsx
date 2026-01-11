@@ -7,8 +7,6 @@ import { FAQ } from './components/FAQ';
 import { Footer } from './components/Footer';
 
 import { Navbar } from './components/Navbar';
-import { Instructor } from './components/Instructor';
-import { Contact } from './components/Contact';
 import { MouseSpotlight } from './components/MouseSpotlight';
 import { EditorOverlay } from './components/EditorOverlay';
 import { TimelineProgress } from './components/TimelineProgress';
@@ -61,17 +59,11 @@ function HomePage() {
         <div className="fade-in-section editor-panel">
           <Solution />
         </div>
-                <div className="fade-in-section editor-panel">
-          <Instructor />
-        </div>
         <div id="products" className="fade-in-section editor-panel">
           <Pricing />
         </div>
         <div className="fade-in-section editor-panel">
           <FAQ />
-        </div>
-        <div className="fade-in-section editor-panel">
-          <Contact />
         </div>
       </div>
       <Footer />

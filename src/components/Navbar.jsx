@@ -38,14 +38,6 @@ export const Navbar = () => {
         navigate('/');
     };
 
-    const scrollToSection = (id) => {
-        setIsMobileMenuOpen(false);
-        const element = document.getElementById(id);
-        if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-        }
-    };
-
     const handleLogoClick = () => {
         if (location.pathname === '/') {
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -63,9 +55,7 @@ export const Navbar = () => {
                     </div>
 
                     <div className="desktop-menu">
-                        <Link to="/urunler" className="nav-link">Ürünler</Link>
-                        <button onClick={() => scrollToSection('instructor')} className="nav-link">Ben Kimim</button>
-                        <button onClick={() => scrollToSection('contact')} className="nav-link">İletişim</button>
+                        <Link to="/#products" className="nav-link">Kurslar</Link>
                         <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
 
                         {loading ? (
@@ -132,9 +122,7 @@ export const Navbar = () => {
             {/* Mobile Menu Overlay */}
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
-                    <Link to="/urunler" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Ürünler</Link>
-                    <button onClick={() => scrollToSection('instructor')} className="mobile-nav-link">Ben Kimim</button>
-                    <button onClick={() => scrollToSection('contact')} className="mobile-nav-link">İletişim</button>
+                    <Link to="/#products" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Kurslar</Link>
                     <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
 
                     {isAuthenticated ? (

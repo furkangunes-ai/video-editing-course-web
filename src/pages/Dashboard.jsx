@@ -368,65 +368,6 @@ export function Dashboard() {
               )}
             </div>
 
-            {/* Referans Programi Bolumu */}
-            <div style={styles.referralSection}>
-              <h2 style={styles.sectionTitle}>
-                <Gift size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#a78bfa' }} />
-                Referans Programi
-              </h2>
-
-              <div style={styles.referralCard}>
-                <div style={styles.referralHeader}>
-                  <div style={styles.referralInfo}>
-                    <h3 style={styles.referralTitle}>Arkadaslarini Davet Et, Kazan!</h3>
-                    <p style={styles.referralDesc}>
-                      Her basarili referanstan 50 TL indirim kodu kazan. Davet ettigin kisi de 30 TL indirim kazanir!
-                    </p>
-                  </div>
-                </div>
-
-                {referralData?.referral_code && (
-                  <div style={styles.referralCodeBox}>
-                    <div style={styles.codeLabel}>Referans Kodun</div>
-                    <div style={styles.codeWrapper}>
-                      <code style={styles.referralCode}>{referralData.referral_code}</code>
-                      <button onClick={copyReferralCode} style={styles.copyBtn}>
-                        {codeCopied ? <Check size={18} /> : <Copy size={18} />}
-                      </button>
-                    </div>
-                    <button onClick={copyReferralLink} style={styles.copyLinkBtn}>
-                      Referans Linkini Kopyala
-                    </button>
-                  </div>
-                )}
-
-                {referralStats && (
-                  <div style={styles.referralStats}>
-                    <div style={styles.statItem}>
-                      <Users size={20} style={{ color: '#00d9ff' }} />
-                      <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{referralStats.total_referrals || 0}</span>
-                        <span style={styles.statLabel}>Toplam Davet</span>
-                      </div>
-                    </div>
-                    <div style={styles.statItem}>
-                      <Check size={20} style={{ color: '#00ff9d' }} />
-                      <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{referralStats.active_referrals || 0}</span>
-                        <span style={styles.statLabel}>Basarili</span>
-                      </div>
-                    </div>
-                    <div style={styles.statItem}>
-                      <Gift size={20} style={{ color: '#a78bfa' }} />
-                      <div style={styles.statInfo}>
-                        <span style={styles.statValue}>{referralStats.total_earnings || 0} TL</span>
-                        <span style={styles.statLabel}>Kazanc</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
           </>
         ) : (
           <div style={styles.noaccess}>
@@ -438,6 +379,66 @@ export function Dashboard() {
             <Link to="/#products" style={styles.buyBtn}>Kursu Satın Al</Link>
           </div>
         )}
+
+        {/* Referans Programi Bolumu - Tum kullanicilar gorebilir */}
+        <div style={styles.referralSection}>
+          <h2 style={styles.sectionTitle}>
+            <Gift size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#a78bfa' }} />
+            Referans Programi
+          </h2>
+
+          <div style={styles.referralCard}>
+            <div style={styles.referralHeader}>
+              <div style={styles.referralInfo}>
+                <h3 style={styles.referralTitle}>Arkadaslarini Davet Et, Kazan!</h3>
+                <p style={styles.referralDesc}>
+                  Her basarili referanstan 50 TL indirim kodu kazan. Davet ettigin kisi de 30 TL indirim kazanir!
+                </p>
+              </div>
+            </div>
+
+            {referralData?.referral_code && (
+              <div style={styles.referralCodeBox}>
+                <div style={styles.codeLabel}>Referans Kodun</div>
+                <div style={styles.codeWrapper}>
+                  <code style={styles.referralCode}>{referralData.referral_code}</code>
+                  <button onClick={copyReferralCode} style={styles.copyBtn}>
+                    {codeCopied ? <Check size={18} /> : <Copy size={18} />}
+                  </button>
+                </div>
+                <button onClick={copyReferralLink} style={styles.copyLinkBtn}>
+                  Referans Linkini Kopyala
+                </button>
+              </div>
+            )}
+
+            {referralStats && (
+              <div style={styles.referralStats}>
+                <div style={styles.statItem}>
+                  <Users size={20} style={{ color: '#00d9ff' }} />
+                  <div style={styles.statInfo}>
+                    <span style={styles.statValue}>{referralStats.total_referrals || 0}</span>
+                    <span style={styles.statLabel}>Toplam Davet</span>
+                  </div>
+                </div>
+                <div style={styles.statItem}>
+                  <Check size={20} style={{ color: '#00ff9d' }} />
+                  <div style={styles.statInfo}>
+                    <span style={styles.statValue}>{referralStats.active_referrals || 0}</span>
+                    <span style={styles.statLabel}>Basarili</span>
+                  </div>
+                </div>
+                <div style={styles.statItem}>
+                  <Gift size={20} style={{ color: '#a78bfa' }} />
+                  <div style={styles.statInfo}>
+                    <span style={styles.statValue}>{referralStats.total_earnings || 0} TL</span>
+                    <span style={styles.statLabel}>Kazanc</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

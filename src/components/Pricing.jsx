@@ -115,16 +115,14 @@ export const Pricing = () => {
                         </div>
 
                         <div className="pricing-cta">
-                            <a
-                                href="https://wa.me/905011411940?text=Merhaba,%20Canlı%20Video%20Editörlük%20Eğitimi%20hakkında%20bilgi%20almak%20istiyorum."
-                                target="_blank"
-                                rel="noopener noreferrer"
+                            <Link
+                                to="/satin-al?kurs=canli-egitim"
                                 className="btn btn-block btn-skool"
                             >
-                                Kayıt Ol <ArrowRight size={20} />
-                            </a>
+                                Hemen Satın Al <ArrowRight size={20} />
+                            </Link>
                             <p className="guarantee-text live-text">
-                                Sınırlı kontenjan - Sadece 10 kişi
+                                + Ustalık Sınıfı kursu hediye!
                             </p>
                         </div>
                     </div>

@@ -27,8 +27,34 @@ export const Checkout = () => {
     const [discountLoading, setDiscountLoading] = useState(false);
     const [discountError, setDiscountError] = useState('');
 
+    // Ürün bilgileri
+    const PRODUCTS = {
+        'ustalık-sinifi': {
+            id: 'ustalık-sinifi',
+            name: 'Video Editörlüğü Ustalık Sınıfı',
+            price: 199,
+            originalPrice: 1199,
+            discount: 83,
+            description: 'Sıfırdan profesyonele, tek kurs',
+            features: ['90+ Video İçerik', 'Ömür Boyu Erişim', 'Sertifika', '3 Gün Para İade Garantisi']
+        },
+        'canli-egitim': {
+            id: 'canli-egitim',
+            name: 'Canlı Video Editörlük Eğitimi',
+            price: 899,
+            originalPrice: 1199,
+            discount: 25,
+            description: '4 Seans interaktif eğitim + Ustalık Sınıfı hediye',
+            features: ['Canlı Dersler', 'Ustalık Sınıfı Kursu Hediye', 'WhatsApp Destek', 'Birebir Geri Bildirim']
+        }
+    };
+
+    // URL'den kurs parametresini al
+    const productId = searchParams.get('kurs') || 'ustalık-sinifi';
+    const selectedProduct = PRODUCTS[productId] || PRODUCTS['ustalık-sinifi'];
+
     // Fiyat hesaplama
-    const basePrice = 199;
+    const basePrice = selectedProduct.price;
     const discountAmount = discountApplied?.discount_amount || 0;
     const finalPrice = basePrice - discountAmount;
 
@@ -290,7 +316,7 @@ export const Checkout = () => {
                 buyer_surname: formData.surname,
                 buyer_email: formData.email,
                 verification_code: verificationCode,
-                product_id: 'ustalık-sinifi'
+                product_id: selectedProduct.id
             };
 
             // Indirim kodu varsa ekle
@@ -368,24 +394,24 @@ export const Checkout = () => {
                         <div className="product-summary">
                             <h2>Sipariş Özeti</h2>
 
-                            <div className="product-card">
-                                <div className="product-icon">
+                            <div className={`product-card ${productId === 'canli-egitim' ? 'live-card' : ''}`}>
+                                <div className={`product-icon ${productId === 'canli-egitim' ? 'live-icon' : ''}`}>
                                     <CreditCard size={32} />
                                 </div>
                                 <div className="product-info">
-                                    <h3>Video Editörlüğü Ustalık Sınıfı</h3>
-                                    <p>Sıfırdan profesyonele, tek kurs</p>
+                                    <h3>{selectedProduct.name}</h3>
+                                    <p>{selectedProduct.description}</p>
                                 </div>
                             </div>
 
                             <div className="price-breakdown">
                                 <div className="price-row">
                                     <span>Normal Fiyat</span>
-                                    <span className="original-price">₺1.199</span>
+                                    <span className="original-price">₺{selectedProduct.originalPrice.toLocaleString('tr-TR')}</span>
                                 </div>
                                 <div className="price-row discount">
-                                    <span>İndirim (%83)</span>
-                                    <span>-₺1.000</span>
+                                    <span>İndirim (%{selectedProduct.discount})</span>
+                                    <span>-₺{(selectedProduct.originalPrice - selectedProduct.price).toLocaleString('tr-TR')}</span>
                                 </div>
 
                                 {/* Indirim Kodu Bölümü */}
@@ -457,22 +483,12 @@ export const Checkout = () => {
                             </div>
 
                             <div className="features-list">
-                                <div className="feature">
-                                    <CheckCircle size={16} />
-                                    <span>90+ Video İçerik</span>
-                                </div>
-                                <div className="feature">
-                                    <CheckCircle size={16} />
-                                    <span>Ömür Boyu Erişim</span>
-                                </div>
-                                <div className="feature">
-                                    <CheckCircle size={16} />
-                                    <span>Sertifika</span>
-                                </div>
-                                <div className="feature">
-                                    <CheckCircle size={16} />
-                                    <span>3 Gün Para İade Garantisi</span>
-                                </div>
+                                {selectedProduct.features.map((feature, index) => (
+                                    <div className="feature" key={index}>
+                                        <CheckCircle size={16} />
+                                        <span>{feature}</span>
+                                    </div>
+                                ))}
                             </div>
                         </div>
 
@@ -832,6 +848,17 @@ export const Checkout = () => {
                     align-items: center;
                     justify-content: center;
                     color: #00ff9d;
+                }
+
+                /* Canlı Eğitim Kursu Stilleri */
+                .product-card.live-card {
+                    background: rgba(255, 51, 51, 0.05);
+                    border-color: rgba(255, 51, 51, 0.2);
+                }
+
+                .product-icon.live-icon {
+                    background: linear-gradient(135deg, rgba(255, 51, 51, 0.2), rgba(255, 51, 51, 0.05));
+                    color: #ff3333;
                 }
 
                 .product-info h3 {

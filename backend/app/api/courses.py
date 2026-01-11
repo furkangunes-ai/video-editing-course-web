@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User, CourseAccess
 from app.models.course import Course, Lesson, UserProgress
 from app.services.auth import get_current_active_user, get_admin_user
 from app.api.schemas import (
@@ -16,6 +16,25 @@ from app.api.schemas import (
 )
 
 router = APIRouter(prefix="/api/courses", tags=["courses"])
+
+
+def user_has_course_access(db: Session, user_id: int, course_id: int) -> bool:
+    """Kullanıcının belirli bir kursa erişimi olup olmadığını kontrol et"""
+    # Önce CourseAccess tablosuna bak
+    access = db.query(CourseAccess).filter(
+        CourseAccess.user_id == user_id,
+        CourseAccess.course_id == course_id
+    ).first()
+
+    if access:
+        return True
+
+    # Geriye uyumluluk: has_access True ise ve kurs ID 1 ise erişim var
+    user = db.query(User).filter(User.id == user_id).first()
+    if user and user.has_access and course_id == 1:
+        return True
+
+    return False
 
 
 @router.get("/", response_model=List[CourseResponse])
@@ -51,7 +70,8 @@ async def get_lesson(
         raise HTTPException(status_code=404, detail="Ders bulunamadı")
 
     # Ücretsiz ders veya erişimi var mı kontrol et
-    if not lesson.is_free and not current_user.has_access:
+    has_access = user_has_course_access(db, current_user.id, course_id)
+    if not lesson.is_free and not has_access:
         raise HTTPException(
             status_code=403,
             detail="Bu derse erişmek için kurs satın almalısınız"
