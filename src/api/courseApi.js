@@ -25,25 +25,18 @@ export async function getCourse(courseId) {
 }
 
 export async function getLessonVideo(courseId, lessonId) {
-  const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}/lessons/${lessonId}`, {
+  // Railway backend'deki mevcut video endpoint'ini kullan
+  const response = await fetch(`${API_BASE_URL}/api/videos/lesson/${lessonId}`, {
     headers: getAuthHeaders(),
   });
 
-  const data = await response.json();
-
   if (!response.ok) {
-    throw new Error(data.detail || 'Video yuklenemedi');
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || 'Video yuklenemedi');
   }
 
-  // Frontend'in beklediği formata dönüştür
-  return {
-    id: data.id,
-    title: data.title,
-    description: data.description,
-    embed_url: data.video_url, // Bunny.net embed URL
-    duration_seconds: data.duration_seconds,
-    is_free: data.is_free
-  };
+  // Backend zaten doğru formatta döndürüyor (embed_url dahil)
+  return response.json();
 }
 
 export async function updateProgress(lessonId, watchedSeconds, completed = false) {
