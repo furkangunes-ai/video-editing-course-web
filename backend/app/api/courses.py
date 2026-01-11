@@ -123,6 +123,61 @@ async def get_my_progress(
     return progress
 
 
+# Kullanıcının erişebildiği kursları getir
+@router.get("/my-courses")
+async def get_my_courses(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Kullanıcının erişimi olan kursları getir"""
+    # CourseAccess tablosundan erişimi olan kurs ID'lerini al
+    access_records = db.query(CourseAccess).filter(
+        CourseAccess.user_id == current_user.id
+    ).all()
+
+    course_ids = [a.course_id for a in access_records]
+
+    # Geriye uyumluluk: has_access True ise kurs 1'e erişimi var
+    if current_user.has_access and 1 not in course_ids:
+        course_ids.append(1)
+
+    if not course_ids:
+        return []
+
+    # Kursları getir
+    courses = db.query(Course).filter(
+        Course.id.in_(course_ids),
+        Course.is_published == True
+    ).order_by(Course.order).all()
+
+    # Her kurs için ilerleme hesapla
+    result = []
+    for course in courses:
+        # Toplam ders sayısı
+        total_lessons = db.query(Lesson).filter(Lesson.course_id == course.id).count()
+
+        # Tamamlanan ders sayısı
+        completed_lessons = db.query(UserProgress).join(Lesson).filter(
+            UserProgress.user_id == current_user.id,
+            Lesson.course_id == course.id,
+            UserProgress.completed == True
+        ).count()
+
+        completion_percentage = int((completed_lessons / total_lessons * 100)) if total_lessons > 0 else 0
+
+        result.append({
+            "id": course.id,
+            "title": course.title,
+            "description": course.description,
+            "thumbnail_url": course.thumbnail_url,
+            "total_lessons": total_lessons,
+            "completed_lessons": completed_lessons,
+            "completion_percentage": completion_percentage
+        })
+
+    return result
+
+
 # Admin endpoints
 @router.post("/admin/course", response_model=CourseResponse)
 async def create_course(

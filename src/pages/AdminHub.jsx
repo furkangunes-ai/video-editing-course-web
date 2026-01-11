@@ -1,6 +1,53 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
+
+const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
 export function AdminHub() {
+  const [courseCreating, setCourseCreating] = useState(false);
+  const [courseMessage, setCourseMessage] = useState('');
+
+  const createLiveCourse = async () => {
+    setCourseCreating(true);
+    setCourseMessage('');
+
+    try {
+      // Admin token'ı localStorage'dan al
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setCourseMessage('Hata: Giriş yapmanız gerekiyor');
+        setCourseCreating(false);
+        return;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/courses/admin/course`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: 'Canlı Video Editörlük Eğitimi',
+          description: '4 Seans interaktif canlı eğitim. Haftalık 2 saat canlı ders, özel WhatsApp destek grubu ve birebir geri bildirim.',
+          thumbnail_url: null,
+          order: 2,
+          is_published: true
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCourseMessage(`Başarılı! Kurs ID: ${data.id} olarak oluşturuldu.`);
+      } else {
+        const error = await response.json();
+        setCourseMessage(`Hata: ${error.detail || 'Kurs oluşturulamadı'}`);
+      }
+    } catch (err) {
+      setCourseMessage(`Hata: ${err.message}`);
+    } finally {
+      setCourseCreating(false);
+    }
+  };
   const tools = [
     {
       title: 'Analytics Dashboard',
@@ -127,6 +174,36 @@ export function AdminHub() {
             </Link>
           )
         ))}
+      </div>
+
+      {/* Kurs Oluştur Bölümü */}
+      <div style={styles.courseSection}>
+        <h2 style={styles.sectionTitle}>🎓 Kurs Yönetimi</h2>
+        <div style={styles.courseActions}>
+          <button
+            onClick={createLiveCourse}
+            disabled={courseCreating}
+            style={{
+              ...styles.createCourseBtn,
+              opacity: courseCreating ? 0.6 : 1,
+              cursor: courseCreating ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {courseCreating ? '⏳ Oluşturuluyor...' : '🔴 Canlı Eğitim Kursu Oluştur (ID: 2)'}
+          </button>
+          {courseMessage && (
+            <p style={{
+              ...styles.courseMessage,
+              color: courseMessage.includes('Başarılı') ? '#00ff9d' : '#ff4757'
+            }}>
+              {courseMessage}
+            </p>
+          )}
+        </div>
+        <p style={styles.courseNote}>
+          Not: Bu buton veritabanında "Canlı Video Editörlük Eğitimi" kursunu oluşturur.
+          899 TL'lik paketi alan kullanıcılar otomatik olarak bu kursa ve ana kursa erişim kazanır.
+        </p>
       </div>
 
       {/* Quick Links */}
@@ -261,6 +338,40 @@ const styles = {
     borderRadius: '0.25rem',
     fontSize: '0.7rem',
     color: '#a0a0a0',
+  },
+  courseSection: {
+    maxWidth: '1200px',
+    margin: '0 auto 3rem',
+    padding: '1.5rem',
+    backgroundColor: 'rgba(255, 77, 77, 0.05)',
+    border: '1px solid rgba(255, 77, 77, 0.2)',
+    borderRadius: '1rem',
+  },
+  courseActions: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+    marginBottom: '1rem',
+  },
+  createCourseBtn: {
+    padding: '1rem 2rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#fff',
+    backgroundColor: '#ff4d4d',
+    border: 'none',
+    borderRadius: '0.5rem',
+    transition: 'all 0.2s',
+    width: 'fit-content',
+  },
+  courseMessage: {
+    fontSize: '0.95rem',
+    fontWeight: '500',
+  },
+  courseNote: {
+    fontSize: '0.85rem',
+    color: '#888',
+    lineHeight: '1.5',
   },
   quickLinksSection: {
     maxWidth: '1200px',

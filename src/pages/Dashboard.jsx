@@ -22,6 +22,10 @@ export function Dashboard() {
   const [referralStats, setReferralStats] = useState(null);
   const [codeCopied, setCodeCopied] = useState(false);
 
+  // Kurslar state'i
+  const [myCourses, setMyCourses] = useState([]);
+  const [coursesLoading, setCoursesLoading] = useState(false);
+
   useEffect(() => {
     if (!loading && !isAuthenticated) {
       navigate('/giris');
@@ -46,6 +50,30 @@ export function Dashboard() {
       checkCertificateEligibility(1); // Kurs ID: 1
     }
   }, [user, token]);
+
+  // Kullanıcının kurslarını yükle
+  useEffect(() => {
+    if (token) {
+      fetchMyCourses();
+    }
+  }, [token]);
+
+  const fetchMyCourses = async () => {
+    setCoursesLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/courses/my-courses`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMyCourses(data);
+      }
+    } catch (err) {
+      console.error('Kurslar yüklenemedi:', err);
+    } finally {
+      setCoursesLoading(false);
+    }
+  };
 
   // Referans bilgilerini yükle
   useEffect(() => {
@@ -242,22 +270,50 @@ export function Dashboard() {
           <p style={styles.subtitle}>{user.email}</p>
         </div>
 
-        {user.has_access ? (
+        {myCourses.length > 0 ? (
           <>
             <div style={styles.courses}>
               <h2 style={styles.sectionTitle}>Kurslarım</h2>
-              <div style={styles.courseGrid}>
-                <div style={styles.courseCard}>
-                  <div style={styles.courseThumbnail}>
-                    <span style={styles.playIcon}>▶</span>
-                  </div>
-                  <h3 style={styles.courseTitle}>Video Editörlüğü Ustalık Sınıfı</h3>
-                  <p style={styles.courseProgress}>
-                    İlerleme: {certificateEligibility?.completion_percentage || 0}%
-                  </p>
-                  <Link to="/kurs/1" style={styles.continueBtn}>Devam Et</Link>
+              {coursesLoading ? (
+                <div style={styles.certLoading}>
+                  <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                  <span>Kurslar yükleniyor...</span>
                 </div>
-              </div>
+              ) : (
+                <div style={styles.courseGrid}>
+                  {myCourses.map(course => (
+                    <div key={course.id} style={styles.courseCard}>
+                      <div style={{
+                        ...styles.courseThumbnail,
+                        background: course.id === 2
+                          ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
+                          : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
+                      }}>
+                        <span style={styles.playIcon}>▶</span>
+                      </div>
+                      <h3 style={styles.courseTitle}>{course.title}</h3>
+                      <p style={styles.courseProgress}>
+                        İlerleme: {course.completion_percentage || 0}%
+                      </p>
+                      <div style={styles.progressBar}>
+                        <div style={{
+                          ...styles.progressFill,
+                          width: `${course.completion_percentage || 0}%`,
+                          background: course.id === 2 ? '#ff4d4d' : '#00ff9d'
+                        }}></div>
+                      </div>
+                      <Link to={`/kurs/${course.id}`} style={{
+                        ...styles.continueBtn,
+                        background: course.id === 2
+                          ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
+                          : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
+                      }}>
+                        {course.completion_percentage > 0 ? 'Devam Et' : 'Başla'}
+                      </Link>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Sertifikalar Bölümü */}
@@ -665,7 +721,20 @@ const styles = {
   courseProgress: {
     color: '#a0a0a0',
     fontSize: '0.9rem',
+    marginBottom: '0.5rem',
+  },
+  progressBar: {
+    width: '100%',
+    height: '6px',
+    background: 'rgba(255, 255, 255, 0.1)',
+    borderRadius: '3px',
     marginBottom: '1rem',
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: '3px',
+    transition: 'width 0.3s ease',
   },
   continueBtn: {
     display: 'block',
