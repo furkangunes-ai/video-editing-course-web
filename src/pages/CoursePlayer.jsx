@@ -97,7 +97,9 @@ export function CoursePlayer() {
         navigate(`/kurs/${courseId}/ders/${courseData.lessons[0].id}`, { replace: true });
       }
     } catch (err) {
-      setError(err.message);
+      // err bazen Error objesi, bazen string, bazen de API response objesi olabilir
+      const errorMessage = typeof err === 'string' ? err : (err?.message || 'Kurs yuklenemedi');
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -155,7 +157,8 @@ export function CoursePlayer() {
         updateProgress(lId, watchedSecondsRef.current, false).catch(() => {});
       }, 10000);
     } catch (err) {
-      setError(err.message);
+      const errorMessage = typeof err === 'string' ? err : (err?.message || 'Video yuklenemedi');
+      setError(errorMessage);
     }
   };
 

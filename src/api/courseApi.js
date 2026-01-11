@@ -28,19 +28,21 @@ export async function getLessonVideo(courseId, lessonId) {
   const response = await fetch(`${API_BASE_URL}/api/courses/${courseId}/lessons/${lessonId}`, {
     headers: getAuthHeaders(),
   });
+
+  const data = await response.json();
+
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.detail || 'Video yüklenemedi');
+    throw new Error(data.detail || 'Video yuklenemedi');
   }
-  const lesson = await response.json();
+
   // Frontend'in beklediği formata dönüştür
   return {
-    id: lesson.id,
-    title: lesson.title,
-    description: lesson.description,
-    embed_url: lesson.video_url, // Bunny.net embed URL
-    duration_seconds: lesson.duration_seconds,
-    is_free: lesson.is_free
+    id: data.id,
+    title: data.title,
+    description: data.description,
+    embed_url: data.video_url, // Bunny.net embed URL
+    duration_seconds: data.duration_seconds,
+    is_free: data.is_free
   };
 }
 
