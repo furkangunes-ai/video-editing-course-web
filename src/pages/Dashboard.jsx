@@ -376,7 +376,7 @@ export function Dashboard() {
             <p style={styles.noaccessText}>
               Kurslara erişmek için satın alma işlemini tamamlayın.
             </p>
-            <Link to="/#products" style={styles.buyBtn}>Kursu Satın Al</Link>
+            <Link to="/urunler" style={styles.buyBtn}>Kursu Satın Al</Link>
           </div>
         )}
 
