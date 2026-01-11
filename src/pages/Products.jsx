@@ -71,7 +71,7 @@ export const Products = () => {
                                         <div className="feature-icon">
                                             <Video size={16} />
                                         </div>
-                                        <span>7+ Saat Video</span>
+                                        <span>7+ Saat & 90+ Video</span>
                                     </div>
                                     <div className="feature-item">
                                         <div className="feature-icon">
@@ -98,7 +98,7 @@ export const Products = () => {
                                 <ul className="benefits-list">
                                     <li>
                                         <CheckCircle size={16} />
-                                        <span>Tüm Eğitim Modülleri (7+ Saat)</span>
+                                        <span>Tüm Eğitim Modülleri (7+ Saat & 90+ Video)</span>
                                     </li>
                                     <li>
                                         <CheckCircle size={16} />

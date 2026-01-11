@@ -38,7 +38,7 @@ export const Pricing = () => {
                         <div className="pricing-features">
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon" />
-                                <span>Tüm Eğitim Modülleri (7+ Saat)</span>
+                                <span>Tüm Eğitim Modülleri (7+ Saat & 90+ Video)</span>
                             </div>
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon" />
@@ -69,55 +69,63 @@ export const Pricing = () => {
                         </div>
                     </div>
 
-                    {/* Skool Card - Ödeme sayfasına yönlendir */}
+                    {/* Canlı Eğitim Kartı */}
                     <div
-                        className={`pricing-card skool-card ${activePlan === 'skool' ? 'active' : 'inactive'}`}
-                        onClick={() => setActivePlan('skool')}
+                        className={`pricing-card skool-card ${activePlan === 'live' ? 'active' : 'inactive'}`}
+                        onClick={() => setActivePlan('live')}
                     >
                         <div className="pricing-header">
-                            <h3 className="plan-name">Skool Topluluk & Abonelik</h3>
+                            <div className="pricing-badge live-badge">CANLI EĞİTİM</div>
+                            <h3 className="plan-name">Canlı Video Editörlük Eğitimi</h3>
 
                             <div className="price-frame skool-frame">
+                                <div className="discount-tag">
+                                    %25 İNDİRİM
+                                </div>
                                 <div className="old-price-wrapper">
-                                    <span className="old-price">$12</span>
-                                    <div className="strikethrough-line skool-strike"></div>
+                                    <span className="old-price">1.199 TL</span>
+                                    <div className="strikethrough-line"></div>
                                 </div>
 
                                 <div className="current-price-container">
-                                    <span className="current-price skool-price">$5</span>
-                                    <span className="period">/ Ay</span>
+                                    <span className="current-price skool-price">899 TL</span>
                                 </div>
                             </div>
 
-                            <p className="price-subtitle">Aylık Abonelik. İstediğin zaman iptal et.</p>
+                            <p className="price-subtitle">4 Seans interaktif eğitim. Sınırlı kontenjan.</p>
                         </div>
 
                         <div className="pricing-features">
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon skool-icon" />
-                                <span>Tüm Eğitim Modülleri (Mevcut + Gelecek)</span>
+                                <span>Haftalık 2 Saat Canlı Ders</span>
                             </div>
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon skool-icon" />
-                                <span>Skool Topluluk Erişimi</span>
+                                <span>Özel WhatsApp Destek Grubu</span>
                             </div>
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon skool-icon" />
-                                <span>Sürekli Güncel İçerik</span>
+                                <span>Birebir Geri Bildirim</span>
                             </div>
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon skool-icon" />
-                                <span>Aylık Canlı Yayınlar</span>
+                                <span>Tüm Kayıtlara Ömür Boyu Erişim</span>
                             </div>
                         </div>
 
                         <div className="pricing-cta">
-                            <Link
-                                to="/satin-al"
+                            <a
+                                href="https://wa.me/905011411940?text=Merhaba,%20Canlı%20Video%20Editörlük%20Eğitimi%20hakkında%20bilgi%20almak%20istiyorum."
+                                target="_blank"
+                                rel="noopener noreferrer"
                                 className="btn btn-block btn-skool"
                             >
-                                Skool ile Abone Ol <ArrowRight size={20} />
-                            </Link>
+                                Kayıt Ol <ArrowRight size={20} />
+                            </a>
+                            <p className="guarantee-text live-text">
+                                Sınırlı kontenjan - Sadece 10 kişi
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -211,6 +219,15 @@ export const Pricing = () => {
              background: #555;
              box-shadow: none;
              color: #aaa;
+        }
+
+        .pricing-badge.live-badge {
+            background: #ff3333;
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.4);
+        }
+
+        .live-text {
+            color: #ff3333;
         }
 
         .pricing-header {
