@@ -38,7 +38,7 @@ export const Pricing = () => {
                         <div className="pricing-features">
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon" />
-                                <span>Tüm Eğitim Modülleri (7+ Saat & 90+ Video)</span>
+                                <span>Tüm Eğitim Modülleri (90+ Video)</span>
                             </div>
                             <div className="feature-item">
                                 <Check size={20} className="feature-icon" />

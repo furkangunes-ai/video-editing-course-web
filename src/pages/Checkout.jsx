@@ -266,7 +266,7 @@ export const Checkout = () => {
                             <div className="features-list">
                                 <div className="feature">
                                     <CheckCircle size={16} />
-                                    <span>7+ Saat & 90+ Video İçerik</span>
+                                    <span>90+ Video İçerik</span>
                                 </div>
                                 <div className="feature">
                                     <CheckCircle size={16} />

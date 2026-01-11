@@ -41,7 +41,7 @@ export const Solution = () => {
               <div className="stat-item">
                 <Zap size={32} className="stat-icon" />
                 <div className="stat-info">
-                  <span className="stat-value">7+ Saat & 90+ Video</span>
+                  <span className="stat-value">90+ Video</span>
                   <span className="stat-label">Dolu Dolu İçerik</span>
                 </div>
               </div>
