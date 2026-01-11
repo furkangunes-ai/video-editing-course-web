@@ -27,6 +27,11 @@ export const Checkout = () => {
     const [discountLoading, setDiscountLoading] = useState(false);
     const [discountError, setDiscountError] = useState('');
 
+    const formRef = useRef(null);
+    const { user, isAuthenticated } = useAuth();
+    const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
+
     // Ürün bilgileri
     const PRODUCTS = {
         'ustalık-sinifi': {
@@ -57,11 +62,6 @@ export const Checkout = () => {
     const basePrice = selectedProduct.price;
     const discountAmount = discountApplied?.discount_amount || 0;
     const finalPrice = basePrice - discountAmount;
-
-    const formRef = useRef(null);
-    const { user, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
-    const [searchParams] = useSearchParams();
 
     // Giriş yapmış kullanıcının bilgilerini form'a doldur
     useEffect(() => {
