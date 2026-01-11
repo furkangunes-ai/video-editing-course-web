@@ -55,7 +55,7 @@ export const Navbar = () => {
                     </div>
 
                     <div className="desktop-menu">
-                        <Link to="/#products" className="nav-link">Kurslar</Link>
+                        <Link to="/#products" className="nav-link">Ürünler</Link>
                         <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
 
                         {loading ? (
@@ -122,7 +122,7 @@ export const Navbar = () => {
             {/* Mobile Menu Overlay */}
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
-                    <Link to="/#products" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Kurslar</Link>
+                    <Link to="/#products" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Ürünler</Link>
                     <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
 
                     {isAuthenticated ? (
