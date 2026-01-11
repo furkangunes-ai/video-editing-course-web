@@ -46,6 +46,28 @@ export const Navbar = () => {
         }
     };
 
+    const handleProductsClick = (e) => {
+        e.preventDefault();
+        setIsMobileMenuOpen(false);
+
+        if (location.pathname === '/') {
+            // Zaten anasayfadaysak direkt scroll yap
+            const element = document.getElementById('products');
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth' });
+            }
+        } else {
+            // Başka sayfadaysak önce anasayfaya git, sonra scroll yap
+            navigate('/');
+            setTimeout(() => {
+                const element = document.getElementById('products');
+                if (element) {
+                    element.scrollIntoView({ behavior: 'smooth' });
+                }
+            }, 100);
+        }
+    };
+
     return (
         <>
             <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
@@ -55,7 +77,7 @@ export const Navbar = () => {
                     </div>
 
                     <div className="desktop-menu">
-                        <Link to="/#products" className="nav-link">Ürünler</Link>
+                        <a href="/#products" className="nav-link" onClick={handleProductsClick}>Ürünler</a>
                         <Link to="/icerik-uretimi" className="nav-link">İçerik Üretimi</Link>
 
                         {loading ? (
@@ -122,7 +144,7 @@ export const Navbar = () => {
             {/* Mobile Menu Overlay */}
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
-                    <Link to="/#products" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>Ürünler</Link>
+                    <a href="/#products" className="mobile-nav-link" onClick={handleProductsClick}>Ürünler</a>
                     <Link to="/icerik-uretimi" className="mobile-nav-link" onClick={() => setIsMobileMenuOpen(false)}>İçerik Üretimi</Link>
 
                     {isAuthenticated ? (
