@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Award, Download, ExternalLink, Loader2 } from 'lucide-react';
+import { Award, Download, ExternalLink, Loader2, Copy, Check, Users, Gift } from 'lucide-react';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
@@ -16,6 +16,11 @@ export function Dashboard() {
   const [certificateEligibility, setCertificateEligibility] = useState(null);
   const [certLoading, setCertLoading] = useState(false);
   const [certGenerating, setCertGenerating] = useState(false);
+
+  // Referans state'leri
+  const [referralData, setReferralData] = useState(null);
+  const [referralStats, setReferralStats] = useState(null);
+  const [codeCopied, setCodeCopied] = useState(false);
 
   useEffect(() => {
     if (!loading && !isAuthenticated) {
@@ -41,6 +46,13 @@ export function Dashboard() {
       checkCertificateEligibility(1); // Kurs ID: 1
     }
   }, [user, token]);
+
+  // Referans bilgilerini yükle
+  useEffect(() => {
+    if (token) {
+      fetchReferralData();
+    }
+  }, [token]);
 
   const fetchCertificates = async () => {
     try {
@@ -97,6 +109,48 @@ export function Dashboard() {
       alert('Bir hata oluştu');
     } finally {
       setCertGenerating(false);
+    }
+  };
+
+  const fetchReferralData = async () => {
+    try {
+      const [codeRes, statsRes] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/referrals/my-code`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        }),
+        fetch(`${API_BASE_URL}/api/referrals/my-stats`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        })
+      ]);
+
+      if (codeRes.ok) {
+        const data = await codeRes.json();
+        setReferralData(data);
+      }
+
+      if (statsRes.ok) {
+        const data = await statsRes.json();
+        setReferralStats(data);
+      }
+    } catch (err) {
+      console.error('Referans bilgileri yuklenemedi:', err);
+    }
+  };
+
+  const copyReferralCode = () => {
+    if (referralData?.referral_code) {
+      navigator.clipboard.writeText(referralData.referral_code);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
+    }
+  };
+
+  const copyReferralLink = () => {
+    if (referralData?.referral_code) {
+      const link = `${window.location.origin}/kayit?ref=${referralData.referral_code}`;
+      navigator.clipboard.writeText(link);
+      setCodeCopied(true);
+      setTimeout(() => setCodeCopied(false), 2000);
     }
   };
 
@@ -308,10 +362,70 @@ export function Dashboard() {
                   )}
 
                   {certificates.length === 0 && !certificateEligibility && (
-                    <p style={styles.noCerts}>Henüz sertifikanız bulunmuyor.</p>
+                    <p style={styles.noCerts}>Henuz sertifikaniz bulunmuyor.</p>
                   )}
                 </>
               )}
+            </div>
+
+            {/* Referans Programi Bolumu */}
+            <div style={styles.referralSection}>
+              <h2 style={styles.sectionTitle}>
+                <Gift size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle', color: '#a78bfa' }} />
+                Referans Programi
+              </h2>
+
+              <div style={styles.referralCard}>
+                <div style={styles.referralHeader}>
+                  <div style={styles.referralInfo}>
+                    <h3 style={styles.referralTitle}>Arkadaslarini Davet Et, Kazan!</h3>
+                    <p style={styles.referralDesc}>
+                      Her basarili referanstan 50 TL indirim kodu kazan. Davet ettigin kisi de 30 TL indirim kazanir!
+                    </p>
+                  </div>
+                </div>
+
+                {referralData?.referral_code && (
+                  <div style={styles.referralCodeBox}>
+                    <div style={styles.codeLabel}>Referans Kodun</div>
+                    <div style={styles.codeWrapper}>
+                      <code style={styles.referralCode}>{referralData.referral_code}</code>
+                      <button onClick={copyReferralCode} style={styles.copyBtn}>
+                        {codeCopied ? <Check size={18} /> : <Copy size={18} />}
+                      </button>
+                    </div>
+                    <button onClick={copyReferralLink} style={styles.copyLinkBtn}>
+                      Referans Linkini Kopyala
+                    </button>
+                  </div>
+                )}
+
+                {referralStats && (
+                  <div style={styles.referralStats}>
+                    <div style={styles.statItem}>
+                      <Users size={20} style={{ color: '#00d9ff' }} />
+                      <div style={styles.statInfo}>
+                        <span style={styles.statValue}>{referralStats.total_referrals || 0}</span>
+                        <span style={styles.statLabel}>Toplam Davet</span>
+                      </div>
+                    </div>
+                    <div style={styles.statItem}>
+                      <Check size={20} style={{ color: '#00ff9d' }} />
+                      <div style={styles.statInfo}>
+                        <span style={styles.statValue}>{referralStats.active_referrals || 0}</span>
+                        <span style={styles.statLabel}>Basarili</span>
+                      </div>
+                    </div>
+                    <div style={styles.statItem}>
+                      <Gift size={20} style={{ color: '#a78bfa' }} />
+                      <div style={styles.statInfo}>
+                        <span style={styles.statValue}>{referralStats.total_earnings || 0} TL</span>
+                        <span style={styles.statLabel}>Kazanc</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </>
         ) : (
@@ -745,5 +859,105 @@ const styles = {
     textAlign: 'center',
     color: '#a0a0a0',
     padding: '2rem',
+  },
+  // Referans stilleri
+  referralSection: {
+    marginTop: '3rem',
+  },
+  referralCard: {
+    background: 'linear-gradient(135deg, rgba(167, 139, 250, 0.05) 0%, rgba(112, 0, 255, 0.05) 100%)',
+    border: '1px solid rgba(167, 139, 250, 0.2)',
+    borderRadius: '1rem',
+    padding: '1.5rem',
+  },
+  referralHeader: {
+    marginBottom: '1.5rem',
+  },
+  referralInfo: {},
+  referralTitle: {
+    fontSize: '1.25rem',
+    fontWeight: '600',
+    marginBottom: '0.5rem',
+    color: '#fff',
+  },
+  referralDesc: {
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+    lineHeight: '1.5',
+  },
+  referralCodeBox: {
+    background: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: '0.75rem',
+    padding: '1.25rem',
+    marginBottom: '1.5rem',
+    textAlign: 'center',
+  },
+  codeLabel: {
+    fontSize: '0.8rem',
+    color: '#666',
+    marginBottom: '0.5rem',
+  },
+  codeWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.75rem',
+    marginBottom: '1rem',
+  },
+  referralCode: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    letterSpacing: '0.15em',
+    color: '#a78bfa',
+    background: 'rgba(167, 139, 250, 0.2)',
+    padding: '0.5rem 1rem',
+    borderRadius: '0.5rem',
+  },
+  copyBtn: {
+    background: 'rgba(167, 139, 250, 0.2)',
+    border: 'none',
+    padding: '0.5rem',
+    borderRadius: '0.5rem',
+    color: '#a78bfa',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  copyLinkBtn: {
+    background: 'linear-gradient(135deg, #a78bfa 0%, #7c3aed 100%)',
+    color: '#fff',
+    border: 'none',
+    padding: '0.75rem 1.5rem',
+    borderRadius: '2rem',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'transform 0.2s',
+  },
+  referralStats: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '1rem',
+  },
+  statItem: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    background: 'rgba(255, 255, 255, 0.03)',
+    padding: '1rem',
+    borderRadius: '0.75rem',
+  },
+  statInfo: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  statValue: {
+    fontSize: '1.25rem',
+    fontWeight: '700',
+  },
+  statLabel: {
+    fontSize: '0.75rem',
+    color: '#666',
   },
 };

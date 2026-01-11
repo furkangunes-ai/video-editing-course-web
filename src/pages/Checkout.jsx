@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
-import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail, ArrowRight, RefreshCw } from 'lucide-react';
+import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail, ArrowRight, RefreshCw, Tag, Gift } from 'lucide-react';
 import { trackCheckoutStart, trackEmailVerified, trackPaymentStart, trackError, setTag } from '../utils/clarity';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
@@ -20,9 +20,22 @@ export const Checkout = () => {
         surname: '',
         email: ''
     });
+
+    // Indirim kodu state'leri
+    const [discountCode, setDiscountCode] = useState('');
+    const [discountApplied, setDiscountApplied] = useState(null);
+    const [discountLoading, setDiscountLoading] = useState(false);
+    const [discountError, setDiscountError] = useState('');
+
+    // Fiyat hesaplama
+    const basePrice = 199;
+    const discountAmount = discountApplied?.discount_amount || 0;
+    const finalPrice = basePrice - discountAmount;
+
     const formRef = useRef(null);
     const { user, isAuthenticated } = useAuth();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
 
     // Giriş yapmış kullanıcının bilgilerini form'a doldur
     useEffect(() => {
@@ -50,6 +63,114 @@ export const Checkout = () => {
             return () => clearTimeout(timer);
         }
     }, [countdown]);
+
+    // URL'den referans veya indirim kodu al
+    useEffect(() => {
+        const refCode = searchParams.get('ref');
+        const discCode = searchParams.get('discount');
+        const recoveryToken = searchParams.get('recovery');
+
+        if (refCode && !discountApplied) {
+            setDiscountCode(refCode);
+            handleApplyDiscount(refCode, 'referral');
+        } else if (discCode && !discountApplied) {
+            setDiscountCode(discCode);
+            handleApplyDiscount(discCode, 'discount');
+        }
+
+        // Recovery token ile gelen kullanıcı için bilgileri doldur
+        if (recoveryToken) {
+            fetchRecoveryData(recoveryToken);
+        }
+    }, [searchParams]);
+
+    // Recovery token ile sipariş bilgilerini getir
+    const fetchRecoveryData = async (token) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/cart/recover/${token}`);
+            if (response.ok) {
+                const data = await response.json();
+                if (data.order) {
+                    setFormData({
+                        name: data.order.buyer_name || '',
+                        surname: data.order.buyer_surname || '',
+                        email: data.order.buyer_email || ''
+                    });
+                    // Eğer özel indirim kodu varsa uygula
+                    if (data.order.discount_code) {
+                        setDiscountCode(data.order.discount_code);
+                        handleApplyDiscount(data.order.discount_code, 'discount');
+                    }
+                }
+            }
+        } catch (err) {
+            console.error('Recovery data fetch error:', err);
+        }
+    };
+
+    // Indirim kodu doğrula ve uygula
+    const handleApplyDiscount = async (code = discountCode, codeType = 'auto') => {
+        if (!code.trim()) {
+            setDiscountError('Lütfen bir kod girin');
+            return;
+        }
+
+        setDiscountLoading(true);
+        setDiscountError('');
+
+        try {
+            // Önce referans kodu olarak dene
+            let response = await fetch(`${API_BASE_URL}/api/referrals/validate/${code.trim()}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.valid) {
+                    setDiscountApplied({
+                        type: 'referral',
+                        code: code.trim(),
+                        discount_amount: data.discount_amount || 30,
+                        message: data.message || 'Referans indirimi uygulandı!'
+                    });
+                    setDiscountError('');
+                    return;
+                }
+            }
+
+            // Referans kodu değilse, indirim kodu olarak dene
+            response = await fetch(`${API_BASE_URL}/api/discounts/validate/${code.trim()}`);
+
+            if (response.ok) {
+                const data = await response.json();
+                if (data.valid) {
+                    setDiscountApplied({
+                        type: 'discount',
+                        code: code.trim(),
+                        discount_amount: data.discount_amount || 0,
+                        discount_percent: data.discount_percent || 0,
+                        message: data.message || 'İndirim kodu uygulandı!'
+                    });
+                    setDiscountError('');
+                    return;
+                }
+            }
+
+            // Her iki tip de geçersiz
+            setDiscountError('Geçersiz veya süresi dolmuş kod');
+            setDiscountApplied(null);
+        } catch (err) {
+            setDiscountError('Kod doğrulanırken bir hata oluştu');
+            setDiscountApplied(null);
+        } finally {
+            setDiscountLoading(false);
+        }
+    };
+
+    // Indirim kodunu kaldır
+    const handleRemoveDiscount = () => {
+        setDiscountApplied(null);
+        setDiscountCode('');
+        setDiscountError('');
+    };
 
     const handleInputChange = (e) => {
         setFormData({
@@ -164,18 +285,27 @@ export const Checkout = () => {
         trackPaymentStart();
 
         try {
+            const orderPayload = {
+                buyer_name: formData.name,
+                buyer_surname: formData.surname,
+                buyer_email: formData.email,
+                verification_code: verificationCode,
+                product_id: 'ustalık-sinifi'
+            };
+
+            // Indirim kodu varsa ekle
+            if (discountApplied) {
+                orderPayload.discount_code = discountApplied.code;
+                orderPayload.discount_type = discountApplied.type;
+                orderPayload.discount_amount = discountApplied.discount_amount;
+            }
+
             const response = await fetch(`${API_BASE_URL}/api/payment/create-guest-order`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    buyer_name: formData.name,
-                    buyer_surname: formData.surname,
-                    buyer_email: formData.email,
-                    verification_code: verificationCode,
-                    product_id: 'ustalık-sinifi'
-                })
+                body: JSON.stringify(orderPayload)
             });
 
             if (!response.ok) {
@@ -257,9 +387,72 @@ export const Checkout = () => {
                                     <span>İndirim (%83)</span>
                                     <span>-₺1.000</span>
                                 </div>
+
+                                {/* Indirim Kodu Bölümü */}
+                                <div className="discount-code-section">
+                                    {!discountApplied ? (
+                                        <>
+                                            <div className="discount-input-group">
+                                                <div className="discount-input-wrapper">
+                                                    <Tag size={16} />
+                                                    <input
+                                                        type="text"
+                                                        value={discountCode}
+                                                        onChange={(e) => {
+                                                            setDiscountCode(e.target.value.toUpperCase());
+                                                            setDiscountError('');
+                                                        }}
+                                                        placeholder="İndirim veya referans kodu"
+                                                        disabled={discountLoading}
+                                                    />
+                                                </div>
+                                                <button
+                                                    className="apply-discount-btn"
+                                                    onClick={() => handleApplyDiscount()}
+                                                    disabled={discountLoading || !discountCode.trim()}
+                                                >
+                                                    {discountLoading ? (
+                                                        <Loader2 className="spinner" size={16} />
+                                                    ) : (
+                                                        'Uygula'
+                                                    )}
+                                                </button>
+                                            </div>
+                                            {discountError && (
+                                                <p className="discount-error">{discountError}</p>
+                                            )}
+                                        </>
+                                    ) : (
+                                        <div className="discount-applied">
+                                            <div className="discount-applied-info">
+                                                <Gift size={16} />
+                                                <span>{discountApplied.code}</span>
+                                                <span className="discount-badge">
+                                                    {discountApplied.type === 'referral' ? 'Referans' : 'İndirim'}
+                                                </span>
+                                            </div>
+                                            <button
+                                                className="remove-discount-btn"
+                                                onClick={handleRemoveDiscount}
+                                            >
+                                                Kaldır
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {discountApplied && (
+                                    <div className="price-row extra-discount">
+                                        <span>
+                                            {discountApplied.type === 'referral' ? 'Referans İndirimi' : 'Kupon İndirimi'}
+                                        </span>
+                                        <span>-₺{discountAmount}</span>
+                                    </div>
+                                )}
+
                                 <div className="price-row total">
                                     <span>Toplam</span>
-                                    <span className="final-price">₺199</span>
+                                    <span className="final-price">₺{finalPrice}</span>
                                 </div>
                             </div>
 
@@ -487,7 +680,7 @@ export const Checkout = () => {
                                         ) : (
                                             <>
                                                 <Lock size={20} />
-                                                Güvenli Ödeme Yap - ₺199
+                                                Güvenli Ödeme Yap - ₺{finalPrice}
                                             </>
                                         )}
                                     </button>
@@ -667,6 +860,131 @@ export const Checkout = () => {
 
                 .price-row.discount {
                     color: #00ff9d;
+                }
+
+                .price-row.extra-discount {
+                    color: #ff9d00;
+                    font-weight: 500;
+                }
+
+                /* Indirim Kodu Stilleri */
+                .discount-code-section {
+                    margin: 1rem 0;
+                    padding: 1rem 0;
+                    border-top: 1px dashed rgba(255, 255, 255, 0.1);
+                    border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+                }
+
+                .discount-input-group {
+                    display: flex;
+                    gap: 0.5rem;
+                }
+
+                .discount-input-wrapper {
+                    flex: 1;
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    padding: 0.5rem 0.75rem;
+                    background: rgba(255, 255, 255, 0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    border-radius: 0.5rem;
+                }
+
+                .discount-input-wrapper svg {
+                    color: var(--color-text-muted);
+                    flex-shrink: 0;
+                }
+
+                .discount-input-wrapper input {
+                    flex: 1;
+                    background: transparent;
+                    border: none;
+                    color: var(--color-text);
+                    font-size: 0.9rem;
+                    outline: none;
+                }
+
+                .discount-input-wrapper input::placeholder {
+                    color: rgba(255, 255, 255, 0.3);
+                }
+
+                .apply-discount-btn {
+                    padding: 0.5rem 1rem;
+                    background: rgba(0, 255, 157, 0.1);
+                    border: 1px solid rgba(0, 255, 157, 0.3);
+                    border-radius: 0.5rem;
+                    color: #00ff9d;
+                    font-size: 0.85rem;
+                    font-weight: 500;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    min-width: 70px;
+                }
+
+                .apply-discount-btn:hover:not(:disabled) {
+                    background: rgba(0, 255, 157, 0.2);
+                }
+
+                .apply-discount-btn:disabled {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
+
+                .discount-error {
+                    color: #ff4757;
+                    font-size: 0.8rem;
+                    margin-top: 0.5rem;
+                    margin-bottom: 0;
+                }
+
+                .discount-applied {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    padding: 0.75rem;
+                    background: rgba(0, 255, 157, 0.1);
+                    border: 1px solid rgba(0, 255, 157, 0.3);
+                    border-radius: 0.5rem;
+                }
+
+                .discount-applied-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 0.5rem;
+                    color: #00ff9d;
+                }
+
+                .discount-applied-info svg {
+                    flex-shrink: 0;
+                }
+
+                .discount-badge {
+                    font-size: 0.7rem;
+                    padding: 0.15rem 0.4rem;
+                    background: rgba(0, 255, 157, 0.2);
+                    border-radius: 0.25rem;
+                    text-transform: uppercase;
+                    font-weight: 600;
+                }
+
+                .remove-discount-btn {
+                    padding: 0.25rem 0.5rem;
+                    background: transparent;
+                    border: 1px solid rgba(255, 255, 255, 0.2);
+                    border-radius: 0.25rem;
+                    color: var(--color-text-muted);
+                    font-size: 0.75rem;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                }
+
+                .remove-discount-btn:hover {
+                    border-color: #ff4757;
+                    color: #ff4757;
                 }
 
                 .price-row.total {

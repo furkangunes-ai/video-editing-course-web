@@ -27,6 +27,11 @@ import { ResetPassword } from './pages/ResetPassword';
 import { AdminAnalytics } from './pages/AdminAnalytics';
 import { AdminEmailTemplates } from './pages/AdminEmailTemplates';
 import { AdminHub } from './pages/AdminHub';
+import { AdminQuizBuilder } from './pages/AdminQuizBuilder';
+import { AdminContentOrder } from './pages/AdminContentOrder';
+import { AdminReviews } from './pages/AdminReviews';
+import { AdminReferrals } from './pages/AdminReferrals';
+import { AdminAbandonedCarts } from './pages/AdminAbandonedCarts';
 import { Profile } from './pages/Profile';
 import { Checkout } from './pages/Checkout';
 import { PaymentSuccess } from './pages/PaymentSuccess';
@@ -87,11 +92,19 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/kurs/:courseId" element={<CoursePlayer />} />
           <Route path="/kurs/:courseId/ders/:lessonId" element={<CoursePlayer />} />
+          <Route path="/kurs/:courseId/quiz/:quizId" element={<CoursePlayer />} />
           <Route path="/icerik-uretimi" element={<ContentGenerator />} />
           <Route path="/urunler" element={<Products />} />
           <Route path="/0110" element={<AdminHub />} />
           <Route path="/admin/analytics" element={<AdminAnalytics />} />
           <Route path="/admin/email-templates" element={<AdminEmailTemplates />} />
+          <Route path="/admin/quizzes" element={<AdminQuizBuilder />} />
+          <Route path="/admin/quizzes/:quizId" element={<AdminQuizBuilder />} />
+          <Route path="/admin/content-order" element={<AdminContentOrder />} />
+          <Route path="/admin/content-order/:courseId" element={<AdminContentOrder />} />
+          <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/referrals" element={<AdminReferrals />} />
+          <Route path="/admin/abandoned-carts" element={<AdminAbandonedCarts />} />
           <Route path="/profil" element={<Profile />} />
           <Route path="/satin-al" element={<Checkout />} />
           <Route path="/odeme-basarili" element={<PaymentSuccess />} />
