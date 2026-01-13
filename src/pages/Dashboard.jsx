@@ -53,10 +53,10 @@ export function Dashboard() {
 
   // Kullanıcının kurslarını yükle
   useEffect(() => {
-    if (token) {
+    if (token && user) {
       fetchMyCourses();
     }
-  }, [token]);
+  }, [token, user]);
 
   const fetchMyCourses = async () => {
     setCoursesLoading(true);
