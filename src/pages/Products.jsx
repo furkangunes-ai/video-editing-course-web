@@ -212,15 +212,13 @@ export const Products = () => {
                                     </li>
                                 </ul>
 
-                                <a
-                                    href="https://wa.me/905011411940?text=Merhaba,%20Canlı%20Video%20Editörlük%20Eğitimi%20hakkında%20bilgi%20almak%20istiyorum."
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                <Link
+                                    to="/satin-al?kurs=canli-egitim"
                                     className="cta-button live-cta"
                                 >
-                                    <span>Kayıt Ol</span>
+                                    <span>Hemen Satın Al</span>
                                     <ArrowRight size={18} />
-                                </a>
+                                </Link>
 
                                 <p className="limited-spots live-spots">
                                     <Sparkles size={14} />

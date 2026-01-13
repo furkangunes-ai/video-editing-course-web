@@ -67,9 +67,26 @@ export function Dashboard() {
       if (res.ok) {
         const data = await res.json();
         setMyCourses(data);
+      } else if (res.status === 404 && user?.has_access) {
+        // Fallback: Yeni endpoint yoksa has_access ile çalış
+        setMyCourses([{
+          id: 1,
+          title: "Video Editörlüğü Ustalık Sınıfı",
+          description: "Profesyonel video editör olma yolculuğunda ihtiyacın olan her şey",
+          completion_percentage: 0
+        }]);
       }
     } catch (err) {
       console.error('Kurslar yüklenemedi:', err);
+      // Fallback for network errors
+      if (user?.has_access) {
+        setMyCourses([{
+          id: 1,
+          title: "Video Editörlüğü Ustalık Sınıfı",
+          description: "Profesyonel video editör olma yolculuğunda ihtiyacın olan her şey",
+          completion_percentage: 0
+        }]);
+      }
     } finally {
       setCoursesLoading(false);
     }
