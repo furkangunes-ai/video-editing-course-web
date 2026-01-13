@@ -67,8 +67,8 @@ export function Dashboard() {
       if (res.ok) {
         const data = await res.json();
         setMyCourses(data);
-      } else if (res.status === 404 && user?.has_access) {
-        // Fallback: Yeni endpoint yoksa has_access ile çalış
+      } else if (!res.ok && user?.has_access) {
+        // Fallback: Endpoint yoksa veya hata varsa has_access ile çalış
         setMyCourses([{
           id: 1,
           title: "Video Editörlüğü Ustalık Sınıfı",
