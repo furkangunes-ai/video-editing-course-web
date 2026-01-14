@@ -1,9 +1,27 @@
 import { useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Award, Download, ExternalLink, Loader2, Copy, Check, Users, Gift } from 'lucide-react';
+import { Award, Download, ExternalLink, Loader2, Copy, Check, Users, Gift, Lock } from 'lucide-react';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
+
+// Tüm kurslar - açık/kilitli gösterim için
+const ALL_COURSES = [
+  {
+    id: 1,
+    title: "Video Editörlüğü Ustalık Sınıfı",
+    description: "Sıfırdan profesyonele, kapsamlı video editörlük eğitimi",
+    price: 199,
+    color: "green"
+  },
+  {
+    id: 2,
+    title: "Canlı Video Editörlük Eğitimi",
+    description: "4 seans interaktif canlı eğitim + WhatsApp destek grubu",
+    price: 899,
+    color: "red"
+  }
+];
 
 export function Dashboard() {
   const { user, loading, logout, isAuthenticated, token } = useAuth();
@@ -22,8 +40,9 @@ export function Dashboard() {
   const [referralStats, setReferralStats] = useState(null);
   const [codeCopied, setCodeCopied] = useState(false);
 
-  // Kurslar state'i
-  const [myCourses, setMyCourses] = useState([]);
+  // Kurslar state'i - erişilebilir kurs ID'leri
+  const [accessibleCourseIds, setAccessibleCourseIds] = useState([]);
+  const [courseProgress, setCourseProgress] = useState({}); // {courseId: percentage}
   const [coursesLoading, setCoursesLoading] = useState(false);
 
   useEffect(() => {
@@ -51,46 +70,23 @@ export function Dashboard() {
     }
   }, [user, token]);
 
-  // Kullanıcının kurslarını yükle
+  // Kullanıcının kurs erişimlerini kontrol et
   useEffect(() => {
-    if (token && user) {
-      fetchMyCourses();
-    }
-  }, [token, user]);
+    if (user) {
+      setCoursesLoading(true);
 
-  const fetchMyCourses = async () => {
-    setCoursesLoading(true);
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/courses/my-courses`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setMyCourses(data);
-      } else if (!res.ok && user?.has_access) {
-        // Fallback: Endpoint yoksa veya hata varsa has_access ile çalış
-        setMyCourses([{
-          id: 1,
-          title: "Video Editörlüğü Ustalık Sınıfı",
-          description: "Profesyonel video editör olma yolculuğunda ihtiyacın olan her şey",
-          completion_percentage: 0
-        }]);
+      // has_access true ise kurs 1'e erişimi var (199 TL satın almış)
+      // İleride backend'den CourseAccess tablosundan çekilebilir
+      if (user.has_access) {
+        setAccessibleCourseIds([1]); // Sadece kurs 1
+        setCourseProgress({ 1: 0 }); // İlerleme bilgisi
+      } else {
+        setAccessibleCourseIds([]); // Hiçbir kursa erişim yok
       }
-    } catch (err) {
-      console.error('Kurslar yüklenemedi:', err);
-      // Fallback for network errors
-      if (user?.has_access) {
-        setMyCourses([{
-          id: 1,
-          title: "Video Editörlüğü Ustalık Sınıfı",
-          description: "Profesyonel video editör olma yolculuğunda ihtiyacın olan her şey",
-          completion_percentage: 0
-        }]);
-      }
-    } finally {
+
       setCoursesLoading(false);
     }
-  };
+  }, [user]);
 
   // Referans bilgilerini yükle
   useEffect(() => {
@@ -287,169 +283,195 @@ export function Dashboard() {
           <p style={styles.subtitle}>{user.email}</p>
         </div>
 
-        {myCourses.length > 0 ? (
-          <>
-            <div style={styles.courses}>
-              <h2 style={styles.sectionTitle}>Kurslarım</h2>
-              {coursesLoading ? (
-                <div style={styles.certLoading}>
-                  <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>Kurslar yükleniyor...</span>
-                </div>
-              ) : (
-                <div style={styles.courseGrid}>
-                  {myCourses.map(course => (
-                    <div key={course.id} style={styles.courseCard}>
-                      <div style={{
-                        ...styles.courseThumbnail,
-                        background: course.id === 2
-                          ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
-                          : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
-                      }}>
-                        <span style={styles.playIcon}>▶</span>
-                      </div>
-                      <h3 style={styles.courseTitle}>{course.title}</h3>
-                      <p style={styles.courseProgress}>
-                        İlerleme: {course.completion_percentage || 0}%
-                      </p>
-                      <div style={styles.progressBar}>
-                        <div style={{
-                          ...styles.progressFill,
-                          width: `${course.completion_percentage || 0}%`,
-                          background: course.id === 2 ? '#ff4d4d' : '#00ff9d'
-                        }}></div>
-                      </div>
-                      <Link to={`/kurs/${course.id}`} style={{
-                        ...styles.continueBtn,
-                        background: course.id === 2
-                          ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
-                          : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
-                      }}>
-                        {course.completion_percentage > 0 ? 'Devam Et' : 'Başla'}
-                      </Link>
-                    </div>
-                  ))}
-                </div>
-              )}
+        {/* Kurslar Bölümü - Tüm kurslar gösterilir (açık/kilitli) */}
+        <div style={styles.courses}>
+          <h2 style={styles.sectionTitle}>Eğitimler</h2>
+          {coursesLoading ? (
+            <div style={styles.certLoading}>
+              <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
+              <span>Kurslar yükleniyor...</span>
             </div>
+          ) : (
+            <div style={styles.courseGrid}>
+              {ALL_COURSES.map(course => {
+                const hasAccess = accessibleCourseIds.includes(course.id);
+                const progress = courseProgress[course.id] || 0;
 
-            {/* Sertifikalar Bölümü */}
-            <div style={styles.certificateSection}>
-              <h2 style={styles.sectionTitle}>
-                <Award size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
-                Sertifikalarım
-              </h2>
-
-              {certLoading ? (
-                <div style={styles.certLoading}>
-                  <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
-                  <span>Yükleniyor...</span>
-                </div>
-              ) : (
-                <>
-                  {/* Mevcut Sertifikalar */}
-                  {certificates.length > 0 && (
-                    <div style={styles.certGrid}>
-                      {certificates.map(cert => (
-                        <div key={cert.id} style={styles.certCard}>
-                          <div style={styles.certHeader}>
-                            <Award size={32} color="#00ff9d" />
-                            <span style={styles.certBadge}>Tamamlama Sertifikası</span>
-                          </div>
-                          <h3 style={styles.certTitle}>{cert.course_title}</h3>
-                          <p style={styles.certDate}>
-                            {new Date(cert.completion_date).toLocaleDateString('tr-TR', {
-                              day: 'numeric', month: 'long', year: 'numeric'
-                            })}
-                          </p>
-                          <p style={styles.certCode}>Kod: {cert.certificate_code}</p>
-                          <div style={styles.certActions}>
-                            <a
-                              href={`${API_BASE_URL}/api/certificates/download/${cert.certificate_code}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              style={styles.certBtn}
-                            >
-                              <Download size={16} />
-                              İndir
-                            </a>
-                            <Link to={`/sertifika/${cert.certificate_code}`} style={styles.certBtnSecondary}>
-                              <ExternalLink size={16} />
-                              Görüntüle
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Sertifika Uygunluk Durumu */}
-                  {certificateEligibility && !certificateEligibility.has_certificate && (
-                    <div style={styles.eligibilityCard}>
-                      {certificateEligibility.eligible ? (
-                        <>
-                          <div style={styles.eligibleIcon}>🎉</div>
-                          <h3 style={styles.eligibleTitle}>Tebrikler! Sertifikanızı Alabilirsiniz</h3>
-                          <p style={styles.eligibleText}>
-                            Kursu %{certificateEligibility.completion_percentage} oranında tamamladınız.
-                          </p>
-                          <button
-                            onClick={() => generateCertificate(1)}
-                            disabled={certGenerating}
-                            style={styles.generateBtn}
-                          >
-                            {certGenerating ? (
-                              <>
-                                <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
-                                Oluşturuluyor...
-                              </>
-                            ) : (
-                              <>
-                                <Award size={18} />
-                                Sertifika Oluştur
-                              </>
-                            )}
-                          </button>
-                        </>
+                return (
+                  <div key={course.id} style={{
+                    ...styles.courseCard,
+                    opacity: hasAccess ? 1 : 0.85,
+                    border: hasAccess ? '1px solid rgba(0, 255, 157, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)'
+                  }}>
+                    {/* Thumbnail */}
+                    <div style={{
+                      ...styles.courseThumbnail,
+                      background: course.color === "red"
+                        ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
+                        : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+                      position: 'relative'
+                    }}>
+                      {hasAccess ? (
+                        <span style={styles.playIcon}>▶</span>
                       ) : (
-                        <>
-                          <div style={styles.progressIcon}>📊</div>
-                          <h3 style={styles.progressTitle}>Sertifika İçin İlerlemeniz</h3>
-                          <div style={styles.progressBarContainer}>
-                            <div
-                              style={{
-                                ...styles.progressBar,
-                                width: `${certificateEligibility.completion_percentage}%`
-                              }}
-                            />
-                          </div>
-                          <p style={styles.progressText}>
-                            %{certificateEligibility.completion_percentage} / %{certificateEligibility.required_percentage} tamamlandı
-                          </p>
-                          <p style={styles.progressHint}>
-                            Sertifika almak için kursu en az %80 oranında tamamlamanız gerekiyor.
-                          </p>
-                        </>
+                        <Lock size={32} style={{ color: '#fff' }} />
+                      )}
+                      {!hasAccess && (
+                        <div style={styles.lockedOverlay}></div>
                       )}
                     </div>
-                  )}
 
-                  {certificates.length === 0 && !certificateEligibility && (
-                    <p style={styles.noCerts}>Henuz sertifikaniz bulunmuyor.</p>
-                  )}
-                </>
-              )}
+                    {/* Kurs Bilgileri */}
+                    <h3 style={styles.courseTitle}>{course.title}</h3>
+                    <p style={styles.courseDescription}>{course.description}</p>
+
+                    {hasAccess ? (
+                      <>
+                        <p style={styles.courseProgress}>
+                          İlerleme: {progress}%
+                        </p>
+                        <div style={styles.progressBar}>
+                          <div style={{
+                            ...styles.progressFill,
+                            width: `${progress}%`,
+                            background: course.color === "red" ? '#ff4d4d' : '#00ff9d'
+                          }}></div>
+                        </div>
+                        <Link to={`/kurs/${course.id}`} style={{
+                          ...styles.continueBtn,
+                          background: course.color === "red"
+                            ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
+                            : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
+                        }}>
+                          {progress > 0 ? 'Devam Et' : 'Başla'}
+                        </Link>
+                      </>
+                    ) : (
+                      <>
+                        <div style={styles.lockedInfo}>
+                          <Lock size={16} style={{ marginRight: '0.5rem' }} />
+                          <span>Bu kursa erişiminiz yok</span>
+                        </div>
+                        <p style={styles.priceText}>₺{course.price}</p>
+                        <Link to="/urunler" style={styles.buyBtnSmall}>
+                          Satın Al
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
             </div>
+          )}
+        </div>
 
-          </>
-        ) : (
-          <div style={styles.noaccess}>
-            <div style={styles.lockIcon}>🔒</div>
-            <h2 style={styles.noaccessTitle}>Henüz Kurs Erişiminiz Yok</h2>
-            <p style={styles.noaccessText}>
-              Kurslara erişmek için satın alma işlemini tamamlayın.
-            </p>
-            <Link to="/urunler" style={styles.buyBtn}>Kursu Satın Al</Link>
+        {/* Sertifikalar Bölümü - Sadece erişimi olan kullanıcılara göster */}
+        {accessibleCourseIds.length > 0 && (
+          <div style={styles.certificateSection}>
+            <h2 style={styles.sectionTitle}>
+              <Award size={24} style={{ marginRight: '0.5rem', verticalAlign: 'middle' }} />
+              Sertifikalarım
+            </h2>
+
+            {certLoading ? (
+              <div style={styles.certLoading}>
+                <Loader2 size={24} style={{ animation: 'spin 1s linear infinite' }} />
+                <span>Yükleniyor...</span>
+              </div>
+            ) : (
+              <>
+                {/* Mevcut Sertifikalar */}
+                {certificates.length > 0 && (
+                  <div style={styles.certGrid}>
+                    {certificates.map(cert => (
+                      <div key={cert.id} style={styles.certCard}>
+                        <div style={styles.certHeader}>
+                          <Award size={32} color="#00ff9d" />
+                          <span style={styles.certBadge}>Tamamlama Sertifikası</span>
+                        </div>
+                        <h3 style={styles.certTitle}>{cert.course_title}</h3>
+                        <p style={styles.certDate}>
+                          {new Date(cert.completion_date).toLocaleDateString('tr-TR', {
+                            day: 'numeric', month: 'long', year: 'numeric'
+                          })}
+                        </p>
+                        <p style={styles.certCode}>Kod: {cert.certificate_code}</p>
+                        <div style={styles.certActions}>
+                          <a
+                            href={`${API_BASE_URL}/api/certificates/download/${cert.certificate_code}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={styles.certBtn}
+                          >
+                            <Download size={16} />
+                            İndir
+                          </a>
+                          <Link to={`/sertifika/${cert.certificate_code}`} style={styles.certBtnSecondary}>
+                            <ExternalLink size={16} />
+                            Görüntüle
+                          </Link>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Sertifika Uygunluk Durumu */}
+                {certificateEligibility && !certificateEligibility.has_certificate && (
+                  <div style={styles.eligibilityCard}>
+                    {certificateEligibility.eligible ? (
+                      <>
+                        <div style={styles.eligibleIcon}>🎉</div>
+                        <h3 style={styles.eligibleTitle}>Tebrikler! Sertifikanızı Alabilirsiniz</h3>
+                        <p style={styles.eligibleText}>
+                          Kursu %{certificateEligibility.completion_percentage} oranında tamamladınız.
+                        </p>
+                        <button
+                          onClick={() => generateCertificate(1)}
+                          disabled={certGenerating}
+                          style={styles.generateBtn}
+                        >
+                          {certGenerating ? (
+                            <>
+                              <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                              Oluşturuluyor...
+                            </>
+                          ) : (
+                            <>
+                              <Award size={18} />
+                              Sertifika Oluştur
+                            </>
+                          )}
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <div style={styles.progressIcon}>📊</div>
+                        <h3 style={styles.progressTitle}>Sertifika İçin İlerlemeniz</h3>
+                        <div style={styles.progressBarContainer}>
+                          <div
+                            style={{
+                              ...styles.progressBar,
+                              width: `${certificateEligibility.completion_percentage}%`
+                            }}
+                          />
+                        </div>
+                        <p style={styles.progressText}>
+                          %{certificateEligibility.completion_percentage} / %{certificateEligibility.required_percentage} tamamlandı
+                        </p>
+                        <p style={styles.progressHint}>
+                          Sertifika almak için kursu en az %80 oranında tamamlamanız gerekiyor.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+
+                {certificates.length === 0 && !certificateEligibility && (
+                  <p style={styles.noCerts}>Henuz sertifikaniz bulunmuyor.</p>
+                )}
+              </>
+            )}
           </div>
         )}
 
@@ -739,6 +761,45 @@ const styles = {
     color: '#a0a0a0',
     fontSize: '0.9rem',
     marginBottom: '0.5rem',
+  },
+  courseDescription: {
+    color: '#888',
+    fontSize: '0.85rem',
+    marginBottom: '1rem',
+    lineHeight: '1.4',
+  },
+  lockedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0,0,0,0.3)',
+    borderRadius: '0.75rem',
+  },
+  lockedInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    color: '#888',
+    fontSize: '0.9rem',
+    marginBottom: '0.75rem',
+  },
+  priceText: {
+    color: '#00ff9d',
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    marginBottom: '1rem',
+  },
+  buyBtnSmall: {
+    display: 'block',
+    textAlign: 'center',
+    padding: '0.75rem',
+    background: 'linear-gradient(135deg, #7000ff 0%, #9b4dff 100%)',
+    color: '#fff',
+    borderRadius: '0.5rem',
+    textDecoration: 'none',
+    fontWeight: '600',
+    transition: 'transform 0.2s, box-shadow 0.2s',
   },
   progressBar: {
     width: '100%',
