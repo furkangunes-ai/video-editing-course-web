@@ -12,14 +12,16 @@ const ALL_COURSES = [
     title: "Video Editörlüğü Ustalık Sınıfı",
     description: "Sıfırdan profesyonele, kapsamlı video editörlük eğitimi",
     price: 199,
-    color: "green"
+    color: "green",
+    thumbnail: null // Backend'den gelecek
   },
   {
     id: 2,
     title: "Canlı Video Editörlük Eğitimi",
     description: "4 seans interaktif canlı eğitim + WhatsApp destek grubu",
     price: 899,
-    color: "red"
+    color: "red",
+    thumbnail: null // Backend'den gelecek
   }
 ];
 
@@ -300,21 +302,21 @@ export function Dashboard() {
                 return (
                   <div key={course.id} style={{
                     ...styles.courseCard,
-                    opacity: hasAccess ? 1 : 0.85,
-                    border: hasAccess ? '1px solid rgba(0, 255, 157, 0.3)' : '1px solid rgba(255, 255, 255, 0.1)'
+                    border: hasAccess
+                      ? '1px solid rgba(0, 255, 157, 0.3)'
+                      : '1px solid rgba(255, 255, 255, 0.08)'
                   }}>
                     {/* Thumbnail */}
                     <div style={{
                       ...styles.courseThumbnail,
                       background: course.color === "red"
-                        ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
-                        : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
-                      position: 'relative'
+                        ? 'linear-gradient(135deg, #8B0000 0%, #cc0000 100%)'
+                        : 'linear-gradient(135deg, #004d2e 0%, #00994d 100%)'
                     }}>
                       {hasAccess ? (
                         <span style={styles.playIcon}>▶</span>
                       ) : (
-                        <Lock size={32} style={{ color: '#fff' }} />
+                        <Lock size={36} style={{ color: 'rgba(255,255,255,0.7)' }} />
                       )}
                       {!hasAccess && (
                         <div style={styles.lockedOverlay}></div>
@@ -322,42 +324,44 @@ export function Dashboard() {
                     </div>
 
                     {/* Kurs Bilgileri */}
-                    <h3 style={styles.courseTitle}>{course.title}</h3>
-                    <p style={styles.courseDescription}>{course.description}</p>
+                    <div style={styles.courseContent}>
+                      <h3 style={styles.courseTitle}>{course.title}</h3>
+                      <p style={styles.courseDescription}>{course.description}</p>
 
-                    {hasAccess ? (
-                      <>
-                        <p style={styles.courseProgress}>
-                          İlerleme: {progress}%
-                        </p>
-                        <div style={styles.progressBar}>
-                          <div style={{
-                            ...styles.progressFill,
-                            width: `${progress}%`,
-                            background: course.color === "red" ? '#ff4d4d' : '#00ff9d'
-                          }}></div>
-                        </div>
-                        <Link to={`/kurs/${course.id}`} style={{
-                          ...styles.continueBtn,
-                          background: course.color === "red"
-                            ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
-                            : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
-                        }}>
-                          {progress > 0 ? 'Devam Et' : 'Başla'}
-                        </Link>
-                      </>
-                    ) : (
-                      <>
-                        <div style={styles.lockedInfo}>
-                          <Lock size={16} style={{ marginRight: '0.5rem' }} />
-                          <span>Bu kursa erişiminiz yok</span>
-                        </div>
-                        <p style={styles.priceText}>₺{course.price}</p>
-                        <Link to="/urunler" style={styles.buyBtnSmall}>
-                          Satın Al
-                        </Link>
-                      </>
-                    )}
+                      {hasAccess ? (
+                        <>
+                          <p style={styles.courseProgress}>
+                            İlerleme: {progress}%
+                          </p>
+                          <div style={styles.progressBar}>
+                            <div style={{
+                              ...styles.progressFill,
+                              width: `${progress}%`,
+                              background: course.color === "red" ? '#ff4d4d' : '#00ff9d'
+                            }}></div>
+                          </div>
+                          <Link to={`/kurs/${course.id}`} style={{
+                            ...styles.continueBtn,
+                            background: course.color === "red"
+                              ? 'linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%)'
+                              : 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)'
+                          }}>
+                            {progress > 0 ? 'Devam Et' : 'Başla'}
+                          </Link>
+                        </>
+                      ) : (
+                        <>
+                          <div style={styles.lockedInfo}>
+                            <Lock size={14} style={{ marginRight: '0.4rem' }} />
+                            <span>Bu kursa erişiminiz yok</span>
+                          </div>
+                          <p style={styles.priceText}>₺{course.price}</p>
+                          <Link to="/urunler" style={styles.buyBtnSmall}>
+                            Satın Al
+                          </Link>
+                        </>
+                      )}
+                    </div>
                   </div>
                 );
               })}
@@ -731,27 +735,37 @@ const styles = {
   },
   courseGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+    gridTemplateColumns: 'repeat(2, 1fr)',
     gap: '1.5rem',
+    maxWidth: '800px',
   },
   courseCard: {
     backgroundColor: 'rgba(255,255,255,0.05)',
     border: '1px solid rgba(255,255,255,0.1)',
     borderRadius: '1rem',
-    padding: '1.5rem',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
   },
   courseThumbnail: {
     backgroundColor: 'rgba(0,255,157,0.1)',
-    borderRadius: '0.75rem',
-    height: '150px',
+    height: '140px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: '1rem',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  courseContent: {
+    padding: '1.25rem',
+    display: 'flex',
+    flexDirection: 'column',
+    flex: 1,
   },
   playIcon: {
-    fontSize: '3rem',
-    color: '#00ff9d',
+    fontSize: '2.5rem',
+    color: '#fff',
+    opacity: 0.9,
   },
   courseTitle: {
     fontSize: '1.2rem',
@@ -774,8 +788,7 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(0,0,0,0.3)',
-    borderRadius: '0.75rem',
+    background: 'rgba(0,0,0,0.4)',
   },
   lockedInfo: {
     display: 'flex',

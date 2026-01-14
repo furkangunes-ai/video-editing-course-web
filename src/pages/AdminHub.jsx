@@ -1,11 +1,17 @@
 import { Link } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
 export function AdminHub() {
   const [courseCreating, setCourseCreating] = useState(false);
   const [courseMessage, setCourseMessage] = useState('');
+
+  // Kapak resmi state'leri
+  const [thumbnailUploading, setThumbnailUploading] = useState(false);
+  const [thumbnailMessage, setThumbnailMessage] = useState('');
+  const [selectedCourseId, setSelectedCourseId] = useState('1');
+  const fileInputRef = useRef(null);
 
   const createLiveCourse = async () => {
     setCourseCreating(true);
@@ -48,6 +54,65 @@ export function AdminHub() {
       setCourseCreating(false);
     }
   };
+
+  // Kapak resmi yükleme
+  const handleThumbnailUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Dosya türü kontrolü
+    if (!file.type.startsWith('image/')) {
+      setThumbnailMessage('Hata: Sadece resim dosyaları yüklenebilir');
+      return;
+    }
+
+    // Dosya boyutu kontrolü (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      setThumbnailMessage('Hata: Dosya boyutu 5MB\'dan küçük olmalı');
+      return;
+    }
+
+    setThumbnailUploading(true);
+    setThumbnailMessage('');
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setThumbnailMessage('Hata: Giriş yapmanız gerekiyor');
+        setThumbnailUploading(false);
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('course_id', selectedCourseId);
+
+      const response = await fetch(`${API_BASE_URL}/api/courses/admin/thumbnail`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setThumbnailMessage(`Başarılı! Kapak resmi yüklendi: ${data.thumbnail_url}`);
+      } else {
+        const error = await response.json();
+        setThumbnailMessage(`Hata: ${error.detail || 'Yükleme başarısız'}`);
+      }
+    } catch (err) {
+      setThumbnailMessage(`Hata: ${err.message}`);
+    } finally {
+      setThumbnailUploading(false);
+      // Input'u temizle
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   const tools = [
     {
       title: 'Analytics Dashboard',
@@ -179,29 +244,82 @@ export function AdminHub() {
       {/* Kurs Oluştur Bölümü */}
       <div style={styles.courseSection}>
         <h2 style={styles.sectionTitle}>🎓 Kurs Yönetimi</h2>
-        <div style={styles.courseActions}>
-          <button
-            onClick={createLiveCourse}
-            disabled={courseCreating}
-            style={{
-              ...styles.createCourseBtn,
-              opacity: courseCreating ? 0.6 : 1,
-              cursor: courseCreating ? 'not-allowed' : 'pointer'
-            }}
-          >
-            {courseCreating ? '⏳ Oluşturuluyor...' : '🔴 Canlı Eğitim Kursu Oluştur (ID: 2)'}
-          </button>
-          {courseMessage && (
-            <p style={{
-              ...styles.courseMessage,
-              color: courseMessage.includes('Başarılı') ? '#00ff9d' : '#ff4757'
-            }}>
-              {courseMessage}
-            </p>
-          )}
+
+        {/* Kurs Oluştur */}
+        <div style={styles.courseSubSection}>
+          <h3 style={styles.subSectionTitle}>Yeni Kurs Oluştur</h3>
+          <div style={styles.courseActions}>
+            <button
+              onClick={createLiveCourse}
+              disabled={courseCreating}
+              style={{
+                ...styles.createCourseBtn,
+                opacity: courseCreating ? 0.6 : 1,
+                cursor: courseCreating ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {courseCreating ? '⏳ Oluşturuluyor...' : '🔴 Canlı Eğitim Kursu Oluştur (ID: 2)'}
+            </button>
+            {courseMessage && (
+              <p style={{
+                ...styles.courseMessage,
+                color: courseMessage.includes('Başarılı') ? '#00ff9d' : '#ff4757'
+              }}>
+                {courseMessage}
+              </p>
+            )}
+          </div>
         </div>
+
+        {/* Kapak Resmi Yükleme */}
+        <div style={styles.courseSubSection}>
+          <h3 style={styles.subSectionTitle}>🖼️ Kurs Kapak Resmi Yükle</h3>
+          <div style={styles.thumbnailUploader}>
+            <div style={styles.thumbnailForm}>
+              <label style={styles.selectLabel}>Kurs Seç:</label>
+              <select
+                value={selectedCourseId}
+                onChange={(e) => setSelectedCourseId(e.target.value)}
+                style={styles.courseSelect}
+              >
+                <option value="1">Kurs 1 - Video Editörlüğü Ustalık Sınıfı (199 TL)</option>
+                <option value="2">Kurs 2 - Canlı Video Editörlük Eğitimi (899 TL)</option>
+              </select>
+
+              <input
+                type="file"
+                ref={fileInputRef}
+                accept="image/*"
+                onChange={handleThumbnailUpload}
+                style={styles.fileInput}
+                id="thumbnail-upload"
+              />
+              <label htmlFor="thumbnail-upload" style={{
+                ...styles.uploadBtn,
+                opacity: thumbnailUploading ? 0.6 : 1,
+                cursor: thumbnailUploading ? 'not-allowed' : 'pointer'
+              }}>
+                {thumbnailUploading ? '⏳ Yükleniyor...' : '📤 Kapak Resmi Seç'}
+              </label>
+            </div>
+
+            {thumbnailMessage && (
+              <p style={{
+                ...styles.courseMessage,
+                color: thumbnailMessage.includes('Başarılı') ? '#00ff9d' : '#ff4757'
+              }}>
+                {thumbnailMessage}
+              </p>
+            )}
+
+            <p style={styles.thumbnailNote}>
+              Önerilen boyut: 1280x720px (16:9). Max dosya boyutu: 5MB. PNG veya JPG.
+            </p>
+          </div>
+        </div>
+
         <p style={styles.courseNote}>
-          Not: Bu buton veritabanında "Canlı Video Editörlük Eğitimi" kursunu oluşturur.
+          Not: Kurs 2 veritabanında "Canlı Video Editörlük Eğitimi" olarak oluşturulmalı.
           899 TL'lik paketi alan kullanıcılar otomatik olarak bu kursa ve ana kursa erişim kazanır.
         </p>
       </div>
@@ -372,6 +490,64 @@ const styles = {
     fontSize: '0.85rem',
     color: '#888',
     lineHeight: '1.5',
+    marginTop: '1rem',
+    paddingTop: '1rem',
+    borderTop: '1px solid rgba(255,255,255,0.1)',
+  },
+  courseSubSection: {
+    marginBottom: '1.5rem',
+    paddingBottom: '1.5rem',
+    borderBottom: '1px solid rgba(255,255,255,0.1)',
+  },
+  subSectionTitle: {
+    fontSize: '1rem',
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: '1rem',
+  },
+  thumbnailUploader: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1rem',
+  },
+  thumbnailForm: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '1rem',
+    flexWrap: 'wrap',
+  },
+  selectLabel: {
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+  },
+  courseSelect: {
+    padding: '0.75rem 1rem',
+    fontSize: '0.9rem',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '0.5rem',
+    color: '#fff',
+    outline: 'none',
+    cursor: 'pointer',
+    minWidth: '300px',
+  },
+  fileInput: {
+    display: 'none',
+  },
+  uploadBtn: {
+    padding: '0.75rem 1.5rem',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    color: '#000',
+    backgroundColor: '#00ff9d',
+    border: 'none',
+    borderRadius: '0.5rem',
+    display: 'inline-block',
+    transition: 'all 0.2s',
+  },
+  thumbnailNote: {
+    fontSize: '0.8rem',
+    color: '#666',
   },
   quickLinksSection: {
     maxWidth: '1200px',

@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
 from sqlalchemy.orm import Session
 from typing import List
+import os
+import uuid
+from datetime import datetime
 
 from app.database import get_db
 from app.models.user import User, CourseAccess
@@ -205,3 +208,54 @@ async def create_lesson(
     db.commit()
     db.refresh(new_lesson)
     return new_lesson
+
+
+@router.post("/admin/thumbnail")
+async def upload_thumbnail(
+    file: UploadFile = File(...),
+    course_id: int = Form(...),
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user)
+):
+    """Kurs kapak resmi yükle (Admin)"""
+
+    # Kurs var mı kontrol et
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Kurs bulunamadı")
+
+    # Dosya türü kontrolü
+    allowed_types = ["image/jpeg", "image/png", "image/webp", "image/gif"]
+    if file.content_type not in allowed_types:
+        raise HTTPException(status_code=400, detail="Sadece JPEG, PNG, WebP veya GIF dosyaları kabul edilir")
+
+    # Dosya boyutu kontrolü (5MB)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Dosya boyutu 5MB'dan küçük olmalı")
+
+    # Upload klasörünü oluştur
+    upload_dir = os.path.join(os.path.dirname(__file__), "..", "..", "static", "thumbnails")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Benzersiz dosya adı oluştur
+    file_ext = file.filename.split(".")[-1] if "." in file.filename else "jpg"
+    unique_filename = f"course_{course_id}_{uuid.uuid4().hex[:8]}.{file_ext}"
+    file_path = os.path.join(upload_dir, unique_filename)
+
+    # Dosyayı kaydet
+    with open(file_path, "wb") as f:
+        f.write(contents)
+
+    # Thumbnail URL'ini oluştur
+    thumbnail_url = f"/static/thumbnails/{unique_filename}"
+
+    # Kurs thumbnail'ını güncelle
+    course.thumbnail_url = thumbnail_url
+    db.commit()
+
+    return {
+        "message": "Kapak resmi başarıyla yüklendi",
+        "thumbnail_url": thumbnail_url,
+        "course_id": course_id
+    }
