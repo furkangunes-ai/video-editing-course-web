@@ -1,16 +1,154 @@
 <!doctype html>
-<html lang="en">
+<html lang="tr">
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VideoMaster - Profesyonel Kurgu Eğitimi</title>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="theme-color" content="#0a0a0a" />
+
+  <title>Furkan Güneş — Profesyonel Video Kurgu Eğitimi | Dolarla Kazan</title>
+  <meta name="description"
+    content="Sıfırdan ileri seviyeye video editörlüğü öğren, freelance müşteri bulma stratejileriyle dolarla kazanmaya başla. 7+ saat kapsamlı eğitim, ömür boyu erişim, %96 memnuniyet garantisi." />
+  <meta name="keywords"
+    content="video kurgu eğitimi, premiere pro kursu, video editörlüğü, freelance editör, online kurs Türkçe, dolarla kazanmak, Furkan Güneş" />
+  <meta name="author" content="Furkan Güneş" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://furkangunes.co/" />
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://furkangunes.co/" />
+  <meta property="og:title" content="Furkan Güneş — Profesyonel Video Kurgu Eğitimi" />
+  <meta property="og:description"
+    content="Sıfırdan ileri seviyeye video editörlüğü öğren, freelance müşteri bulma stratejileriyle dolarla kazanmaya başla. 7+ saat kapsamlı eğitim, ömür boyu erişim." />
+  <meta property="og:image" content="https://furkangunes.co/hero-image.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:locale" content="tr_TR" />
+  <meta property="og:site_name" content="Furkan Güneş Eğitim" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:url" content="https://furkangunes.co/" />
+  <meta name="twitter:title" content="Furkan Güneş — Profesyonel Video Kurgu Eğitimi" />
+  <meta name="twitter:description"
+    content="Sıfırdan ileri seviyeye video editörlüğü öğren, freelance müşteri bulma stratejileriyle dolarla kazanmaya başla." />
+  <meta name="twitter:image" content="https://furkangunes.co/hero-image.png" />
+  <meta name="twitter:creator" content="@furkangunes" />
+
+  <!-- Favicon (SVG-based brand mark) -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700;800&display=swap"
     rel="stylesheet">
+
+  <!-- Schema.org JSON-LD: Course + Person + Organization -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Course",
+        "@id": "https://furkangunes.co/#course",
+        "name": "Video Editörlüğü Ustalık Sınıfı",
+        "description": "Sıfırdan ileri seviyeye video kurgusu, Premiere Pro ustalığı, viral video sırları ve freelance müşteri bulma stratejileri içeren 7+ saatlik kapsamlı online eğitim.",
+        "provider": { "@id": "https://furkangunes.co/#org" },
+        "instructor": { "@id": "https://furkangunes.co/#person" },
+        "inLanguage": "tr",
+        "educationalLevel": "Beginner to Advanced",
+        "offers": {
+          "@type": "Offer",
+          "price": "999",
+          "priceCurrency": "TRY",
+          "availability": "https://schema.org/InStock",
+          "url": "https://furkangunes.co/#products"
+        },
+        "hasCourseInstance": {
+          "@type": "CourseInstance",
+          "courseMode": "Online",
+          "courseWorkload": "PT7H"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.9",
+          "reviewCount": "500",
+          "bestRating": "5"
+        }
+      },
+      {
+        "@type": "Person",
+        "@id": "https://furkangunes.co/#person",
+        "name": "Furkan Güneş",
+        "url": "https://furkangunes.co",
+        "jobTitle": "Profesyonel Video Editörü & İçerik Üreticisi",
+        "description": "5+ yıl deneyimli video editörü. 2000+ video kurgusu, 30M+ izleyici.",
+        "sameAs": [
+          "https://www.instagram.com/furkangunes.3/"
+        ]
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://furkangunes.co/#org",
+        "name": "Furkan Güneş Eğitim",
+        "url": "https://furkangunes.co",
+        "founder": { "@id": "https://furkangunes.co/#person" },
+        "contactPoint": {
+          "@type": "ContactPoint",
+          "telephone": "+90-501-141-1940",
+          "contactType": "customer support",
+          "areaServed": "TR",
+          "availableLanguage": ["Turkish"]
+        }
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Analytics 4 (GA4) — ADMIN PANELDEN DOLDURULACAK -->
+  <script>
+    // Tracking ID'leri admin panelden çekiyoruz; yoksa yüklenmez.
+    (function () {
+      try {
+        var cfg = JSON.parse(localStorage.getItem('siteConfig') || '{}');
+        var gaId = (cfg.analytics && cfg.analytics.ga4Id) || '';
+        if (gaId) {
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=' + gaId;
+          document.head.appendChild(s);
+          window.dataLayer = window.dataLayer || [];
+          window.gtag = function () { window.dataLayer.push(arguments); };
+          window.gtag('js', new Date());
+          window.gtag('config', gaId);
+        }
+      } catch (e) { /* noop */ }
+    })();
+  </script>
+
+  <!-- Meta Pixel — ADMIN PANELDEN DOLDURULACAK -->
+  <script>
+    (function () {
+      try {
+        var cfg = JSON.parse(localStorage.getItem('siteConfig') || '{}');
+        var pixelId = (cfg.analytics && cfg.analytics.metaPixelId) || '';
+        if (pixelId) {
+          !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () { n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments) };
+            if (!f._fbq) f._fbq = n; n.push = n; n.loaded = !0; n.version = '2.0';
+            n.queue = []; t = b.createElement(e); t.async = !0;
+            t.src = v; s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s)
+          }(window, document, 'script', 'https://connect.facebook.net/en_US/fbevents.js');
+          window.fbq('init', pixelId);
+          window.fbq('track', 'PageView');
+        }
+      } catch (e) { /* noop */ }
+    })();
+  </script>
 </head>
 
 <body>

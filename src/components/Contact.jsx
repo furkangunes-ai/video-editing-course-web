@@ -1,7 +1,19 @@
 import React from 'react';
 import { Mail, MessageCircle, Instagram } from 'lucide-react';
+import { useSiteConfig } from '../hooks/useSiteConfig';
 
 export const Contact = () => {
+  const config = useSiteConfig();
+  const whatsappUrl = `https://wa.me/${config.contact.whatsapp}`;
+  const instagramUrl = `https://www.instagram.com/${config.contact.instagram}/`;
+  const formatPhone = (raw) => {
+    const digits = raw.replace(/\D/g, '');
+    if (digits.startsWith('90') && digits.length === 12) {
+      return `+90 ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8, 10)} ${digits.slice(10)}`;
+    }
+    return `+${digits}`;
+  };
+
   return (
     <section id="contact" className="section contact-section">
       <div className="container">
@@ -14,28 +26,28 @@ export const Contact = () => {
           </div>
 
           <div className="contact-cards">
-            <a href="mailto:admin@furkangunes.co" className="contact-card">
+            <a href={`mailto:${config.contact.email}`} className="contact-card">
               <div className="icon-box">
                 <Mail size={32} />
               </div>
               <h3>E-posta Gönder</h3>
-              <p>admin@furkangunes.co</p>
+              <p>{config.contact.email}</p>
             </a>
 
-            <a href="https://wa.me/905011411940" target="_blank" rel="noopener noreferrer" className="contact-card highlight">
+            <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="contact-card highlight">
               <div className="icon-box">
                 <MessageCircle size={32} />
               </div>
               <h3>WhatsApp</h3>
-              <p>+90 501 141 19 40</p>
+              <p>{formatPhone(config.contact.whatsapp)}</p>
             </a>
 
-            <a href="https://www.instagram.com/furkangunes.3/" className="contact-card">
+            <a href={instagramUrl} target="_blank" rel="noopener noreferrer" className="contact-card">
               <div className="icon-box">
                 <Instagram size={32} />
               </div>
               <h3>Instagram</h3>
-              <p>@furkangunes.3</p>
+              <p>@{config.contact.instagram}</p>
             </a>
           </div>
         </div>
@@ -43,7 +55,6 @@ export const Contact = () => {
 
       <style>{`
         .contact-section {
-          /* background-color: var(--color-surface); Removed for panel style */
           padding: 2rem 0;
         }
 

@@ -1,7 +1,9 @@
 import React from 'react';
-import { CheckCircle, Award, Users, Star, Video } from 'lucide-react';
+import { Award, Users, Video } from 'lucide-react';
 import { ParticleSwap } from './ParticleSwap';
+import { CountStat } from './CountStat';
 import furkanImage from '../assets/furkan-gunes.jpg';
+import furkanImageWebp from '../assets/furkan-gunes.webp';
 
 export const Instructor = () => {
   return (
@@ -9,14 +11,21 @@ export const Instructor = () => {
       <div className="instructor-content">
         <div className="instructor-image-wrapper">
           <div className="image-frame">
-            <img
-              src={furkanImage}
-              alt="Furkan Güneş"
-              className="instructor-img"
-            />
+            <picture>
+              <source srcSet={furkanImageWebp} type="image/webp" />
+              <img
+                src={furkanImage}
+                alt="Furkan Güneş"
+                className="instructor-img"
+                width="600"
+                height="750"
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
           </div>
           <div className="experience-badge">
-            <span className="years">5+</span>
+            <span className="years"><CountStat target={5} suffix="+" duration={1200} /></span>
             <span className="label">Yıl Deneyim</span>
           </div>
         </div>
@@ -45,11 +54,11 @@ export const Instructor = () => {
           <div className="achievements">
             <div className="achievement-item">
               <Video size={24} className="achievement-icon" />
-              <span>2000+ Video Kurgusu</span>
+              <span><CountStat target={2000} suffix="+" /> Video Kurgusu</span>
             </div>
             <div className="achievement-item">
               <Users size={24} className="achievement-icon" />
-              <span>30.000.000+ İzleyici</span>
+              <span><CountStat target={30000000} suffix="+" duration={2400} /> İzleyici</span>
             </div>
             <div className="achievement-item">
               <Award size={24} className="achievement-icon" />
@@ -101,7 +110,7 @@ export const Instructor = () => {
           margin: 0;
           letter-spacing: -0.02em;
         }
-        
+
         .title-prefix {
           font-size: 1.5rem;
           font-weight: 400;
@@ -195,7 +204,7 @@ export const Instructor = () => {
           border: 1px solid var(--color-border);
           transition: transform 0.2s;
         }
-        
+
         .achievement-item:hover {
           transform: translateY(-2px);
           border-color: var(--color-primary);
@@ -223,7 +232,7 @@ export const Instructor = () => {
             align-items: center;
             gap: 2rem;
           }
-          
+
           .instructor-bio-container {
             border-left: none;
             padding-left: 0;
@@ -233,11 +242,11 @@ export const Instructor = () => {
           .achievements {
             justify-content: center;
           }
-          
+
           .achievement-item {
             justify-content: center;
           }
-          
+
           .experience-badge {
             right: 0;
             left: 0;

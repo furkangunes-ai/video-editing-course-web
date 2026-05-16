@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Play, ArrowRight } from 'lucide-react';
+import { VideoModal } from './VideoModal';
+import { useSiteConfig } from '../hooks/useSiteConfig';
 
 export const Hero = () => {
+  const config = useSiteConfig();
+  const [videoOpen, setVideoOpen] = useState(false);
+  const whatsappUrl = `https://wa.me/${config.contact.whatsapp}`;
+
   return (
     <section className="section hero">
       <div className="container">
@@ -9,51 +15,74 @@ export const Hero = () => {
           <div className="hero-text">
             <div className="badge">
               <span className="badge-dot"></span>
-              Yeni Başlayanlar İçin Özel
+              {config.hero.badge}
             </div>
             <h1 className="hero-title">
-              Video Editörlüğü ile <br />
-              <span className="text-gradient-primary">Gelirinizi İkiye Katlayın</span>
+              {config.hero.titleLine1} <br />
+              <span className="text-gradient-primary">{config.hero.titleLine2}</span>
             </h1>
-            <p className="hero-subtitle">
-              Editörlük, doğru stratejilerle global bir gelir yoludur.
-              Güzel yemek için en pahalı malzemeler şart değil.
-            </p>
+            <p className="hero-subtitle">{config.hero.subtitle}</p>
             <div className="hero-actions">
               <a
-                href="https://wa.me/905011411940"
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-primary"
               >
                 Hemen Başla <ArrowRight size={20} />
               </a>
-              <button className="btn btn-outline">
+              <button
+                type="button"
+                className="btn btn-outline"
+                onClick={() => setVideoOpen(true)}
+              >
                 <Play size={20} /> Örnek Ders İzle
               </button>
             </div>
-            <p className="hero-guarantee">
-              * %96 Memnuniyet Garantisi
-            </p>
+            <p className="hero-guarantee">{config.hero.guaranteeText}</p>
           </div>
 
           <div className="hero-visual">
-            <div className="visual-card">
+            <div
+              className="visual-card"
+              onClick={() => setVideoOpen(true)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => e.key === 'Enter' && setVideoOpen(true)}
+            >
               <div className="visual-glow"></div>
               <div className="visual-content">
-                {/* Video Container */}
                 <div className="video-wrapper">
-                  <img
-                    src="/hero-image.png"
-                    alt="Video Editörlüğü Arayüzü"
-                    className="hero-image"
-                  />
+                  <picture>
+                    <source srcSet="/hero-image.webp" type="image/webp" />
+                    <img
+                      src="/hero-image.png"
+                      alt="Video Editörlüğü Arayüzü"
+                      className="hero-image"
+                      width="800"
+                      height="450"
+                      loading="eager"
+                      fetchpriority="high"
+                      decoding="async"
+                    />
+                  </picture>
+                </div>
+                <div className="play-overlay">
+                  <div className="play-button">
+                    <Play size={28} fill="currentColor" />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      <VideoModal
+        open={videoOpen}
+        onClose={() => setVideoOpen(false)}
+        videoUrl={config.hero.sampleVideoUrl}
+      />
 
       <style>{`
         .hero {
@@ -62,7 +91,7 @@ export const Hero = () => {
           align-items: center;
           position: relative;
           overflow: hidden;
-          padding-top: 120px; /* Space for header if added later */
+          padding-top: 120px;
         }
 
         .hero-content {
@@ -112,8 +141,6 @@ export const Hero = () => {
           margin-bottom: 1.5rem;
         }
 
-
-
         .hero-guarantee {
           font-size: 0.9rem;
           color: var(--color-text-muted);
@@ -131,6 +158,13 @@ export const Hero = () => {
           border: 1px solid var(--color-border);
           aspect-ratio: 16/9;
           box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+          cursor: pointer;
+          transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .visual-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), 0 0 40px rgba(0, 255, 157, 0.15);
         }
 
         .visual-content {
@@ -160,67 +194,41 @@ export const Hero = () => {
           opacity: 0.8;
         }
 
-        .hero-video {
-          width: 100%;
-          height: 100%;
-          border: none;
-        }
-
         .video-wrapper {
           width: 100%;
           height: 100%;
           position: relative;
         }
 
-        .play-button-wrapper {
+        .play-overlay {
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
+          inset: 0;
           display: flex;
-          flex-direction: column;
           align-items: center;
           justify-content: center;
-          z-index: 10;
-          background: rgba(0, 0, 0, 0.3);
-          cursor: pointer;
-          transition: background 0.3s ease;
-          gap: 1rem;
+          background: linear-gradient(to top, rgba(0,0,0,0.3), transparent 50%);
+          transition: background 0.3s;
         }
 
-        .video-hint {
-          color: white;
-          font-size: 0.9rem;
-          opacity: 0;
-          transform: translateY(10px);
-          transition: all 0.3s ease;
-        }
-
-        .play-button-wrapper:hover .video-hint {
-          opacity: 1;
-          transform: translateY(0);
-        }
-
-        .play-button-wrapper:hover {
-          background: rgba(0, 0, 0, 0.1);
+        .visual-card:hover .play-overlay {
+          background: linear-gradient(to top, rgba(0,0,0,0.5), rgba(0,0,0,0.1));
         }
 
         .play-button {
           width: 80px;
           height: 80px;
-          background: rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.4);
           backdrop-filter: blur(10px);
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
-          border: 1px solid rgba(255, 255, 255, 0.2);
+          border: 1px solid rgba(255, 255, 255, 0.3);
           color: white;
-          transition: transform 0.3s ease;
+          transition: transform 0.3s ease, background 0.3s;
         }
 
-        .play-button-wrapper:hover .play-button {
+        .visual-card:hover .play-button {
           transform: scale(1.1);
           background: var(--color-primary);
           color: black;
@@ -255,13 +263,18 @@ export const Hero = () => {
             flex-direction: column;
             width: 100%;
           }
-          
+
           .btn {
             width: 100%;
           }
-          
+
           .hero-visual {
             margin-top: 2rem;
+          }
+
+          .play-button {
+            width: 60px;
+            height: 60px;
           }
         }
       `}</style>

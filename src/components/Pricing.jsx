@@ -1,127 +1,130 @@
 import React, { useState } from 'react';
 import { Check, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useSiteConfig } from '../hooks/useSiteConfig';
 
 export const Pricing = () => {
+    const config = useSiteConfig();
     const [activePlan, setActivePlan] = useState('pro');
+
+    const main = config.pricing.main;
+    const skool = config.pricing.skool;
+    const visiblePlans = [];
+    if (main.enabled) visiblePlans.push('pro');
+    if (skool.enabled) visiblePlans.push('skool');
 
     return (
         <section className="section pricing-section">
             <div className="container">
                 <div className="pricing-wrapper">
-                    {/* Existing Main Card */}
-                    <div
-                        className={`pricing-card main-card ${activePlan === 'pro' ? 'active' : 'inactive'}`}
-                        onClick={() => setActivePlan('pro')}
-                    >
-                        <div className="pricing-header">
-                            <div className="pricing-badge">SINIRLI SÜRE İÇİN</div>
-                            <h3 className="plan-name">Video Editörlüğü Ustalık Sınıfı</h3>
+                    {main.enabled && (
+                        <div
+                            className={`pricing-card main-card ${activePlan === 'pro' ? 'active' : 'inactive'}`}
+                            onClick={() => setActivePlan('pro')}
+                        >
+                            <div className="pricing-header">
+                                {main.badge && <div className="pricing-badge">{main.badge}</div>}
+                                <h3 className="plan-name">{main.planName}</h3>
 
-                            <div className="price-frame">
-                                <div className="discount-tag">
-                                    %80 İNDİRİM
-                                </div>
-                                <div className="old-price-wrapper">
-                                    <span className="old-price">5.000 TL</span>
-                                    <div className="strikethrough-line"></div>
-                                </div>
+                                <div className="price-frame">
+                                    {main.discountTag && (
+                                        <div className="discount-tag">{main.discountTag}</div>
+                                    )}
+                                    {main.oldPrice && (
+                                        <div className="old-price-wrapper">
+                                            <span className="old-price">{main.oldPrice}</span>
+                                            <div className="strikethrough-line"></div>
+                                        </div>
+                                    )}
 
-                                <div className="current-price-container">
-                                    <span className="current-price">999 TL</span>
-                                </div>
-                            </div>
-
-                            <p className="price-subtitle">Tek seferlik ödeme. Ömür boyu erişim.</p>
-                        </div>
-
-                        <div className="pricing-features">
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon" />
-                                <span>Tüm Eğitim Modülleri (7+ Saat)</span>
-                            </div>
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon" />
-                                <span>Premiere Pro Eğitimi</span>
-                            </div>
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon" />
-                                <span>Müşteri Bulma Rehberi (Bonus)</span>
-                            </div>
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon" />
-                                <span>Özel WhatsApp Destek Grubu</span>
-                            </div>
-
-                        </div>
-
-                        <div className="pricing-cta">
-                            <a
-                                href="https://wa.me/905011411940"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-primary btn-block"
-                            >
-                                Hemen İndirimli Kaydol <ArrowRight size={20} />
-                            </a>
-                            <p className="guarantee-text">
-                                <ShieldCheck size={16} className="inline-icon" />
-                                30 Gün Para İade Garantisi
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* New Skool Card */}
-                    <div
-                        className={`pricing-card skool-card ${activePlan === 'skool' ? 'active' : 'inactive'}`}
-                        onClick={() => setActivePlan('skool')}
-                    >
-                        <div className="pricing-header">
-                            <h3 className="plan-name">Skool Topluluk & Abonelik</h3>
-
-                            <div className="price-frame skool-frame">
-                                <div className="old-price-wrapper">
-                                    <span className="old-price">$12</span>
-                                    <div className="strikethrough-line skool-strike"></div>
+                                    <div className="current-price-container">
+                                        <span className="current-price">{main.currentPrice}</span>
+                                    </div>
                                 </div>
 
-                                <div className="current-price-container">
-                                    <span className="current-price skool-price">$5</span>
-                                    <span className="period">/ Ay</span>
+                                <p className="price-subtitle">{main.subtitle}</p>
+                            </div>
+
+                            <div className="pricing-features">
+                                {main.features.map((f, i) => (
+                                    <div key={i} className="feature-item">
+                                        <Check size={20} className="feature-icon" />
+                                        <span>{f}</span>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="pricing-cta">
+                                <a
+                                    href={main.ctaUrl}
+                                    target={main.ctaUrl.startsWith('http') ? '_blank' : undefined}
+                                    rel={main.ctaUrl.startsWith('http') ? 'noopener noreferrer' : undefined}
+                                    className="btn btn-primary btn-block"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {main.ctaText} <ArrowRight size={20} />
+                                </a>
+                                {main.guaranteeText && (
+                                    <p className="guarantee-text">
+                                        <ShieldCheck size={16} className="inline-icon" />
+                                        {main.guaranteeText}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {skool.enabled && (
+                        <div
+                            className={`pricing-card skool-card ${activePlan === 'skool' ? 'active' : 'inactive'}`}
+                            onClick={() => setActivePlan('skool')}
+                        >
+                            <div className="pricing-header">
+                                <h3 className="plan-name">{skool.planName}</h3>
+
+                                <div className="price-frame skool-frame">
+                                    {skool.oldPrice && (
+                                        <div className="old-price-wrapper">
+                                            <span className="old-price">{skool.oldPrice}</span>
+                                            <div className="strikethrough-line skool-strike"></div>
+                                        </div>
+                                    )}
+
+                                    <div className="current-price-container">
+                                        <span className="current-price skool-price">{skool.currentPrice}</span>
+                                        {skool.period && <span className="period">{skool.period}</span>}
+                                    </div>
                                 </div>
+
+                                <p className="price-subtitle">{skool.subtitle}</p>
                             </div>
 
-                            <p className="price-subtitle">Aylık Abonelik. İstediğin zaman iptal et.</p>
-                        </div>
+                            <div className="pricing-features">
+                                {skool.features.map((f, i) => (
+                                    <div key={i} className="feature-item">
+                                        <Check size={20} className="feature-icon skool-icon" />
+                                        <span>{f}</span>
+                                    </div>
+                                ))}
+                            </div>
 
-                        <div className="pricing-features">
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon skool-icon" />
-                                <span>Tüm Eğitim Modülleri (Mevcut + Gelecek)</span>
-                            </div>
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon skool-icon" />
-                                <span>Skool Topluluk Erişimi</span>
-                            </div>
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon skool-icon" />
-                                <span>Sürekli Güncel İçerik</span>
-                            </div>
-                            <div className="feature-item">
-                                <Check size={20} className="feature-icon skool-icon" />
-                                <span>Aylık Canlı Yayınlar</span>
+                            <div className="pricing-cta">
+                                <a
+                                    href={skool.ctaUrl}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-block btn-skool"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    {skool.ctaText} <ArrowRight size={20} />
+                                </a>
                             </div>
                         </div>
-
-                        <div className="pricing-cta">
-                            <a
-                                href="#"
-                                className="btn btn-block btn-skool"
-                            >
-                                Skool ile Abone Ol <ArrowRight size={20} />
-                            </a>
-                        </div>
-                    </div>
+                    )}
                 </div>
+
+                {visiblePlans.length === 0 && (
+                    <p className="empty-pricing">Şu anda aktif bir paket bulunmuyor. Yakında!</p>
+                )}
             </div>
 
             <style>{`
@@ -135,7 +138,13 @@ export const Pricing = () => {
           gap: 2rem;
           flex-wrap: wrap;
           align-items: stretch;
-          perspective: 1000px; /* For potential 3D effects */
+          perspective: 1000px;
+        }
+
+        .empty-pricing {
+          text-align: center;
+          color: var(--color-text-muted);
+          padding: 3rem 0;
         }
 
         .pricing-card {
@@ -151,18 +160,7 @@ export const Pricing = () => {
           cursor: pointer;
           transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
-        
-        /* Main Card Specifics */
-        .main-card {
-             /* Default border before active state handles it */
-        }
 
-        /* Skool Card Specifics */
-        .skool-card {
-             /* Default border before active state handles it */
-        }
-        
-        /* Interactive States */
         .pricing-card.active {
             transform: scale(1.05);
             z-index: 10;
@@ -187,7 +185,7 @@ export const Pricing = () => {
             border-color: var(--color-border-muted, #333);
             box-shadow: none;
         }
-        
+
         .pricing-card:hover:not(.active) {
             opacity: 0.8;
             transform: scale(0.97);
@@ -206,8 +204,9 @@ export const Pricing = () => {
           font-size: 0.9rem;
           box-shadow: 0 5px 15px rgba(0, 255, 157, 0.4);
           transition: transform 0.3s;
+          white-space: nowrap;
         }
-        
+
         .pricing-card.inactive .pricing-badge {
              background: #555;
              box-shadow: none;
@@ -231,7 +230,7 @@ export const Pricing = () => {
             margin-bottom: 0.5rem;
             transition: color 0.3s;
         }
-        
+
         .inactive .plan-name {
             color: var(--color-text-muted);
         }
@@ -251,19 +250,19 @@ export const Pricing = () => {
             width: 100%;
             transition: all 0.3s;
         }
-        
+
         .skool-frame {
             background: linear-gradient(180deg, rgba(255, 51, 51, 0.1) 0%, rgba(0, 0, 0, 0) 100%);
             border-color: rgba(255, 51, 51, 0.3);
             box-shadow: 0 0 30px rgba(255, 51, 51, 0.05);
         }
-        
+
         .inactive .price-frame {
              background: transparent;
              border-color: #333;
              box-shadow: none;
         }
-        
+
         .discount-tag {
             position: absolute;
             top: -12px;
@@ -275,7 +274,7 @@ export const Pricing = () => {
             border-radius: 4px;
             box-shadow: 0 2px 10px rgba(255, 77, 77, 0.4);
         }
-        
+
         .inactive .discount-tag {
             background: #555;
             box-shadow: none;
@@ -293,7 +292,7 @@ export const Pricing = () => {
           font-weight: 500;
           opacity: 0.7;
         }
-        
+
         .strikethrough-line {
             position: absolute;
             top: 50%;
@@ -304,12 +303,12 @@ export const Pricing = () => {
             transform: rotate(-5deg);
             box-shadow: 0 0 5px rgba(255, 77, 77, 0.5);
         }
-        
+
         .skool-strike {
              background-color: #ffffff;
              opacity: 0.5;
         }
-        
+
         .inactive .strikethrough-line {
             background-color: #777;
             box-shadow: none;
@@ -333,21 +332,21 @@ export const Pricing = () => {
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
+
         .skool-price {
             background: linear-gradient(to bottom, #ffffff, #ff3333);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 30px rgba(255, 51, 51, 0.3);
         }
-        
+
         .inactive .current-price {
              background: #888;
              -webkit-background-clip: text;
              -webkit-text-fill-color: transparent;
              text-shadow: none;
         }
-        
+
         .period {
             color: var(--color-text-muted);
             font-size: 1.2rem;
@@ -378,11 +377,11 @@ export const Pricing = () => {
           color: var(--color-primary);
           flex-shrink: 0;
         }
-        
+
         .skool-icon {
             color: #ff3333;
         }
-        
+
         .inactive .feature-icon {
             color: #555;
         }
@@ -395,8 +394,7 @@ export const Pricing = () => {
           justify-content: center;
           gap: 0.5rem;
         }
-        
-        
+
         .btn-skool {
             background: linear-gradient(135deg, #ff4d4d 0%, #cc0000 100%);
             color: white;
@@ -407,18 +405,18 @@ export const Pricing = () => {
             box-shadow: 0 0 20px rgba(255, 77, 77, 0.4);
             border: 1px solid rgba(255, 77, 77, 0.5);
         }
-        
+
         .btn-skool:hover {
             background: linear-gradient(135deg, #ff4d4d 20%, #cc0000 100%);
             box-shadow: 0 0 35px rgba(255, 77, 77, 0.6);
             transform: translateY(-2px);
             border-color: #ff4d4d;
         }
-        
+
         .inactive .btn {
             background-color: #333;
             color: #777;
-            pointer-events: none; /* Prevent clicking button on inactive card? Maybe allow but just dim it */
+            pointer-events: none;
             box-shadow: none;
         }
 
@@ -431,19 +429,19 @@ export const Pricing = () => {
           justify-content: center;
           gap: 0.5rem;
         }
-        
+
         @media (max-width: 768px) {
             .pricing-wrapper {
                 flex-direction: column;
                 align-items: center;
                 gap: 1.5rem;
             }
-            
+
             .pricing-card {
                 max-width: 100%;
-                padding: 1.5rem 1rem; /* Reduced horizontal padding */
+                padding: 1.5rem 1rem;
             }
-            
+
             .pricing-header {
                 margin-bottom: 1rem;
                 padding-bottom: 1rem;
@@ -454,34 +452,33 @@ export const Pricing = () => {
                 padding: 0.4rem 1rem;
                 width: max-content;
             }
-            
+
             .plan-name {
                 font-size: 1.25rem;
             }
-            
+
             .price-frame {
                  padding: 1.5rem 1rem;
             }
-            
+
             .current-price {
-                font-size: 2.2rem; /* Reduced further */
+                font-size: 2.2rem;
             }
-            
+
             .old-price {
                 font-size: 1.2rem;
             }
-            
+
             .feature-item {
                 font-size: 1rem;
             }
-            
-            /* In mobile, disable scale difference to avoid layout shift issues and improve readability */
+
             .pricing-card.active {
                 transform: none;
                 border-color: var(--color-primary);
                 box-shadow: 0 0 15px rgba(0, 255, 157, 0.1);
             }
-            
+
             .skool-card.active {
                 border-color: #ff3333;
                 box-shadow: 0 0 15px rgba(255, 51, 51, 0.15);
@@ -489,7 +486,7 @@ export const Pricing = () => {
 
             .pricing-card.inactive {
                 transform: none;
-                opacity: 1; 
+                opacity: 1;
                 filter: none;
                 border-color: var(--color-border);
             }

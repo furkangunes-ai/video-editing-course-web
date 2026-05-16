@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
+import { useSiteConfig } from '../hooks/useSiteConfig';
 
 export const Navbar = () => {
+    const config = useSiteConfig();
     const [isScrolled, setIsScrolled] = useState(false);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const whatsappUrl = `https://wa.me/${config.contact.whatsapp}`;
 
     useEffect(() => {
         const handleScroll = () => {
             setIsScrolled(window.scrollY > 50);
         };
-        window.addEventListener('scroll', handleScroll);
+        window.addEventListener('scroll', handleScroll, { passive: true });
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
@@ -25,16 +28,17 @@ export const Navbar = () => {
         <>
             <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
                 <div className="container navbar-container">
-                    <div className="logo">
-                        VideoMaster
-                    </div>
+                    <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="logo">
+                        {config.brand.name}
+                        {config.brand.tagline && <span className="logo-tag">{config.brand.tagline}</span>}
+                    </button>
 
                     <div className="desktop-menu">
                         <button onClick={() => scrollToSection('products')} className="nav-link">Ürünler</button>
                         <button onClick={() => scrollToSection('instructor')} className="nav-link">Ben Kimim</button>
                         <button onClick={() => scrollToSection('contact')} className="nav-link">İletişim</button>
                         <a
-                            href="https://wa.me/905011411940"
+                            href={whatsappUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="btn btn-primary btn-sm"
@@ -46,18 +50,27 @@ export const Navbar = () => {
                     <button
                         className="mobile-menu-btn"
                         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                        aria-label="Menü"
                     >
                         {isMobileMenuOpen ? <X /> : <Menu />}
                     </button>
                 </div>
             </nav>
 
-            {/* Mobile Menu Overlay */}
             <div className={`mobile-menu ${isMobileMenuOpen ? 'open' : ''}`}>
                 <div className="mobile-menu-content">
                     <button onClick={() => scrollToSection('products')} className="mobile-nav-link">Ürünler</button>
                     <button onClick={() => scrollToSection('instructor')} className="mobile-nav-link">Ben Kimim</button>
                     <button onClick={() => scrollToSection('contact')} className="mobile-nav-link">İletişim</button>
+                    <a
+                        href={whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-primary"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                    >
+                        Kayıt Ol
+                    </a>
                 </div>
             </div>
 
@@ -92,6 +105,19 @@ export const Navbar = () => {
           background: linear-gradient(to right, var(--color-primary), var(--color-accent));
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
+          display: inline-flex;
+          align-items: baseline;
+          gap: 0.4rem;
+        }
+
+        .logo-tag {
+          font-size: 0.75rem;
+          font-weight: 500;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: var(--color-text-muted);
+          background: none;
+          -webkit-text-fill-color: var(--color-text-muted);
         }
 
         .desktop-menu {
@@ -143,6 +169,7 @@ export const Navbar = () => {
           flex-direction: column;
           align-items: center;
           gap: 2rem;
+          padding: 0 2rem;
         }
 
         .mobile-nav-link {
