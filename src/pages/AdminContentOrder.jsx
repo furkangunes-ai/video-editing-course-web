@@ -49,7 +49,7 @@ export function AdminContentOrder() {
           fetchContents(data[0].id);
         }
       }
-    } catch (err) {
+    } catch {
       setError('Kurslar yüklenemedi');
     } finally {
       setLoading(false);
@@ -67,7 +67,7 @@ export function AdminContentOrder() {
         setContents(data);
         setHasChanges(false);
       }
-    } catch (err) {
+    } catch {
       setError('İçerikler yüklenemedi');
     } finally {
       setLoading(false);
@@ -145,7 +145,7 @@ export function AdminContentOrder() {
         const err = await response.json();
         setError(err.detail || 'Kaydetme başarısız');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata oluştu');
     } finally {
       setSaving(false);

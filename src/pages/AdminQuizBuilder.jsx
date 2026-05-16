@@ -64,7 +64,7 @@ export function AdminQuizBuilder() {
         const data = await response.json();
         setQuizzes(data);
       }
-    } catch (err) {
+    } catch {
       setError('Quizler yüklenemedi');
     } finally {
       setLoading(false);
@@ -86,7 +86,7 @@ export function AdminQuizBuilder() {
           course_id: data.course_id
         });
       }
-    } catch (err) {
+    } catch {
       setError('Quiz detayları yüklenemedi');
     }
   };
@@ -110,7 +110,7 @@ export function AdminQuizBuilder() {
         const err = await response.json();
         setError(err.detail || 'Quiz oluşturulamadı');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata oluştu');
     } finally {
       setSaving(false);
@@ -131,7 +131,7 @@ export function AdminQuizBuilder() {
         fetchQuizDetails(selectedQuiz.id);
         fetchQuizzes();
       }
-    } catch (err) {
+    } catch {
       setError('Güncelleme başarısız');
     } finally {
       setSaving(false);
@@ -151,7 +151,7 @@ export function AdminQuizBuilder() {
         fetchQuizDetails(selectedQuiz.id);
         fetchQuizzes();
       }
-    } catch (err) {
+    } catch {
       setError('İşlem başarısız');
     }
   };
@@ -169,7 +169,7 @@ export function AdminQuizBuilder() {
         fetchQuizzes();
         navigate('/admin/quizzes');
       }
-    } catch (err) {
+    } catch {
       setError('Silme başarısız');
     }
   };
@@ -197,7 +197,7 @@ export function AdminQuizBuilder() {
         });
         fetchQuizDetails(selectedQuiz.id);
       }
-    } catch (err) {
+    } catch {
       setError('Soru eklenemedi');
     } finally {
       setSaving(false);
@@ -219,7 +219,7 @@ export function AdminQuizBuilder() {
         setShowQuestionForm(false);
         fetchQuizDetails(selectedQuiz.id);
       }
-    } catch (err) {
+    } catch {
       setError('Güncelleme başarısız');
     } finally {
       setSaving(false);
@@ -237,7 +237,7 @@ export function AdminQuizBuilder() {
         setSuccess('Soru silindi');
         fetchQuizDetails(selectedQuiz.id);
       }
-    } catch (err) {
+    } catch {
       setError('Silme başarısız');
     }
   };

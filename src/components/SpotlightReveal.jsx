@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 
 export const SpotlightReveal = ({ text, hiddenText, className = "" }) => {
     const containerRef = useRef(null);

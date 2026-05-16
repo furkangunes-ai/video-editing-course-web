@@ -36,7 +36,7 @@ export function QuizPlayer({ quizId, onComplete }) {
       } else {
         setError('Quiz yüklenemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata oluştu');
     } finally {
       setLoading(false);
@@ -69,7 +69,7 @@ export function QuizPlayer({ quizId, onComplete }) {
       } else {
         setError('Quiz gönderilemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata oluştu');
     } finally {
       setSubmitting(false);

@@ -53,7 +53,7 @@ export function AdminReviews() {
           averageRating: 0
         });
       }
-    } catch (err) {
+    } catch {
       setError('Yorumlar yuklenemedi');
     } finally {
       setLoading(false);
@@ -73,7 +73,7 @@ export function AdminReviews() {
         fetchReviews();
         setTimeout(() => setSuccess(''), 3000);
       }
-    } catch (err) {
+    } catch {
       setError('Islem basarisiz');
     }
   };
@@ -91,7 +91,7 @@ export function AdminReviews() {
         fetchReviews();
         setTimeout(() => setSuccess(''), 3000);
       }
-    } catch (err) {
+    } catch {
       setError('Islem basarisiz');
     }
   };
@@ -110,7 +110,7 @@ export function AdminReviews() {
         fetchReviews();
         setTimeout(() => setSuccess(''), 3000);
       }
-    } catch (err) {
+    } catch {
       setError('Silme basarisiz');
     }
   };

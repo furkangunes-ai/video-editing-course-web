@@ -28,7 +28,7 @@ export function Certificate() {
       } else {
         setError(data.message || 'Sertifika bulunamadı');
       }
-    } catch (err) {
+    } catch {
       setError('Sertifika doğrulanamadı');
     } finally {
       setLoading(false);
@@ -48,7 +48,7 @@ export function Certificate() {
           text: `${certificate.recipient_name}, ${certificate.course_title} eğitimini tamamladı!`,
           url: url
         });
-      } catch (err) {
+      } catch {
         // Kullanıcı paylaşımı iptal etti
       }
     } else {

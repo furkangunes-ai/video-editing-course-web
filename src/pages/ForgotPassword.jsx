@@ -29,7 +29,7 @@ export function ForgotPassword() {
       } else {
         setError(data.detail || 'Bir hata oluştu');
       }
-    } catch (err) {
+    } catch {
       setError('Sunucuya bağlanılamadı');
     } finally {
       setLoading(false);
