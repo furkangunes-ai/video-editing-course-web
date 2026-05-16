@@ -333,7 +333,7 @@ export function Dashboard() {
                           <p style={styles.courseProgress}>
                             İlerleme: {progress}%
                           </p>
-                          <div style={styles.progressBar}>
+                          <div style={styles.progressBarTrack}>
                             <div style={{
                               ...styles.progressFill,
                               width: `${progress}%`,
@@ -814,7 +814,7 @@ const styles = {
     fontWeight: '600',
     transition: 'transform 0.2s, box-shadow 0.2s',
   },
-  progressBar: {
+  progressBarTrack: {
     width: '100%',
     height: '6px',
     background: 'rgba(255, 255, 255, 0.1)',

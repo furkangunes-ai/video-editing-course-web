@@ -81,7 +81,7 @@ export function AdminReferrals() {
         const data = await settingsRes.json();
         setSettings(data);
       }
-    } catch (err) {
+    } catch {
       setError('Veriler yuklenemedi');
     } finally {
       setLoading(false);
@@ -104,7 +104,7 @@ export function AdminReferrals() {
         const err = await response.json();
         setError(err.detail || 'Ayarlar kaydedilemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata olustu');
     } finally {
       setSettingsLoading(false);
@@ -135,7 +135,7 @@ export function AdminReferrals() {
         const err = await response.json();
         setError(err.detail || 'Kod olusturulamadi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata olustu');
     }
   };
@@ -153,7 +153,7 @@ export function AdminReferrals() {
         fetchData();
         setTimeout(() => setSuccess(''), 3000);
       }
-    } catch (err) {
+    } catch {
       setError('Islem basarisiz');
     }
   };

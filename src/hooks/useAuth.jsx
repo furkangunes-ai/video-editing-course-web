@@ -26,7 +26,7 @@ export function AuthProvider({ children }) {
             is_verified: userData.is_verified,
           });
           trackCourseAccess(userData.has_access);
-        } catch (error) {
+        } catch {
           setUser(null);
         }
       }
@@ -67,7 +67,7 @@ export function AuthProvider({ children }) {
       try {
         const userData = await getMe();
         setUser(userData);
-      } catch (error) {
+      } catch {
         setUser(null);
       }
     }
@@ -90,6 +90,7 @@ export function AuthProvider({ children }) {
   );
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
