@@ -11,7 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-pro
 export function CoursePlayer() {
   const { courseId, lessonId, quizId } = useParams();
   const navigate = useNavigate();
-  const { user, loading: authLoading, isAuthenticated } = useAuth();
+  const { user: _user, loading: authLoading, isAuthenticated } = useAuth();
 
   const [course, setCourse] = useState(null);
   const [contents, setContents] = useState([]); // Unified content list (lessons + quizzes)
@@ -173,7 +173,7 @@ export function CoursePlayer() {
       } else {
         setError('Quiz yuklenemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Quiz yuklenemedi');
     }
   };
@@ -213,7 +213,7 @@ export function CoursePlayer() {
     return quizAttempts.some((a) => a.quiz_id === quizId && a.passed);
   };
 
-  const getContentIcon = (contentType) => {
+  const _getContentIcon = (contentType) => {
     return contentType === 'lesson' ? '▶' : '?';
   };
 

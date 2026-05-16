@@ -13,7 +13,7 @@ export const Checkout = () => {
     const [orderData, setOrderData] = useState(null);
     const [step, setStep] = useState(1); // 1: Form, 2: Doğrulama, 3: Ödeme
     const [verificationCode, setVerificationCode] = useState('');
-    const [isEmailVerified, setIsEmailVerified] = useState(false);
+    const [_isEmailVerified, setIsEmailVerified] = useState(false);
     const [countdown, setCountdown] = useState(0);
     const [formData, setFormData] = useState({
         name: '',
@@ -28,7 +28,7 @@ export const Checkout = () => {
     const [discountError, setDiscountError] = useState('');
 
     const formRef = useRef(null);
-    const { user, isAuthenticated } = useAuth();
+    const { user, isAuthenticated: _isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
 
@@ -135,7 +135,7 @@ export const Checkout = () => {
     };
 
     // Indirim kodu doğrula ve uygula
-    const handleApplyDiscount = async (code = discountCode, codeType = 'auto') => {
+    const handleApplyDiscount = async (code = discountCode) => {
         if (!code.trim()) {
             setDiscountError('Lütfen bir kod girin');
             return;
@@ -183,7 +183,7 @@ export const Checkout = () => {
             // Her iki tip de geçersiz
             setDiscountError('Geçersiz veya süresi dolmuş kod');
             setDiscountApplied(null);
-        } catch (err) {
+        } catch {
             setDiscountError('Kod doğrulanırken bir hata oluştu');
             setDiscountApplied(null);
         } finally {

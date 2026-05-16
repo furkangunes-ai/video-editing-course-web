@@ -48,7 +48,7 @@ export function Register() {
       } else {
         setError(data.detail || 'Kayıt başarısız');
       }
-    } catch (err) {
+    } catch {
       setError('Sunucuya bağlanılamadı');
     } finally {
       setLoading(false);
@@ -73,7 +73,7 @@ export function Register() {
       } else {
         setError(data.detail || 'Doğrulama başarısız');
       }
-    } catch (err) {
+    } catch {
       setError('Sunucuya bağlanılamadı');
     } finally {
       setLoading(false);
@@ -98,7 +98,7 @@ export function Register() {
       } else {
         setError(data.detail || 'Kod gönderilemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Sunucuya bağlanılamadı');
     } finally {
       setLoading(false);

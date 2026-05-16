@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Edit3, Eye, Save, X, RefreshCw, ChevronLeft, Code, FileText } from 'lucide-react';
 
@@ -46,7 +46,7 @@ export function AdminEmailTemplates() {
             } else {
                 setError('Şablonlar yüklenemedi');
             }
-        } catch (err) {
+        } catch {
             setError('Bağlantı hatası');
         } finally {
             setLoading(false);
@@ -62,7 +62,7 @@ export function AdminEmailTemplates() {
             const data = await response.json();
             setSuccess(`Varsayılan şablonlar oluşturuldu: ${data.created?.join(', ') || 'Hiçbiri'}`);
             fetchTemplates(adminKey);
-        } catch (err) {
+        } catch {
             setError('Şablonlar oluşturulamadı');
         } finally {
             setLoading(false);
@@ -108,7 +108,7 @@ export function AdminEmailTemplates() {
             } else {
                 setError('Kaydetme başarısız');
             }
-        } catch (err) {
+        } catch {
             setError('Kaydetme hatası');
         } finally {
             setSaving(false);

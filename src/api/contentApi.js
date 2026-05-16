@@ -79,7 +79,7 @@ export async function generateContentStream(topic, onStepUpdate, onComplete, onE
             if (data.step === 5 && data.status === 'completed') {
               finalResult = data.result;
             }
-          } catch (e) {
+          } catch {
             // JSON parse hatası - devam et
           }
         }

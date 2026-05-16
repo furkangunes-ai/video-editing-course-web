@@ -32,7 +32,7 @@ export function AdminAnalytics() {
       }
       setDashboard(data);
       return true;
-    } catch (err) {
+    } catch {
       setError('Veriler yüklenemedi');
       return false;
     }
@@ -114,12 +114,14 @@ export function AdminAnalytics() {
   // Fetch on tab change
   useEffect(() => {
     if (!isAuthenticated) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (activeTab === 'users') fetchUsers(adminKey, 1, '', '');
     if (activeTab === 'orders') fetchOrders(adminKey, 1, '');
   }, [activeTab, isAuthenticated, adminKey, fetchUsers, fetchOrders]);
 
   // Fetch on date range change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (isAuthenticated) fetchDashboard(adminKey, dateRange);
   }, [dateRange, isAuthenticated, adminKey, fetchDashboard]);
 
@@ -137,6 +139,7 @@ export function AdminAnalytics() {
   // Order filter
   useEffect(() => {
     if (isAuthenticated && activeTab === 'orders') {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchOrders(adminKey, 1, orderStatus);
       setOrderPage(1);
     }

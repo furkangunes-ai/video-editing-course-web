@@ -52,7 +52,7 @@ export function AdminAbandonedCarts() {
         const data = await statsRes.json();
         setStats(data);
       }
-    } catch (err) {
+    } catch {
       setError('Veriler yuklenemedi');
     } finally {
       setLoading(false);
@@ -76,7 +76,7 @@ export function AdminAbandonedCarts() {
         const err = await response.json();
         setError(err.detail || 'Email gonderilemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata olustu');
     } finally {
       setProcessing(false);
@@ -99,7 +99,7 @@ export function AdminAbandonedCarts() {
         const err = await response.json();
         setError(err.detail || 'Email gonderilemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata olustu');
     }
   };

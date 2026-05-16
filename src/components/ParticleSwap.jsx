@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 
-export const ParticleSwap = ({ text, hiddenText, className = "" }) => {
-    const [isHovering, setIsHovering] = useState(false);
-
-    // Split text into characters for the particle effect
-    const chars = text.split('').map((char, index) => ({
+const buildChars = (text) =>
+    text.split('').map((char) => ({
         char,
-        // Generate random dispersion values for each character
         style: {
             '--x': `${(Math.random() - 0.5) * 100}px`,
             '--y': `${(Math.random() - 0.5) * 100}px`,
             '--r': `${(Math.random() - 0.5) * 360}deg`,
-            '--d': `${Math.random() * 0.5}s`, // Random delay
-        }
+            '--d': `${Math.random() * 0.5}s`,
+        },
     }));
+
+export const ParticleSwap = ({ text, hiddenText, className = "" }) => {
+    const [isHovering, setIsHovering] = useState(false);
+    const [chars] = useState(() => buildChars(text));
 
     return (
         <span

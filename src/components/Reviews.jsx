@@ -110,7 +110,7 @@ export function Reviews({ courseId }) {
         const data = await response.json();
         setError(data.detail || 'Yorum eklenemedi');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata oluştu');
     } finally {
       setSubmitting(false);
@@ -139,7 +139,7 @@ export function Reviews({ courseId }) {
         const data = await response.json();
         setError(data.detail || 'Güncelleme başarısız');
       }
-    } catch (err) {
+    } catch {
       setError('Bir hata oluştu');
     } finally {
       setSubmitting(false);
@@ -161,7 +161,7 @@ export function Reviews({ courseId }) {
         setFormData({ rating: 5, title: '', content: '' });
         fetchReviews();
       }
-    } catch (err) {
+    } catch {
       setError('Silme başarısız');
     }
   };
