@@ -93,15 +93,20 @@ const FAQItem = ({ faq }) => {
         }
 
         .faq-answer {
-          max-height: 0;
-          overflow: hidden;
-          transition: max-height 0.3s ease, padding 0.3s ease;
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.3s ease, padding 0.3s ease;
           padding: 0 1.5rem;
           color: var(--color-text-muted);
         }
 
+        .faq-answer > p {
+          overflow: hidden;
+          margin: 0;
+        }
+
         .faq-answer.open {
-          max-height: 200px;
+          grid-template-rows: 1fr;
           padding-bottom: 1.5rem;
         }
       `}</style>

@@ -1,13 +1,23 @@
-import React from 'react';
-import { Instagram, Youtube, Twitter } from 'lucide-react';
+import React, { useState } from 'react';
+import { Instagram, Mail, MessageCircle } from 'lucide-react';
+import { LegalModal } from './LegalModal';
 
 export const Footer = () => {
+    const [openDoc, setOpenDoc] = useState(null);
+
+    const scrollTo = (id) => {
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+    };
+
     return (
         <footer className="footer">
             <div className="container">
                 <div className="footer-content">
                     <div className="footer-brand">
-                        <h3 className="footer-logo">VideoMaster</h3>
+                        <h3 className="footer-logo">
+                            Furkan Güneş<span className="footer-tag"> Eğitim</span>
+                        </h3>
                         <p className="footer-desc">
                             Video kurgu sanatını öğrenin, gelirinizi artırın ve özgürlüğünüze kavuşun.
                         </p>
@@ -15,26 +25,62 @@ export const Footer = () => {
 
                     <div className="footer-links">
                         <h4>Hızlı Bağlantılar</h4>
-                        <a href="#">Eğitim İçeriği</a>
-                        <a href="#">Öğrenci Yorumları</a>
-                        <a href="#">Sıkça Sorulanlar</a>
-                        <a href="#">İletişim</a>
+                        <button type="button" onClick={() => scrollTo('products')}>Eğitim İçeriği</button>
+                        <button type="button" onClick={() => scrollTo('faq')}>Sıkça Sorulanlar</button>
+                        <a
+                            href="https://wa.me/905011411940"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            WhatsApp
+                        </a>
+                    </div>
+
+                    <div className="footer-links">
+                        <h4>Yasal</h4>
+                        <button type="button" onClick={() => setOpenDoc('kvkk')}>KVKK Aydınlatma Metni</button>
+                        <button type="button" onClick={() => setOpenDoc('mesafeli')}>Mesafeli Satış Sözleşmesi</button>
+                        <button type="button" onClick={() => setOpenDoc('iade')}>İade ve İptal Koşulları</button>
                     </div>
 
                     <div className="footer-social">
                         <h4>Bizi Takip Edin</h4>
                         <div className="social-icons">
-                            <a href="#" className="social-icon"><Instagram size={24} /></a>
-                            <a href="#" className="social-icon"><Youtube size={24} /></a>
-                            <a href="#" className="social-icon"><Twitter size={24} /></a>
+                            <a
+                                href="https://www.instagram.com/furkangunes.3/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="social-icon"
+                                aria-label="Instagram"
+                            >
+                                <Instagram size={22} />
+                            </a>
+                            <a
+                                href="mailto:admin@furkangunes.co"
+                                className="social-icon"
+                                aria-label="E-posta"
+                            >
+                                <Mail size={22} />
+                            </a>
+                            <a
+                                href="https://wa.me/905011411940"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="social-icon"
+                                aria-label="WhatsApp"
+                            >
+                                <MessageCircle size={22} />
+                            </a>
                         </div>
                     </div>
                 </div>
 
                 <div className="footer-bottom">
-                    <p>&copy; 2024 VideoMaster. Tüm hakları saklıdır.</p>
+                    <p>&copy; 2026 Furkan Güneş. Tüm hakları saklıdır.</p>
                 </div>
             </div>
+
+            <LegalModal doc={openDoc} onClose={() => setOpenDoc(null)} />
 
             <style>{`
         .footer {
@@ -45,9 +91,9 @@ export const Footer = () => {
 
         .footer-content {
           display: grid;
-          grid-template-columns: 2fr 1fr 1fr;
-          gap: 4rem;
-          margin-bottom: 4rem;
+          grid-template-columns: 2fr 1fr 1fr 1fr;
+          gap: 3rem;
+          margin-bottom: 3rem;
         }
 
         .footer-logo {
@@ -58,6 +104,16 @@ export const Footer = () => {
           -webkit-text-fill-color: transparent;
         }
 
+        .footer-tag {
+          font-size: 0.75rem;
+          font-weight: 500;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          color: var(--color-text-muted);
+          -webkit-text-fill-color: var(--color-text-muted);
+          background: none;
+        }
+
         .footer-desc {
           color: var(--color-text-muted);
           max-width: 300px;
@@ -66,26 +122,35 @@ export const Footer = () => {
         .footer-links, .footer-social {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
+          gap: 0.75rem;
         }
 
         .footer-links h4, .footer-social h4 {
-          font-size: 1.1rem;
+          font-size: 1rem;
           margin-bottom: 0.5rem;
         }
 
-        .footer-links a {
+        .footer-links a,
+        .footer-links button {
           color: var(--color-text-muted);
           transition: color 0.2s;
+          text-align: left;
+          padding: 0;
+          font-size: 0.95rem;
+          background: none;
+          border: none;
+          cursor: pointer;
+          font-family: inherit;
         }
 
-        .footer-links a:hover {
+        .footer-links a:hover,
+        .footer-links button:hover {
           color: var(--color-primary);
         }
 
         .social-icons {
           display: flex;
-          gap: 1rem;
+          gap: 0.75rem;
         }
 
         .social-icon {
@@ -114,7 +179,15 @@ export const Footer = () => {
           font-size: 0.9rem;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
+          .footer-content {
+            grid-template-columns: 1fr 1fr;
+            gap: 2.5rem;
+            text-align: left;
+          }
+        }
+
+        @media (max-width: 600px) {
           .footer-content {
             grid-template-columns: 1fr;
             gap: 2rem;
@@ -127,6 +200,11 @@ export const Footer = () => {
 
           .social-icons {
             justify-content: center;
+          }
+
+          .footer-links a,
+          .footer-links button {
+            text-align: center;
           }
         }
       `}</style>
