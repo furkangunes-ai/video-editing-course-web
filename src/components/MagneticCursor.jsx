@@ -1,121 +1,125 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useIsTouchDevice, useReducedMotion } from '../hooks/useMediaQuery';
+
+const TRAIL_SIZE = 30;
+const TRAIL_LIFETIME = 500;
 
 export const MagneticCursor = () => {
-  const [trail, setTrail] = useState([]);
-
-  // Refs for animation loop values to avoid re-renders
-  const mousePos = useRef({ x: 0, y: 0 });
-  const emitterPos = useRef({ x: 0, y: 0 });
-  const timerRef = useRef();
+  const isTouch = useIsTouchDevice();
+  const reducedMotion = useReducedMotion();
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    // Initialize positions
-    const onFirstMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-      emitterPos.current = { x: e.clientX, y: e.clientY };
-      window.removeEventListener('mousemove', onFirstMove);
+    if (isTouch || reducedMotion) return;
+
+    const container = containerRef.current;
+    if (!container) return;
+
+    const dots = [];
+    for (let i = 0; i < TRAIL_SIZE; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'cursor-trail-dot';
+      dot.style.opacity = '0';
+      container.appendChild(dot);
+      dots.push({ el: dot, x: 0, y: 0, born: 0, active: false });
+    }
+
+    const mouse = { x: 0, y: 0 };
+    const emitter = { x: 0, y: 0 };
+    let initialized = false;
+    let cursor = 0;
+    let lastEmit = 0;
+    let rafId = 0;
+
+    const onMove = (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+      if (!initialized) {
+        emitter.x = mouse.x;
+        emitter.y = mouse.y;
+        initialized = true;
+      }
     };
-    window.addEventListener('mousemove', onFirstMove);
 
-    const onMouseMove = (e) => {
-      mousePos.current = { x: e.clientX, y: e.clientY };
-    };
-
-    window.addEventListener('mousemove', onMouseMove);
-
-    const animate = () => {
-      // 1. Smoothly move the "emitter" towards the actual mouse position
-      // Lower easing = more delay/lag (slower formation)
+    const tick = () => {
+      const now = performance.now();
       const ease = 0.15;
+      const dx = mouse.x - emitter.x;
+      const dy = mouse.y - emitter.y;
 
-      const dx = mousePos.current.x - emitterPos.current.x;
-      const dy = mousePos.current.y - emitterPos.current.y;
+      if (initialized && (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5)) {
+        emitter.x += dx * ease;
+        emitter.y += dy * ease;
 
-      // Only emit if moving significantly
-      if (Math.abs(dx) > 0.5 || Math.abs(dy) > 0.5) {
-        emitterPos.current.x += dx * ease;
-        emitterPos.current.y += dy * ease;
-
-        // 2. Emit a particle at the current LAGGING emitter position
-        const newPoint = {
-          x: emitterPos.current.x,
-          y: emitterPos.current.y,
-          id: Date.now() + Math.random(),
-          createdAt: Date.now()
-        };
-
-        setTrail(prev => {
-          // Keep array size manageable
-          const newTrail = [...prev, newPoint];
-          if (newTrail.length > 60) newTrail.shift();
-          return newTrail;
-        });
+        if (now - lastEmit > 16) {
+          const slot = dots[cursor];
+          slot.x = emitter.x;
+          slot.y = emitter.y;
+          slot.born = now;
+          slot.active = true;
+          slot.el.style.transform = `translate(${slot.x - 4}px, ${slot.y - 4}px) scale(1)`;
+          slot.el.style.opacity = '0.7';
+          cursor = (cursor + 1) % TRAIL_SIZE;
+          lastEmit = now;
+        }
       }
 
-      // 3. Cleanup old points
-      const now = Date.now();
-      setTrail(prev => prev.filter(point => now - point.createdAt < 500));
+      for (let i = 0; i < dots.length; i++) {
+        const d = dots[i];
+        if (!d.active) continue;
+        const age = now - d.born;
+        if (age >= TRAIL_LIFETIME) {
+          d.active = false;
+          d.el.style.opacity = '0';
+          continue;
+        }
+        const t = age / TRAIL_LIFETIME;
+        const opacity = 0.7 * (1 - t);
+        const scale = 1 - t * 0.8;
+        d.el.style.opacity = opacity.toFixed(3);
+        d.el.style.transform = `translate(${d.x - 4}px, ${d.y - 4}px) scale(${scale.toFixed(3)})`;
+      }
 
-      timerRef.current = requestAnimationFrame(animate);
+      rafId = requestAnimationFrame(tick);
     };
 
-    timerRef.current = requestAnimationFrame(animate);
+    window.addEventListener('mousemove', onMove, { passive: true });
+    rafId = requestAnimationFrame(tick);
 
     return () => {
-      window.removeEventListener('mousemove', onMouseMove);
-      window.removeEventListener('mousemove', onFirstMove);
-      cancelAnimationFrame(timerRef.current);
+      window.removeEventListener('mousemove', onMove);
+      cancelAnimationFrame(rafId);
+      dots.forEach((d) => d.el.remove());
     };
-  }, []);
+  }, [isTouch, reducedMotion]);
+
+  if (isTouch || reducedMotion) return null;
 
   return (
     <>
-      {trail.map((point) => (
-        <div
-          key={point.id}
-          className="cursor-trail-dot"
-          style={{
-            left: point.x,
-            top: point.y,
-          }}
-        />
-      ))}
+      <div ref={containerRef} className="cursor-trail-layer" aria-hidden="true" />
       <style>{`
-        body, a, button, input, textarea {
-          cursor: auto;
-        }
-
-        .cursor-trail-dot {
+        .cursor-trail-layer {
           position: fixed;
-          width: 8px; /* Slightly larger for better visibility of lag */
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          z-index: 9999;
+        }
+        .cursor-trail-dot {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 8px;
           height: 8px;
-          background: #00F3FF; 
+          background: #00F3FF;
           border-radius: 50%;
           pointer-events: none;
-          transform: translate(-50%, -50%);
-          z-index: 9999;
-          box-shadow: 
-            0 0 10px #00F3FF, 
-            0 0 20px #00F3FF;
-          animation: fadeOut 0.5s linear forwards;
+          box-shadow: 0 0 10px #00F3FF, 0 0 20px #00F3FF;
           mix-blend-mode: screen;
-        }
-
-        @keyframes fadeOut {
-          0% {
-            opacity: 0.7;
-            transform: translate(-50%, -50%) scale(1);
-          }
-          100% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.2);
-          }
-        }
-
-        @media (hover: none) {
-          .cursor-trail-dot {
-            display: none;
-          }
+          will-change: transform, opacity;
         }
       `}</style>
     </>

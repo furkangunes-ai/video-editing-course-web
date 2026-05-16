@@ -1,42 +1,48 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+import { useReducedMotion } from '../hooks/useMediaQuery';
 
 export const EditorOverlay = () => {
-    const [timecode, setTimecode] = useState("00:00:00:00");
+    const timecodeRef = useRef(null);
+    const reducedMotion = useReducedMotion();
 
     useEffect(() => {
-        const updateTimecode = () => {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const seconds = String(now.getSeconds()).padStart(2, '0');
-            const frames = String(Math.floor(now.getMilliseconds() / 40)).padStart(2, '0'); // Approx 25fps
-            setTimecode(`${hours}:${minutes}:${seconds}:${frames}`);
+        const el = timecodeRef.current;
+        if (!el) return;
+
+        let rafId = 0;
+        let lastUpdate = 0;
+
+        const update = (ts) => {
+            if (ts - lastUpdate > 40) {
+                const now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const seconds = String(now.getSeconds()).padStart(2, '0');
+                const frames = String(Math.floor(now.getMilliseconds() / 40)).padStart(2, '0');
+                el.textContent = `${hours}:${minutes}:${seconds}:${frames}`;
+                lastUpdate = ts;
+            }
+            rafId = requestAnimationFrame(update);
         };
 
-        const interval = setInterval(updateTimecode, 40); // Update every frame approx
-        return () => clearInterval(interval);
+        rafId = requestAnimationFrame(update);
+        return () => cancelAnimationFrame(rafId);
     }, []);
 
     return (
-        <div className="editor-overlay">
-            {/* Safe Margins (Corners) */}
+        <div className="editor-overlay" aria-hidden="true">
             <div className="safe-margin top-left"></div>
             <div className="safe-margin top-right"></div>
             <div className="safe-margin bottom-left"></div>
             <div className="safe-margin bottom-right"></div>
 
-            {/* REC Indicator */}
             <div className="rec-indicator">
-                <div className="rec-dot"></div>
+                <div className={`rec-dot ${reducedMotion ? 'static' : ''}`}></div>
                 <span>REC</span>
             </div>
 
-            {/* Timecode */}
-            <div className="timecode-display">
-                {timecode}
-            </div>
+            <div ref={timecodeRef} className="timecode-display">00:00:00:00</div>
 
-            {/* Center Crosshair */}
             <div className="center-crosshair"></div>
 
             <style>{`
@@ -47,7 +53,7 @@ export const EditorOverlay = () => {
           width: 100%;
           height: 100%;
           pointer-events: none;
-          z-index: 900; /* Below Navbar but above content */
+          z-index: 900;
           padding: 2rem;
         }
 
@@ -59,29 +65,10 @@ export const EditorOverlay = () => {
           border-style: solid;
         }
 
-        .top-left {
-          top: 2rem;
-          left: 2rem;
-          border-width: 2px 0 0 2px;
-        }
-
-        .top-right {
-          top: 2rem;
-          right: 2rem;
-          border-width: 2px 2px 0 0;
-        }
-
-        .bottom-left {
-          bottom: 2rem;
-          left: 2rem;
-          border-width: 0 0 2px 2px;
-        }
-
-        .bottom-right {
-          bottom: 2rem;
-          right: 2rem;
-          border-width: 0 2px 2px 0;
-        }
+        .top-left { top: 2rem; left: 2rem; border-width: 2px 0 0 2px; }
+        .top-right { top: 2rem; right: 2rem; border-width: 2px 2px 0 0; }
+        .bottom-left { bottom: 2rem; left: 2rem; border-width: 0 0 2px 2px; }
+        .bottom-right { bottom: 2rem; right: 2rem; border-width: 0 2px 2px 0; }
 
         .rec-indicator {
           position: absolute;
@@ -104,6 +91,8 @@ export const EditorOverlay = () => {
           border-radius: 50%;
           animation: blink 2s infinite;
         }
+
+        .rec-dot.static { animation: none; }
 
         @keyframes blink {
           0% { opacity: 1; }
@@ -138,46 +127,18 @@ export const EditorOverlay = () => {
           background-color: rgba(255, 255, 255, 0.1);
         }
 
-        .center-crosshair::before {
-          top: 9px;
-          left: 0;
-          width: 100%;
-          height: 2px;
-        }
-
-        .center-crosshair::after {
-          top: 0;
-          left: 9px;
-          width: 2px;
-          height: 100%;
-        }
+        .center-crosshair::before { top: 9px; left: 0; width: 100%; height: 2px; }
+        .center-crosshair::after { top: 0; left: 9px; width: 2px; height: 100%; }
 
         @media (max-width: 768px) {
-          .editor-overlay {
-            padding: 1rem;
-          }
-          
-          .safe-margin {
-            width: 20px;
-            height: 20px;
-          }
-
+          .editor-overlay { padding: 1rem; }
+          .safe-margin { width: 20px; height: 20px; }
           .top-left { top: 1rem; left: 1rem; }
           .top-right { top: 1rem; right: 1rem; }
           .bottom-left { bottom: 1rem; left: 1rem; }
           .bottom-right { bottom: 1rem; right: 1rem; }
-
-          .rec-indicator {
-            top: 1.5rem;
-            left: 2.5rem;
-            font-size: 1rem;
-          }
-
-          .timecode-display {
-            bottom: 1.5rem;
-            right: 2.5rem;
-            font-size: 1rem;
-          }
+          .rec-indicator { top: 1.5rem; left: 2.5rem; font-size: 1rem; }
+          .timecode-display { bottom: 1.5rem; right: 2.5rem; font-size: 1rem; }
         }
       `}</style>
         </div>
