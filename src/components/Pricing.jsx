@@ -1,13 +1,56 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Check, ShieldCheck, ArrowRight } from 'lucide-react';
+import { FlashSaleCountdown } from './FlashSaleCountdown';
+import { useJsonLd } from '../hooks/useDocumentMeta';
+
+const PRICING_OFFERS = [
+    {
+        id: 'ustalık-sinifi',
+        name: 'Video Editörlüğü Ustalık Sınıfı',
+        description: 'Sıfırdan profesyonele 90+ video içerik, ömür boyu erişim ve sertifika.',
+        price: 199,
+        priceCurrency: 'TRY',
+        url: 'https://furkangunes.co/satin-al?kurs=ustalık-sinifi',
+    },
+    {
+        id: 'canli-egitim',
+        name: 'Canlı Video Editörlük Eğitimi',
+        description: '4 seans interaktif canlı eğitim + Ustalık Sınıfı kursu hediye + birebir geri bildirim.',
+        price: 899,
+        priceCurrency: 'TRY',
+        url: 'https://furkangunes.co/satin-al?kurs=canli-egitim',
+    },
+];
+
+const PRICING_JSONLD = {
+    '@context': 'https://schema.org',
+    '@graph': PRICING_OFFERS.map((offer) => ({
+        '@type': 'Course',
+        '@id': `https://furkangunes.co/#${offer.id}`,
+        name: offer.name,
+        description: offer.description,
+        provider: { '@id': 'https://furkangunes.co/#org' },
+        inLanguage: 'tr',
+        hasCourseInstance: { '@type': 'CourseInstance', courseMode: 'Online' },
+        offers: {
+            '@type': 'Offer',
+            price: String(offer.price),
+            priceCurrency: offer.priceCurrency,
+            availability: 'https://schema.org/InStock',
+            url: offer.url,
+        },
+    })),
+};
 
 export const Pricing = () => {
     const [activePlan, setActivePlan] = useState('pro');
+    useJsonLd('pricing-offers-jsonld', PRICING_JSONLD);
 
     return (
         <section className="section pricing-section">
             <div className="container">
+                <FlashSaleCountdown />
                 <div className="pricing-wrapper">
                     {/* Existing Main Card */}
                     <div
