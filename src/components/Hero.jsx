@@ -52,11 +52,19 @@ export const Hero = () => {
               <div className="visual-content">
                 {/* Video Container */}
                 <div className="video-wrapper" onClick={() => setShowVideo(true)}>
-                  <img
-                    src="/hero-image.png"
-                    alt="Video Editörlüğü Arayüzü"
-                    className="hero-image"
-                  />
+                  <picture>
+                    <source srcSet="/hero-image.webp" type="image/webp" />
+                    <img
+                      src="/hero-image.png"
+                      alt="Video Editörlüğü Arayüzü"
+                      className="hero-image"
+                      width="800"
+                      height="450"
+                      loading="eager"
+                      fetchpriority="high"
+                      decoding="async"
+                    />
+                  </picture>
                   <div className="play-button-wrapper">
                     <div className="play-button">
                       <Play size={32} />
