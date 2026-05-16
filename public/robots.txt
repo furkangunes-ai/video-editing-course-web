@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /0110
+Disallow: /admin/
+Disallow: /satin-al
+Disallow: /odeme-basarili
+Disallow: /odeme-hatasi
+Disallow: /dashboard
+Disallow: /profil
+Disallow: /sifremi-unuttum
+Disallow: /sifre-sifirla
+
+Sitemap: https://furkangunes.co/sitemap.xml
