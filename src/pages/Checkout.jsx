@@ -4,6 +4,8 @@ import { Navbar } from '../components/Navbar';
 import { useAuth } from '../hooks/useAuth';
 import { ShieldCheck, CreditCard, Lock, CheckCircle, Loader2, User, Mail, ArrowRight, RefreshCw, Tag, Gift } from 'lucide-react';
 import { trackCheckoutStart, trackEmailVerified, trackPaymentStart, trackError, setTag } from '../utils/clarity';
+import { CheckoutBundle } from '../components/CheckoutBundle';
+import { FlashSaleCountdown } from '../components/FlashSaleCountdown';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
@@ -57,6 +59,15 @@ export const Checkout = () => {
     // URL'den kurs parametresini al
     const productId = searchParams.get('kurs') || 'ustalık-sinifi';
     const selectedProduct = PRODUCTS[productId] || PRODUCTS['ustalık-sinifi'];
+
+    // Üst pakete yükseltme önerisi (sadece daha yüksek bir paket varsa göster)
+    const suggestedProductId = Object.keys(PRODUCTS).find((id) => id !== selectedProduct.id && PRODUCTS[id].price > selectedProduct.price);
+    const suggestedProduct = suggestedProductId ? PRODUCTS[suggestedProductId] : null;
+    const switchProduct = (nextId) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('kurs', nextId);
+        navigate(`/satin-al?${params.toString()}`);
+    };
 
     // Fiyat hesaplama
     const basePrice = selectedProduct.price;
@@ -403,6 +414,16 @@ export const Checkout = () => {
                                     <p>{selectedProduct.description}</p>
                                 </div>
                             </div>
+
+                            {suggestedProduct && (
+                                <div style={{ margin: '1rem 0' }}>
+                                    <CheckoutBundle
+                                        currentProduct={selectedProduct}
+                                        suggestedProduct={suggestedProduct}
+                                        onSwitch={switchProduct}
+                                    />
+                                </div>
+                            )}
 
                             <div className="price-breakdown">
                                 <div className="price-row">

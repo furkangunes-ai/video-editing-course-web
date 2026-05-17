@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
-import { CheckCircle, Download, Share2, ExternalLink, Award, Clock, BookOpen } from 'lucide-react';
+import { CheckCircle, Download, Award, Clock, BookOpen } from 'lucide-react';
+import { CertificateShareButtons } from '../components/CertificateShareButtons';
+import { useDocumentMeta, useJsonLd } from '../hooks/useDocumentMeta';
 
 const API_BASE_URL = 'https://videomaster-backend-production.up.railway.app';
 
@@ -39,23 +41,47 @@ export function Certificate() {
     window.open(`${API_BASE_URL}/api/certificates/download/${code}`, '_blank');
   };
 
-  const handleShare = async () => {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${certificate.recipient_name} - Sertifika`,
-          text: `${certificate.recipient_name}, ${certificate.course_title} eğitimini tamamladı!`,
-          url: url
-        });
-      } catch {
-        // Kullanıcı paylaşımı iptal etti
-      }
-    } else {
-      navigator.clipboard.writeText(url);
-      alert('Link panoya kopyalandı!');
-    }
-  };
+  const recipient = certificate?.recipient_name;
+  const courseTitle = certificate?.course_title;
+  const pageTitle = certificate
+    ? `${recipient} — ${courseTitle} | Sertifika`
+    : null;
+  const pageDescription = certificate
+    ? `${recipient}, ${courseTitle} eğitimini başarıyla tamamladı. Sertifika kodu: ${certificate.certificate_code}. Furkan Güneş Eğitim tarafından verilmiştir.`
+    : null;
+  const pageUrl = typeof window !== 'undefined' ? window.location.href : undefined;
+
+  useDocumentMeta({
+    title: pageTitle,
+    description: pageDescription,
+    url: pageUrl,
+    type: 'profile',
+  });
+
+  useJsonLd(
+    'cert-jsonld',
+    certificate
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'EducationalOccupationalCredential',
+          name: courseTitle,
+          credentialCategory: 'Certificate',
+          url: pageUrl,
+          dateCreated: certificate.completion_date,
+          credentialId: certificate.certificate_code,
+          about: courseTitle,
+          recognizedBy: {
+            '@type': 'Organization',
+            name: 'Furkan Güneş Eğitim',
+            url: 'https://furkangunes.co',
+          },
+          credentialSubject: {
+            '@type': 'Person',
+            name: recipient,
+          },
+        }
+      : null
+  );
 
   if (loading) {
     return (
@@ -141,15 +167,13 @@ export function Certificate() {
             <Download size={20} />
             İndir (HTML)
           </button>
-          <button onClick={handleShare} style={styles.shareBtn}>
-            <Share2 size={20} />
-            Paylaş
-          </button>
         </div>
 
         <p style={styles.printTip}>
           💡 İpucu: İndirilen HTML dosyasını tarayıcıda açıp Ctrl+P ile PDF olarak kaydedin.
         </p>
+
+        <CertificateShareButtons certificate={certificate} />
       </div>
 
       <style>{`
