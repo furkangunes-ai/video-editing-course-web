@@ -77,6 +77,23 @@ class CourseCreate(BaseModel):
     is_published: bool = False
 
 
+class LessonUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    video_url: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    order: Optional[int] = None
+    is_free: Optional[bool] = None
+
+
+class CourseUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    order: Optional[int] = None
+    is_published: Optional[bool] = None
+
+
 # Progress Schemas
 class ProgressUpdate(BaseModel):
     lesson_id: int
