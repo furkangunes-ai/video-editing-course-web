@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status, File, UploadFile, Form
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 import os
@@ -12,8 +13,10 @@ from app.services.auth import get_current_active_user, get_admin_user
 from app.api.schemas import (
     CourseResponse,
     CourseCreate,
+    CourseUpdate,
     LessonResponse,
     LessonCreate,
+    LessonUpdate,
     ProgressUpdate,
     ProgressResponse,
 )
@@ -259,3 +262,135 @@ async def upload_thumbnail(
         "thumbnail_url": thumbnail_url,
         "course_id": course_id
     }
+
+
+# ---------------------------------------------------------------------------
+# Admin: course + lesson management (list / update / delete)
+# ---------------------------------------------------------------------------
+
+@router.get("/admin", response_model=List[CourseResponse])
+async def admin_list_courses(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """Tüm kursları getir (taslak/yayınlanmış fark etmez) — Admin"""
+    return db.query(Course).order_by(Course.order).all()
+
+
+@router.put("/admin/course/{course_id}", response_model=CourseResponse)
+async def admin_update_course(
+    course_id: int,
+    payload: CourseUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """Kurs bilgilerini güncelle (Admin)"""
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Kurs bulunamadı")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(course, field, value)
+
+    db.commit()
+    db.refresh(course)
+    return course
+
+
+@router.delete("/admin/course/{course_id}")
+async def admin_delete_course(
+    course_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """Kursu sil (Admin) — cascade ile dersler, quizler, erişim kayıtları ve
+    ilerlemeler de silinir."""
+    course = db.query(Course).filter(Course.id == course_id).first()
+    if not course:
+        raise HTTPException(status_code=404, detail="Kurs bulunamadı")
+
+    db.delete(course)
+    db.commit()
+    return {"success": True, "deleted_course_id": course_id}
+
+
+@router.put("/admin/lesson/{lesson_id}", response_model=LessonResponse)
+async def admin_update_lesson(
+    lesson_id: int,
+    payload: LessonUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """Ders bilgilerini güncelle (Admin) — video_url, title, description vb."""
+    lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Ders bulunamadı")
+
+    for field, value in payload.model_dump(exclude_unset=True).items():
+        setattr(lesson, field, value)
+
+    db.commit()
+    db.refresh(lesson)
+    return lesson
+
+
+@router.delete("/admin/lesson/{lesson_id}")
+async def admin_delete_lesson(
+    lesson_id: int,
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """Dersi sil (Admin) — cascade ile bağlı user_progress kayıtları da silinir."""
+    lesson = db.query(Lesson).filter(Lesson.id == lesson_id).first()
+    if not lesson:
+        raise HTTPException(status_code=404, detail="Ders bulunamadı")
+
+    db.delete(lesson)
+    db.commit()
+    return {"success": True, "deleted_lesson_id": lesson_id}
+
+
+# ---------------------------------------------------------------------------
+# Admin: one-time CASCADE migration for existing PostgreSQL constraints
+# ---------------------------------------------------------------------------
+
+# (FK adı, tablo, sütun, hedef tablo, hedef sütun)
+_CASCADE_FKS = [
+    ("lessons_course_id_fkey", "lessons", "course_id", "courses", "id"),
+    ("user_progress_lesson_id_fkey", "user_progress", "lesson_id", "lessons", "id"),
+    ("user_progress_user_id_fkey", "user_progress", "user_id", "users", "id"),
+    ("quizzes_course_id_fkey", "quizzes", "course_id", "courses", "id"),
+    ("quiz_questions_quiz_id_fkey", "quiz_questions", "quiz_id", "quizzes", "id"),
+    ("quiz_attempts_quiz_id_fkey", "quiz_attempts", "quiz_id", "quizzes", "id"),
+    ("quiz_attempts_user_id_fkey", "quiz_attempts", "user_id", "users", "id"),
+    ("course_contents_course_id_fkey", "course_contents", "course_id", "courses", "id"),
+    ("course_access_user_id_fkey", "course_access", "user_id", "users", "id"),
+    ("course_access_course_id_fkey", "course_access", "course_id", "courses", "id"),
+]
+
+
+@router.post("/admin/migrate-cascade")
+async def admin_migrate_cascade(
+    db: Session = Depends(get_db),
+    admin: User = Depends(get_admin_user),
+):
+    """ON DELETE CASCADE'i mevcut PostgreSQL constraint'lerine uygula. Bir kez
+    çalıştırılması yeterlidir. Çalıştırma sırasında bağlı tablonun olmaması
+    veya constraint'in farklı bir adda olması durumunda o satır atlanır.
+    """
+    results = []
+    for fk_name, table, column, target_table, target_column in _CASCADE_FKS:
+        try:
+            db.execute(text(f'ALTER TABLE "{table}" DROP CONSTRAINT IF EXISTS "{fk_name}"'))
+            db.execute(text(
+                f'ALTER TABLE "{table}" ADD CONSTRAINT "{fk_name}" '
+                f'FOREIGN KEY ("{column}") REFERENCES "{target_table}"("{target_column}") '
+                f'ON DELETE CASCADE'
+            ))
+            db.commit()
+            results.append({"constraint": fk_name, "status": "ok"})
+        except Exception as exc:
+            db.rollback()
+            results.append({"constraint": fk_name, "status": "skipped", "reason": str(exc)[:200]})
+
+    return {"applied": results}

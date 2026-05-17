@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import { ArrowLeft, Save, GripVertical, Video, FileQuestion, ChevronDown } from 'lucide-react';
+import { ArrowLeft, Save, GripVertical, Video, FileQuestion, ChevronDown, Edit2, Trash2, AlertTriangle, ShieldAlert, X } from 'lucide-react';
 
 const API_URL = import.meta.env.VITE_API_URL || 'https://videomaster-backend-production.up.railway.app';
 
@@ -16,6 +16,9 @@ export function AdminContentOrder() {
   const [success, setSuccess] = useState('');
   const [draggedItem, setDraggedItem] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [editLessonModal, setEditLessonModal] = useState(null);
+  const [deleteContentModal, setDeleteContentModal] = useState(null);
+  const [deleteCourseModal, setDeleteCourseModal] = useState(false);
 
   useEffect(() => {
     fetchCourses();
@@ -105,12 +108,9 @@ export function AdminContentOrder() {
     const newContents = [...contents];
     const draggedContent = newContents[draggedItem];
 
-    // Remove dragged item
     newContents.splice(draggedItem, 1);
-    // Insert at new position
     newContents.splice(dropIndex, 0, draggedContent);
 
-    // Update order values
     const updatedContents = newContents.map((item, idx) => ({
       ...item,
       order: idx + 1
@@ -138,9 +138,8 @@ export function AdminContentOrder() {
       });
 
       if (response.ok) {
-        setSuccess('Sıralama kaydedildi!');
+        flashSuccess('Sıralama kaydedildi!');
         setHasChanges(false);
-        setTimeout(() => setSuccess(''), 3000);
       } else {
         const err = await response.json();
         setError(err.detail || 'Kaydetme başarısız');
@@ -169,6 +168,70 @@ export function AdminContentOrder() {
     setHasChanges(true);
   };
 
+  const flashSuccess = (msg) => {
+    setSuccess(msg);
+    setTimeout(() => setSuccess(''), 3000);
+  };
+
+  const saveLessonEdit = async (lessonId, patch) => {
+    setError('');
+    const response = await fetch(`${API_URL}/api/courses/admin/lesson/${lessonId}`, {
+      method: 'PUT',
+      headers: getAuthHeaders(),
+      body: JSON.stringify(patch),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      setError(err.detail || 'Ders güncellenemedi');
+      return false;
+    }
+    flashSuccess('Ders güncellendi.');
+    setEditLessonModal(null);
+    fetchContents(selectedCourse);
+    return true;
+  };
+
+  const deleteContent = async (content) => {
+    setError('');
+    const endpoint =
+      content.content_type === 'lesson'
+        ? `${API_URL}/api/courses/admin/lesson/${content.content_id}`
+        : `${API_URL}/api/quizzes/admin/${content.content_id}`;
+    const response = await fetch(endpoint, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      setError(err.detail || 'Silinemedi');
+      return;
+    }
+    flashSuccess(content.content_type === 'lesson' ? 'Ders silindi.' : 'Quiz silindi.');
+    setDeleteContentModal(null);
+    fetchContents(selectedCourse);
+  };
+
+  const deleteCourseConfirmed = async () => {
+    setError('');
+    const response = await fetch(`${API_URL}/api/courses/admin/course/${selectedCourse}`, {
+      method: 'DELETE',
+      headers: getAuthHeaders(),
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      setError(err.detail || 'Kurs silinemedi');
+      return;
+    }
+    flashSuccess('Kurs silindi.');
+    setDeleteCourseModal(false);
+    setSelectedCourse(null);
+    setContents([]);
+    fetchCourses();
+    navigate('/admin/content-order');
+  };
+
+  const currentCourseTitle = courses.find((c) => c.id === selectedCourse)?.title || '';
+
   if (loading && !contents.length) {
     return (
       <div style={styles.container}>
@@ -184,59 +247,64 @@ export function AdminContentOrder() {
         <Link to="/0110" style={styles.backLink}>
           <ArrowLeft size={20} /> Admin Hub
         </Link>
-        <h1 style={styles.title}>Icerik Siralamasi</h1>
+        <h1 style={styles.title}>İçerik Sıralaması</h1>
       </div>
 
-      {/* Messages */}
       {error && <div style={styles.error}>{error}</div>}
       {success && <div style={styles.success}>{success}</div>}
 
-      {/* Course Selector */}
       <div style={styles.courseSelector}>
-        <label style={styles.label}>Kurs Secin:</label>
-        <div style={styles.selectWrapper}>
-          <select
-            value={selectedCourse || ''}
-            onChange={handleCourseChange}
-            style={styles.select}
-          >
-            {courses.map(course => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-          <ChevronDown size={20} style={styles.selectIcon} />
+        <label style={styles.label}>Kurs seçin:</label>
+        <div style={styles.selectRow}>
+          <div style={styles.selectWrapper}>
+            <select
+              value={selectedCourse || ''}
+              onChange={handleCourseChange}
+              style={styles.select}
+            >
+              {courses.map(course => (
+                <option key={course.id} value={course.id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={20} style={styles.selectIcon} />
+          </div>
+          {selectedCourse && (
+            <button
+              type="button"
+              onClick={() => setDeleteCourseModal(true)}
+              style={styles.dangerButton}
+              title="Kursu tamamen sil"
+            >
+              <Trash2 size={16} /> Kursu Sil
+            </button>
+          )}
         </div>
       </div>
 
-      {/* Content List */}
       <div style={styles.contentCard}>
         <div style={styles.cardHeader}>
           <h2 style={styles.cardTitle}>
-            Icerikler ({contents.length})
+            İçerikler ({contents.length})
           </h2>
           {hasChanges && (
-            <button
-              onClick={saveOrder}
-              disabled={saving}
-              style={styles.saveButton}
-            >
+            <button onClick={saveOrder} disabled={saving} style={styles.saveButton}>
               <Save size={16} />
-              {saving ? 'Kaydediliyor...' : 'Siralamayi Kaydet'}
+              {saving ? 'Kaydediliyor...' : 'Sıralamayı Kaydet'}
             </button>
           )}
         </div>
 
         <p style={styles.helpText}>
-          Icerikleri surukleyerek siralayin. Ogrenciler bu sirada gorur.
+          İçerikleri sürükleyerek veya ↑↓ tuşlarıyla sıralayın. Düzenleme ve silme butonlarıyla içeriği yönetin.
         </p>
 
         {contents.length === 0 ? (
           <div style={styles.emptyState}>
-            <p>Bu kursta henuz icerik yok.</p>
+            <p>Bu kursta henüz içerik yok.</p>
             <p style={styles.emptyHint}>
-              Ders ve quiz eklemek icin ilgili admin sayfalarini kullanin.
+              Ders eklemek için Admin Hub → "Ders Ekle", quiz eklemek için "Quiz Oluştur" sayfasını kullanın.
             </p>
           </div>
         ) : (
@@ -286,17 +354,36 @@ export function AdminContentOrder() {
                     }}>
                       {item.content_type === 'lesson' ? 'Video' : 'Quiz'}
                     </span>
-                    {item.content_type === 'lesson' && item.duration_seconds && (
+                    {item.content_type === 'lesson' && item.duration_seconds ? (
                       <span style={styles.duration}>
                         {Math.floor(item.duration_seconds / 60)} dk
                       </span>
-                    )}
+                    ) : null}
                     {item.content_type === 'quiz' && (
                       <span style={styles.questionCount}>
                         {item.question_count || 0} soru
                       </span>
                     )}
                   </span>
+                </div>
+
+                <div style={styles.itemActions}>
+                  {item.content_type === 'lesson' && (
+                    <button
+                      onClick={() => setEditLessonModal({ ...item })}
+                      style={styles.iconButton}
+                      title="Dersi düzenle"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setDeleteContentModal(item)}
+                    style={{ ...styles.iconButton, ...styles.iconButtonDanger }}
+                    title="Sil"
+                  >
+                    <Trash2 size={16} />
+                  </button>
                 </div>
 
                 <div style={styles.moveButtons}>
@@ -307,7 +394,7 @@ export function AdminContentOrder() {
                       ...styles.moveButton,
                       opacity: index === 0 ? 0.3 : 1
                     }}
-                    title="Yukari Tasi"
+                    title="Yukarı taşı"
                   >
                     ↑
                   </button>
@@ -318,7 +405,7 @@ export function AdminContentOrder() {
                       ...styles.moveButton,
                       opacity: index === contents.length - 1 ? 0.3 : 1
                     }}
-                    title="Asagi Tasi"
+                    title="Aşağı taşı"
                   >
                     ↓
                   </button>
@@ -329,16 +416,226 @@ export function AdminContentOrder() {
         )}
       </div>
 
-      {/* Info Card */}
       <div style={styles.infoCard}>
-        <h3 style={styles.infoTitle}>Nasil Calisir?</h3>
+        <h3 style={styles.infoTitle}>İpuçları</h3>
         <ul style={styles.infoList}>
-          <li>Video ve quizler bu sirada ogrencilere gosterilir</li>
-          <li>Icerikleri surukleyerek veya ok tuslarıyla siralayin</li>
-          <li>Degisiklikleri kaydetmeyi unutmayin</li>
-          <li>Yeni ders veya quiz eklemek icin ilgili admin sayfalarini kullanin</li>
+          <li>Yeni Bunny.net videosu çıktığında: ders satırının "Düzenle" butonundan video URL'sini güncelle — öğrenci ilerlemesi korunur.</li>
+          <li>Bir dersi silmek = bağlı tüm öğrenci ilerlemesi kalıcı olarak silinir (cascade).</li>
+          <li>Kurs silme işlemi cascade ile dersler, quizler, erişim kayıtları ve ilerlemeleri de siler. Geri alınamaz.</li>
         </ul>
       </div>
+
+      {editLessonModal && (
+        <EditLessonModal
+          lesson={editLessonModal}
+          onSave={saveLessonEdit}
+          onClose={() => setEditLessonModal(null)}
+        />
+      )}
+
+      {deleteContentModal && (
+        <ConfirmDeleteModal
+          title={`"${deleteContentModal.title}" silinsin mi?`}
+          warning={
+            deleteContentModal.content_type === 'lesson'
+              ? 'Bu dersi izlemiş öğrencilerin ilerleme kayıtları da silinecek.'
+              : 'Quizi çözmüş öğrencilerin deneme kayıtları da silinecek.'
+          }
+          onConfirm={() => deleteContent(deleteContentModal)}
+          onClose={() => setDeleteContentModal(null)}
+        />
+      )}
+
+      {deleteCourseModal && (
+        <DeleteCourseModal
+          courseTitle={currentCourseTitle}
+          onConfirm={deleteCourseConfirmed}
+          onClose={() => setDeleteCourseModal(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+function EditLessonModal({ lesson, onSave, onClose }) {
+  const [title, setTitle] = useState(lesson.title || '');
+  const [description, setDescription] = useState(lesson.description || '');
+  const [videoUrl, setVideoUrl] = useState(lesson.video_url || '');
+  const [durationMinutes, setDurationMinutes] = useState(
+    lesson.duration_seconds ? Math.round(lesson.duration_seconds / 60) : 0
+  );
+  const [isFree, setIsFree] = useState(!!lesson.is_free);
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    await onSave(lesson.content_id, {
+      title,
+      description,
+      video_url: videoUrl,
+      duration_seconds: Math.max(0, Number(durationMinutes) || 0) * 60,
+      is_free: isFree,
+    });
+    setSubmitting(false);
+  };
+
+  return (
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <form onSubmit={handleSubmit} style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalHeader}>
+          <h3 style={{ margin: 0, fontSize: '1.1rem' }}>Dersi Düzenle</h3>
+          <button type="button" onClick={onClose} style={styles.modalClose} aria-label="Kapat">
+            <X size={18} />
+          </button>
+        </div>
+        <div style={styles.modalBody}>
+          <label style={styles.formLabel}>Başlık</label>
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            style={styles.formInput}
+            required
+          />
+
+          <label style={styles.formLabel}>Açıklama</label>
+          <textarea
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            style={{ ...styles.formInput, minHeight: 70 }}
+            rows={3}
+          />
+
+          <label style={styles.formLabel}>Video URL (Bunny.net iframe URL veya direct link)</label>
+          <input
+            type="url"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            style={styles.formInput}
+            placeholder="https://iframe.mediadelivery.net/embed/..."
+          />
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div>
+              <label style={styles.formLabel}>Süre (dk)</label>
+              <input
+                type="number"
+                min={0}
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(e.target.value)}
+                style={styles.formInput}
+              />
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 6 }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={isFree}
+                  onChange={(e) => setIsFree(e.target.checked)}
+                />
+                <span style={{ fontSize: '0.9rem' }}>Ücretsiz önizleme</span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div style={styles.modalFooter}>
+          <button type="button" onClick={onClose} style={styles.modalCancel}>İptal</button>
+          <button type="submit" disabled={submitting} style={styles.modalSubmit}>
+            {submitting ? 'Kaydediliyor...' : 'Kaydet'}
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function ConfirmDeleteModal({ title, warning, onConfirm, onClose }) {
+  const [submitting, setSubmitting] = useState(false);
+  const handle = async () => {
+    setSubmitting(true);
+    await onConfirm();
+    setSubmitting(false);
+  };
+  return (
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <div style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalHeader}>
+          <h3 style={{ margin: 0, fontSize: '1.05rem', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <AlertTriangle size={18} color="#ff8a4d" />
+            Silme Onayı
+          </h3>
+          <button type="button" onClick={onClose} style={styles.modalClose} aria-label="Kapat">
+            <X size={18} />
+          </button>
+        </div>
+        <div style={styles.modalBody}>
+          <p style={{ margin: '0 0 0.75rem', fontWeight: 600 }}>{title}</p>
+          <p style={{ margin: 0, color: '#a0a0a0', fontSize: '0.9rem' }}>{warning}</p>
+        </div>
+        <div style={styles.modalFooter}>
+          <button type="button" onClick={onClose} style={styles.modalCancel}>Vazgeç</button>
+          <button type="button" onClick={handle} disabled={submitting} style={styles.modalDanger}>
+            {submitting ? 'Siliniyor...' : 'Evet, sil'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DeleteCourseModal({ courseTitle, onConfirm, onClose }) {
+  const [typed, setTyped] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const matches = typed.trim() === courseTitle.trim();
+
+  const handle = async (e) => {
+    e.preventDefault();
+    if (!matches) return;
+    setSubmitting(true);
+    await onConfirm();
+    setSubmitting(false);
+  };
+
+  return (
+    <div style={styles.modalOverlay} onClick={onClose}>
+      <form onSubmit={handle} style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <div style={styles.modalHeader}>
+          <h3 style={{ margin: 0, fontSize: '1.05rem', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <ShieldAlert size={18} color="#ff4d57" />
+            Kurs silinecek — geri alınamaz
+          </h3>
+          <button type="button" onClick={onClose} style={styles.modalClose} aria-label="Kapat">
+            <X size={18} />
+          </button>
+        </div>
+        <div style={styles.modalBody}>
+          <p style={{ marginTop: 0 }}>
+            <strong>{courseTitle}</strong> kursunu, içindeki tüm dersleri, quizleri, öğrenci ilerlemelerini ve erişim kayıtlarını silmek üzeresin. Bu işlem geri alınamaz.
+          </p>
+          <p style={{ marginBottom: '0.5rem', color: '#a0a0a0', fontSize: '0.9rem' }}>
+            Onaylamak için kurs adını birebir aşağıya yaz:
+          </p>
+          <input
+            type="text"
+            value={typed}
+            onChange={(e) => setTyped(e.target.value)}
+            placeholder={courseTitle}
+            style={styles.formInput}
+            autoFocus
+          />
+        </div>
+        <div style={styles.modalFooter}>
+          <button type="button" onClick={onClose} style={styles.modalCancel}>Vazgeç</button>
+          <button
+            type="submit"
+            disabled={!matches || submitting}
+            style={{ ...styles.modalDanger, opacity: matches ? 1 : 0.4, cursor: matches ? 'pointer' : 'not-allowed' }}
+          >
+            {submitting ? 'Siliniyor...' : 'Kursu sil'}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
@@ -399,9 +696,16 @@ const styles = {
     color: '#a0a0a0',
     fontSize: '0.9rem',
   },
+  selectRow: {
+    display: 'flex',
+    gap: '0.75rem',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+  },
   selectWrapper: {
     position: 'relative',
     maxWidth: '400px',
+    flex: '1 1 280px',
   },
   select: {
     width: '100%',
@@ -421,6 +725,19 @@ const styles = {
     transform: 'translateY(-50%)',
     color: '#666',
     pointerEvents: 'none',
+  },
+  dangerButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+    padding: '0.6rem 1rem',
+    background: 'rgba(255, 77, 87, 0.1)',
+    border: '1px solid rgba(255, 77, 87, 0.4)',
+    borderRadius: '0.5rem',
+    color: '#ff4d57',
+    fontSize: '0.85rem',
+    fontWeight: 600,
+    cursor: 'pointer',
   },
   contentCard: {
     backgroundColor: 'rgba(20, 20, 20, 0.8)',
@@ -546,6 +863,28 @@ const styles = {
   questionCount: {
     color: '#666',
   },
+  itemActions: {
+    display: 'flex',
+    gap: '0.35rem',
+  },
+  iconButton: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '0.4rem',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    color: '#a0a0a0',
+    cursor: 'pointer',
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.15s',
+  },
+  iconButtonDanger: {
+    color: '#ff7a87',
+    borderColor: 'rgba(255, 77, 87, 0.35)',
+    backgroundColor: 'rgba(255, 77, 87, 0.08)',
+  },
   moveButtons: {
     display: 'flex',
     flexDirection: 'column',
@@ -583,6 +922,103 @@ const styles = {
     color: '#a0a0a0',
     fontSize: '0.9rem',
     lineHeight: '1.8',
+  },
+
+  modalOverlay: {
+    position: 'fixed',
+    inset: 0,
+    background: 'rgba(0, 0, 0, 0.7)',
+    backdropFilter: 'blur(6px)',
+    WebkitBackdropFilter: 'blur(6px)',
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '1.5rem',
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 520,
+    background: '#141414',
+    border: '1px solid rgba(255, 255, 255, 0.08)',
+    borderRadius: '0.85rem',
+    color: '#fff',
+    overflow: 'hidden',
+    boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
+  },
+  modalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem 1.25rem',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  modalClose: {
+    background: 'none',
+    border: 'none',
+    color: '#a0a0a0',
+    cursor: 'pointer',
+    padding: 4,
+  },
+  modalBody: {
+    padding: '1.25rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  modalFooter: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '0.5rem',
+    padding: '0.85rem 1.25rem',
+    borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+  },
+  formLabel: {
+    fontSize: '0.8rem',
+    color: '#a0a0a0',
+    marginTop: '0.5rem',
+    marginBottom: '0.25rem',
+  },
+  formInput: {
+    width: '100%',
+    padding: '0.65rem 0.85rem',
+    background: 'rgba(255, 255, 255, 0.04)',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    borderRadius: '0.5rem',
+    color: '#fff',
+    fontSize: '0.95rem',
+    fontFamily: 'inherit',
+    outline: 'none',
+    boxSizing: 'border-box',
+  },
+  modalCancel: {
+    padding: '0.6rem 1.1rem',
+    background: 'transparent',
+    border: '1px solid rgba(255, 255, 255, 0.12)',
+    borderRadius: '0.5rem',
+    color: '#a0a0a0',
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+  },
+  modalSubmit: {
+    padding: '0.6rem 1.2rem',
+    background: 'linear-gradient(135deg, #00ff9d 0%, #00cc7d 100%)',
+    border: 'none',
+    borderRadius: '0.5rem',
+    color: '#000',
+    fontWeight: 700,
+    fontSize: '0.9rem',
+    cursor: 'pointer',
+  },
+  modalDanger: {
+    padding: '0.6rem 1.2rem',
+    background: 'linear-gradient(135deg, #ff4d57 0%, #cc0000 100%)',
+    border: 'none',
+    borderRadius: '0.5rem',
+    color: '#fff',
+    fontWeight: 700,
+    fontSize: '0.9rem',
+    cursor: 'pointer',
   },
 };
 

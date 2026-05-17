@@ -9,7 +9,7 @@ class Quiz(Base):
     __tablename__ = "quizzes"
 
     id = Column(Integer, primary_key=True, index=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     title = Column(String(200), nullable=False)
     description = Column(Text, nullable=True)
     passing_score = Column(Integer, default=70)  # %70 geçme notu
@@ -28,7 +28,7 @@ class QuizQuestion(Base):
     __tablename__ = "quiz_questions"
 
     id = Column(Integer, primary_key=True, index=True)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+    quiz_id = Column(Integer, ForeignKey("quizzes.id", ondelete="CASCADE"), nullable=False)
     question_text = Column(Text, nullable=False)
     option_a = Column(String(500), nullable=False)
     option_b = Column(String(500), nullable=False)
@@ -47,8 +47,8 @@ class QuizAttempt(Base):
     __tablename__ = "quiz_attempts"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    quiz_id = Column(Integer, ForeignKey("quizzes.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    quiz_id = Column(Integer, ForeignKey("quizzes.id", ondelete="CASCADE"), nullable=False)
     score = Column(Integer, nullable=False)  # Yüzde puan
     passed = Column(Boolean, default=False)
     answers = Column(JSON, nullable=True)  # {question_id: selected_answer}
@@ -64,7 +64,7 @@ class CourseContent(Base):
     __tablename__ = "course_contents"
 
     id = Column(Integer, primary_key=True, index=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False)
     content_type = Column(String(20), nullable=False)  # 'lesson' veya 'quiz'
     content_id = Column(Integer, nullable=False)  # lesson.id veya quiz.id
     order = Column(Integer, default=0)

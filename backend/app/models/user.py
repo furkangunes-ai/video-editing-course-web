@@ -36,7 +36,7 @@ class CourseAccess(Base):
     __tablename__ = "course_access"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    course_id = Column(Integer, ForeignKey("courses.id"), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    course_id = Column(Integer, ForeignKey("courses.id", ondelete="CASCADE"), nullable=False, index=True)
     granted_at = Column(DateTime(timezone=True), server_default=func.now())
     granted_by = Column(String, nullable=True)  # 'purchase', 'bundle', 'admin', 'promo'
